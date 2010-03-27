@@ -1,0 +1,52 @@
+Source: gmpc
+Section: sound
+Priority: optional
+Maintainer: Arnaud Cornet <acornet@debian.org>
+Build-Depends: debhelper (>= 7.0.50~), libmpd-dev (>= 0.19.2), gob2, libgtk2.0-dev, libglade2-dev, libglib2.0-dev, libcurl4-gnutls-dev, zlib1g-dev, intltool, libsoup2.4-dev, quilt, libsexy-dev, libsqlite3-dev, valac (>= 0.7.10)
+Standards-Version: 3.8.4
+Homepage: http://gmpc.wikia.com/
+
+Package: gmpc
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Suggests: mpd, gmpc-plugins
+Conflicts: gmpc-plugins(<< 0.18.96)
+Enhances: mpd
+Provides: mpd-client
+Description: Gnome Music Player Client (graphical interface to MPD)
+ A GNOME/GTK2.2 client for Music Player Daemon, it began life as traymp,
+ a simple tray notification client and has grown into much more.
+ Current features include:
+  * Support for loading/saving playlists
+  * File Browser
+  * Browser based on ID3 information
+  * Search
+  * Current playlist viewer with search
+  * ID3 Information
+  * Cover art (via plugins)
+
+Package: gmpc-dbg
+Priority: extra
+Section: debug
+Architecture: any
+Depends: gmpc (= ${binary:Version}), ${misc:Depends}
+Description: Gnome Music Player Client (graphical interface to MPD)
+ A GNOME/GTK2.2 client for Music Player Daemon, it began life as traymp,
+ a simple tray notification client and has grown into much more.
+ Current features include:
+  * Support for loading/saving playlists
+  * File Browser
+  * Browser based on ID3 information
+  * Search
+  * Current playlist viewer with search
+  * ID3 Information
+  * Cover art (via plugins)
+ .
+ This package contains the debugging symbols.
+
+Package: gmpc-dev
+Architecture: any
+Depends: gmpc (= ${binary:Version}), libmpd-dev (>= 0.18.96), pkg-config, ${misc:Depends}
+Description: Gnome Music Player Client (plugin development files)
+ This package contains the necessary header files if you wish to compile
+ plugins for gmpc.
