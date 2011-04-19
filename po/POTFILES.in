@@ -1,0 +1,87 @@
+# files added by intltool-prepare
+[encoding: UTF-8]
+data/gmpc.desktop.in
+glade/playlist3.glade
+src/config1.c
+src/gmpc_easy_download.c
+src/main.c
+src/MetaData/metadata.c
+src/misc.c
+src/mm-keys.c
+src/mpdinteraction.c
+src/playlist3.c
+src/playlist3-messages.c
+src/plugin.c
+src/preferences.c
+src/url-fetcher.c
+src/tray-icon2.c
+src/setup-assistant.c
+src/bug-information.c
+src/smclient/eggdesktopfile.c
+src/smclient/eggsmclient.c
+
+# Ui files
+[type: gettext/glade]glade/aboutdialog.ui
+[type: gettext/glade]glade/password-dialog.ui
+[type: gettext/glade]glade/preferences-connection.ui
+[type: gettext/glade]glade/preferences-esf-dialog.ui
+[type: gettext/glade]glade/preferences-playlist.ui
+[type: gettext/glade]glade/preferences-plugins.ui
+[type: gettext/glade]glade/preferences-server.ui
+[type: gettext/glade]glade/preferences-trayicon.ui
+[type: gettext/glade]glade/preferences-proxy.ui
+[type: gettext/glade]glade/preferences-mmkeys.ui
+[type: gettext/glade]glade/preferences.ui
+[type: gettext/glade]glade/playlist-message-window.ui
+[type: gettext/glade]glade/playlist-save-dialog.ui
+[type: gettext/glade]glade/gmpc-add-url.ui
+
+
+# Browsers
+src/browsers/playlist3-current-playlist-browser.c
+src/browsers/playlist3-file-browser.c
+src/browsers/playlist3-find2-browser.c
+src/browsers/playlist3-playlist-editor.c
+src/browsers/playlist3-tag2-browser.c
+src/browsers/server-information.c
+src/browsers/gmpc-nowplaying2.c
+src/browsers/gmpc-metadata-browser2.c
+
+# Egg files
+src/egg/eggcolumnmodel.c
+src/egg/eggcolumnchooserdialog.c
+
+
+# Gob files
+src/gmpc-mpddata-model.gob
+src/gmpc-mpddata-model-sort.gob
+src/gmpc-mpddata-treeview.gob
+src/gmpc-profiles.gob
+src/gmpc-meta-text-view.gob
+src/gmpc-metaimage.gob
+src/gmpc-clicklabel.gob
+src/gmpc-clicklabel.gob
+src/gmpc-meta-watcher.gob
+src/gmpc-stats-label.gob
+
+# Vala
+src/vala/gmpc-connection.c
+src/vala/gmpc-database-update-tracker.c
+src/vala/gmpc-easy-command.c
+src/vala/gmpc-favorites.c
+src/vala/gmpc-liststore-sort.c
+src/vala/gmpc-metadata-prefetcher.c
+src/vala/gmpc-mpddata-treeview-tooltip.c
+src/vala/gmpc-paned-size-group.c
+src/vala/gmpc-plugin.c
+src/vala/gmpc-rating.c
+src/vala/gmpc-song-links.c
+src/vala/gmpc-test-plugin.c
+src/vala/gmpc-url-fetching-gui.c
+
+#Widgets
+src/Widgets/gmpc-progress.c
+src/Widgets/gmpc-menu-item-rating.c
+
+#Providers
+src/Providers/music-tree.c

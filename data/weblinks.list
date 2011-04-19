@@ -1,0 +1,16 @@
+[Wikipedia Artist]
+type=artist
+url=http://en.wikipedia.org/wiki/Special:Search/%ARTIST%
+
+[Wikipedia Album]
+type=album
+url=http://en.wikipedia.org/wiki/Special:Search/%ALBUM% (%ARTIST% album)
+
+[Secondhand songs]
+type=song
+url=http://secondhandsongs.com/cgi/cluster.php?title=%TITLE%&performer=%ARTIST%&search=Search
+search-and-replace=( )::+
+
+[Last.FM]
+type=artist
+url=http://last.fm/music/%ARTIST%

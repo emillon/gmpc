@@ -1,0 +1,71 @@
+
+.TH gmpc 1 "February 21, 2010" "" "Gnome Music Player Client - Remote control"
+
+.SH NAME
+gmpc-remote - a remote control for GMPC.
+
+.SH SYNOPSIS
+gmpc-remote [OPTION]
+
+.SH DESCRIPTION
+If gmpc is compiled with IPC support gmpc-remote can send commands to the running instance of gmpc.
+
+.SH OPTIONS
+.TP
+.BI --version
+Display version.
+.TP
+.BI --help
+Show all available application options.
+.TP
+.BI --quit
+Quit the running gmpc.
+.TP
+.BI --play
+Give GMPC the play command.
+.TP
+.BI --pause
+Give GMPC the pause command.
+.TP
+.BI --next
+Give GMPC the next command.
+.TP
+.BI --prev
+Give GMPC the previous command.
+.TP
+.BI --stop
+Give GMPC the stop command.
+.TP
+.BI --stream
+Gives mpd a stream to parse and play.
+.TP
+.BI --easycommand
+Send an 'easy command' query to GMPC.
+.TP
+.BI --toggle-view
+Give GMPC the command to show/hide itself.
+.TP
+.BI --hide-view
+Give GMPC the command to hide itself.
+.TP
+.BI --show-view
+Give GMPC the command to show itself.
+.TP
+.BI --spawn
+Spawn a GMPC instance.
+.br
+
+
+.SH SEE ALSO
+Website: http://gmpc.wikia.com/
+
+MPD Website: http://www.musicpd.org
+
+Bug tracker: http://www.musicpd.org/mantis/
+
+.BR gmpc(1)
+.BR mpd(1)
+.BR mpd.conf(5)
+
+.SH AUTHOR
+gmpc-remote was written by Qball Cow <qball@sarine.nl>

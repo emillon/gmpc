@@ -1,0 +1,478 @@
+/* Gnome M usic Player Client (GMPC)
+ * Copyright (C) 2004-2010 Qball Cow <qball@sarine.nl>
+ * Project homepage: http://gmpc.wikia.com/
+ 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+*/
+
+requires 2.0.0
+
+%headertop{
+#include <gtk/gtk.h>
+#include <glib/gstdio.h>
+#include <libmpd/libmpd.h>
+#include <unistd.h>
+#include "misc.h"
+%}
+%ph{
+#include "gmpc-extras.h"
+#include "metadata-cache.h"
+#include "main.h"
+%}
+
+class Gmpc:Meta:Text:View from Gtk:Text:View {
+	private GtkTextBuffer *buffer 	= {gtk_text_buffer_new(NULL)} unrefwith g_object_unref;
+	private mpd_Song *song 			= {NULL} destroywith mpd_freeSong;
+	private MetaDataType type 				= {META_ARTIST_TXT};
+	private gulong meta_id 			= {0};
+    private GtkWidget *edit         = {NULL};
+    private GtkWidget *cancel       = {NULL};
+    private MetaData *met = {NULL} destroywith meta_data_free;
+
+    public gboolean force_ro       = {FALSE};
+    public gboolean use_monospace       = {FALSE};
+    
+
+    private gboolean
+    key_press_event(self, GdkEventKey *key, gpointer user_data)
+    {
+        if(key->keyval == GDK_Escape)
+        {
+            if(self->_priv->cancel){
+                gtk_widget_activate(self->_priv->cancel);
+            }
+            return FALSE;
+        }
+        return FALSE;
+    }
+
+	init (self)
+	{
+		gtk_text_view_set_buffer(GTK_TEXT_VIEW(self), self->_priv->buffer);
+		gtk_text_view_set_editable(GTK_TEXT_VIEW(self), FALSE);
+		gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(self), GTK_WRAP_WORD);
+        g_signal_connect(G_OBJECT(self), "key-press-event", G_CALLBACK(self_key_press_event), NULL);
+
+		g_signal_connect(G_OBJECT(self), "populate-popup", G_CALLBACK(self_menu_populate_callback), NULL);
+		self->_priv->meta_id= g_signal_connect(G_OBJECT(gmw), "data-changed", G_CALLBACK(self_meta_callback), self);
+	}
+	
+	public 
+	GtkWidget * new (int type)
+	{
+		Self *gmi =  GET_NEW;
+		gmi->_priv->type = type;
+        gtk_text_buffer_create_tag (gmi->_priv->buffer, "not_editable",
+                "editable", FALSE, 
+                NULL);
+
+        gtk_text_buffer_create_tag (gmi->_priv->buffer, "monospace",
+                "family", "Monospace",
+                "family-set", TRUE,
+                NULL);
+		return (GtkWidget *)gmi;
+	}
+
+	private 
+	void
+	menu_populate_callback(self, GtkMenu *menu, gpointer data)
+	{
+		if(self->_priv->song)
+		{
+			GtkWidget *item = gtk_separator_menu_item_new();
+			gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
+
+
+			item = gtk_image_menu_item_new_with_label(_("Refetch"));
+			gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(item), gtk_image_new_from_stock(GTK_STOCK_REFRESH, GTK_ICON_SIZE_MENU));
+			g_signal_connect_swapped(G_OBJECT(item), "activate", G_CALLBACK(self_query_refetch),self);
+			gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
+
+			item = gtk_image_menu_item_new_with_label(_("Select file"));
+			gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(item), gtk_image_new_from_stock(GTK_STOCK_OPEN, GTK_ICON_SIZE_MENU));
+			g_signal_connect_swapped(G_OBJECT(item), "activate", G_CALLBACK(self_select_file),self);
+			gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
+
+			item = gtk_image_menu_item_new_from_stock(GTK_STOCK_CLEAR, NULL);
+			g_signal_connect_swapped(G_OBJECT(item), "activate", G_CALLBACK(self_clear_entry),self);
+			gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
+
+			item = gtk_image_menu_item_new_with_label(_("Metadata selector"));
+			gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(item), gtk_image_new_from_stock(GTK_STOCK_EDIT, GTK_ICON_SIZE_MENU));
+			g_signal_connect_swapped(G_OBJECT(item), "activate", G_CALLBACK(self_select_metadata_editor),self);
+			gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
+
+			gtk_widget_show_all(GTK_WIDGET(menu));
+		}
+	}
+
+    private void
+    select_metadata_editor(self)
+    {
+		gmpc_meta_data_edit_window_new(self->_priv->song,self->_priv->type);
+    }
+
+	public 
+	void
+	query_refetch(self)
+	{
+		if(self->_priv->song)
+		{
+			MetaData *met= NULL;
+			MetaDataResult ret;
+			ret = gmpc_meta_watcher_get_meta_path(gmw,self->_priv->song, self->_priv->type|META_QUERY_NO_CACHE, &met);
+			if(ret == META_DATA_FETCHING) {
+				self_set_text_fetching(self);
+			}else if (ret == META_DATA_AVAILABLE) {
+                self_set_text_from_metadata(self, met);
+            } else {
+				self_set_text_na(self);
+			}
+			if(met)
+			{
+				meta_data_free(met);
+			}
+		}
+	}
+
+	public 
+	void
+	query_text_from_song(self, mpd_Song *song)
+    {
+        MetaData *met = NULL;
+        MetaDataResult ret;
+
+        if(self->_priv->song)
+        {
+            mpd_freeSong(self->_priv->song);
+        }
+        self->_priv->song = mpd_songDup(song);
+
+
+        ret = gmpc_meta_watcher_get_meta_path(gmw,self->_priv->song, self->_priv->type, &met);
+        if(ret == META_DATA_FETCHING)
+        {
+            self_set_text_fetching(self);
+        }else if (ret == META_DATA_AVAILABLE) {
+            self_set_text_from_metadata(self,met); 
+        } else {
+            self_set_text_na(self);
+        }
+        if(met)
+        {
+            meta_data_free(met);
+        }
+    }
+
+    private void
+    cancel_button_clicked(self, GtkWidget *button)
+    {
+        gtk_text_view_set_editable(GTK_TEXT_VIEW(self), FALSE);
+        if(self->_priv->met)
+        {
+            MetaData *met = self->_priv->met;
+            self->_priv->met = NULL;
+            /* Create a copy as self_set_from_path modifies self->_priv->path */
+            self_set_text_from_metadata(self, met);
+            meta_data_free(met);
+        }else self_set_text_na(self);
+    }
+
+    private void
+    edit_button_clicked(self, GtkWidget *button)
+    {
+        if(gtk_text_view_get_editable(GTK_TEXT_VIEW(self)))
+        {
+            MetaData *met;
+            gchar *content = NULL;
+            GtkTextIter iter_start, iter_end;
+
+            /* Get start and end of text, and store it */
+            gtk_text_buffer_get_start_iter(self->_priv->buffer, &iter_start);
+            gtk_text_buffer_get_end_iter(self->_priv->buffer, &iter_end);
+            content = gtk_text_buffer_get_text(self->_priv->buffer, &iter_start, &iter_end, FALSE);
+            gtk_text_view_set_editable(GTK_TEXT_VIEW(self), FALSE);
+
+            /* Copy path, because signal callback my destroy path first */
+            met = meta_data_new();
+            met->plugin_name = "User set";
+            met->type = self->_priv->type;
+            if(content){
+                met->content_type = META_DATA_CONTENT_TEXT;
+                met->content = g_strstrip(content);met->size = -1;
+            }else {
+                met->content_type = META_DATA_CONTENT_EMPTY;
+            }
+            meta_data_set_cache(self->_priv->song, META_DATA_AVAILABLE, met); 
+            gmpc_meta_watcher_data_changed(gmw, self->_priv->song, self->_priv->type, META_DATA_AVAILABLE, met);
+            meta_data_free(met);
+
+        }else{
+            gtk_widget_show(self->_priv->cancel);
+            gtk_text_view_set_editable(GTK_TEXT_VIEW(self), TRUE);
+            gtk_button_set_label(GTK_BUTTON(button), GTK_STOCK_SAVE);
+        }
+
+    }
+    private 
+    void
+    set_text(self,const gchar *text, gsize length, int ro)
+    {
+        GtkTextIter iter;
+        GtkTextIter end_iter;
+        gtk_text_buffer_set_text(self->_priv->buffer, text, length);
+
+        gtk_text_buffer_get_start_iter(self->_priv->buffer, &iter);
+        gtk_text_buffer_get_end_iter(self->_priv->buffer, &end_iter);
+        if(self->use_monospace) {
+            gtk_text_buffer_apply_tag_by_name(self->_priv->buffer, "monospace",&iter, &end_iter);
+        }
+        if(!ro && !self->force_ro)
+        {
+            GtkTextChildAnchor *anch;
+            self->_priv->edit = gtk_button_new_from_stock(GTK_STOCK_EDIT); 
+            self->_priv->cancel = gtk_button_new_from_stock(GTK_STOCK_CANCEL); 
+
+            gtk_text_view_set_editable(GTK_TEXT_VIEW(self), FALSE);
+            gtk_widget_set_no_show_all(self->_priv->cancel, TRUE);
+            /* Add 2 empty lines at the end, and make it non-editable */
+            gtk_text_buffer_get_end_iter(self->_priv->buffer, &end_iter);
+            gtk_text_buffer_insert_with_tags_by_name(self->_priv->buffer, &end_iter, "\n\n", -1,"not_editable", NULL);
+
+            /* Add edit widget */
+            anch = gtk_text_buffer_create_child_anchor(self->_priv->buffer, &end_iter);
+            gtk_text_buffer_get_iter_at_child_anchor(self->_priv->buffer, &iter,anch);
+            /* Make widget non-editable */
+            gtk_text_buffer_apply_tag_by_name(self->_priv->buffer, "not_editable",&iter, &end_iter);
+            /* attach widget to anchor */
+            gtk_text_view_add_child_at_anchor(GTK_TEXT_VIEW(self), self->_priv->edit, anch);
+
+            /* Add edit widget */
+            gtk_text_buffer_get_end_iter(self->_priv->buffer, &end_iter);
+            anch = gtk_text_buffer_create_child_anchor(self->_priv->buffer, &end_iter);
+            gtk_text_buffer_get_iter_at_child_anchor(self->_priv->buffer, &iter,anch);
+            /* Make widget non-editable */
+            gtk_text_buffer_apply_tag_by_name(self->_priv->buffer, "not_editable",&iter, &end_iter);
+            /* attach widget to anchor */
+            gtk_text_view_add_child_at_anchor(GTK_TEXT_VIEW(self), self->_priv->cancel, anch);
+
+            /* show button */
+            gtk_widget_show(self->_priv->edit);
+            g_signal_connect_swapped(self->_priv->edit, "clicked",G_CALLBACK(self_edit_button_clicked), self);
+            g_signal_connect_swapped(self->_priv->cancel, "clicked",G_CALLBACK(self_cancel_button_clicked), self);
+        }
+        gtk_text_buffer_get_start_iter(self->_priv->buffer, &iter);
+        gtk_text_buffer_place_cursor(self->_priv->buffer, &iter);
+    }
+
+	signal last NONE (STRING)	
+	void
+	set_text_from_path(self,const gchar *path)
+	{
+		gchar *content=NULL;
+		gsize size = 0;
+		if(g_file_get_contents (path,&content,&size,NULL))
+		{
+			gchar *new_data = NULL;
+			gsize new_size = 0;
+			if(g_utf8_validate(content, size, NULL))
+			{
+                self_set_text(self, content, size, FALSE);
+			}
+			else
+			{
+				new_data = g_locale_to_utf8(content, size, NULL, &new_size, NULL);
+				if(new_data)
+				{
+                    self_set_text(self, new_data, new_size,FALSE);
+					g_free(new_data);
+				}
+				else
+				{
+					new_data = g_strdup_printf("%s: '%s' %s", _("Failed to open file:"), path,_("because of encoding issues"));
+                    self_set_text(self, new_data, -1,TRUE);
+					g_free(new_data);
+				}
+			}
+			g_free(content);
+		}
+	}
+
+    private
+    void
+    set_text_from_metadata(self, MetaData *met)
+    {
+        if(met->content_type == META_DATA_CONTENT_URI) {
+            const gchar *path = meta_data_get_uri(met);
+            self_set_text_from_path(self, path);
+        }else if(met->content_type == META_DATA_CONTENT_TEXT) {
+            const gchar *text = meta_data_get_text(met);
+            self_set_text(self,text, -1, FALSE); 
+        }else if (met->content_type == META_DATA_CONTENT_HTML) {
+            /* TODO: make utf-8 compatible */
+            gchar *text = meta_data_get_text_from_html(met);
+            if(text)
+            {
+                /* Get byte length */
+                self_set_text(self,text, -1, FALSE); 
+                g_free(text);
+            }else{
+                self_set_text_na(self);
+            }
+        }
+        if(self->_priv->met) meta_data_free(self->_priv->met);
+        self->_priv->met = meta_data_dup(met);
+    }
+	
+	signal last NONE (NONE)	
+	void
+	set_text_fetching(self)
+	{
+        if(self->_priv->met) meta_data_free(self->_priv->met);
+        self->_priv->met = NULL;
+		if(self->_priv->type == META_SONG_TXT)
+		{
+            self_set_text(self, _("Fetching Lyrics"), -1,TRUE);
+		}
+		else if (self->_priv->type == META_ARTIST_TXT)
+		{
+            self_set_text(self, _("Fetching Artist Info"), -1,TRUE);
+		}
+        else if (self->_priv->type == META_SONG_GUITAR_TAB)
+        {
+            self_set_text(self, _("Fetching Guitar tab"), -1,TRUE);
+        }
+		else
+		{
+            self_set_text(self, _("Fetching Album Info"), -1,TRUE);
+		}
+	}
+
+	signal last NONE (NONE)	
+	void
+	set_text_na(self)
+	{
+        if(self->_priv->met) meta_data_free(self->_priv->met);
+        self->_priv->met = NULL;
+
+        self_set_text(self, _("Not Available"), -1,FALSE);
+	}
+
+	private
+	void
+	meta_callback(GmpcMetaWatcher *mw , mpd_Song *song,  MetaDataType type, MetaDataResult ret, MetaData *met,gpointer data)
+	{
+		Self *self = data;
+		/**
+		 * Check for fields
+		 */
+		if(self->_priv->type != type)
+			return;
+
+		if(!gmpc_meta_watcher_match_data(self->_priv->type, self->_priv->song, song))
+		{
+			return;
+		}
+		if(ret == META_DATA_AVAILABLE) {
+            self_set_text_from_metadata(self,met); 
+        } else if (ret == META_DATA_FETCHING) {
+			self_set_text_fetching(self);
+		} else {
+			self_set_text_na(self);
+		}
+	}
+	override (G:Object)
+	void
+	finalize (G:Object *obj)
+	{
+
+		PARENT_HANDLER(obj);
+	}
+	override (G:Object)
+	void 
+	dispose (G:Object *obj)
+	{
+		Self *self = GMPC_META_TEXT_VIEW(obj); 
+		if(self->_priv->meta_id)
+		{
+			g_signal_handler_disconnect(G_OBJECT(gmw),self->_priv->meta_id);
+			self->_priv->meta_id =  0;
+		}
+
+		PARENT_HANDLER(obj);
+	}
+	public 
+	void
+	clear_entry(self)
+	{
+        MetaData *met = meta_data_new();
+        met->type = self->_priv->type;
+        met->plugin_name = "User set";
+        met->content_type = META_DATA_CONTENT_EMPTY;
+		meta_data_set_cache(self->_priv->song, META_DATA_UNAVAILABLE, met); 
+		gmpc_meta_watcher_data_changed(gmw, self->_priv->song, self->_priv->type, META_DATA_UNAVAILABLE, NULL);
+        meta_data_free(met);
+	}
+	public
+	void
+	select_file(self)
+	{
+        gchar *p;
+		mpd_Song *song = mpd_songDup(self->_priv->song);
+		MetaDataType type = self->_priv->type;
+		GtkFileFilter *gff = gtk_file_filter_new();
+		GtkWidget *fcd = gtk_file_chooser_dialog_new(_("Select File"),NULL,
+					 GTK_FILE_CHOOSER_ACTION_OPEN,
+				      GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+				      GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+				      NULL);
+		gtk_file_filter_set_name(gff, _("Text Document"));
+		gtk_file_filter_add_mime_type(gff, "text/plain");
+		gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fcd), gff);   
+		gff = gtk_file_filter_new();
+		gtk_file_filter_set_name(gff, _("All"));
+		gtk_file_filter_add_pattern(gff, "*");
+		gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fcd), gff);   
+
+        p = cfg_get_single_value_as_string(config, "MetaData", "text-file-chooser"); 
+        if(p) {
+            gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(fcd), p);
+            g_free(p);
+        }
+		gtk_widget_show_all(fcd);
+		switch(gtk_dialog_run(GTK_DIALOG(fcd)))
+		{
+			case GTK_RESPONSE_ACCEPT:
+				{	
+					gchar *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fcd));
+                    MetaData *met = meta_data_new();
+                    met->type = type;
+                    met->plugin_name = "User set";
+                    met->content_type = META_DATA_CONTENT_URI;
+                    met->content = filename; met->size =-1;
+					meta_data_set_cache(song, META_DATA_AVAILABLE, met); 
+                    cfg_set_single_value_as_string(config, "MetaData", "text-file-chooser", filename); 
+					gmpc_meta_watcher_data_changed(gmw, song, type, META_DATA_AVAILABLE, met);
+
+                    meta_data_free(met);
+                }
+            default:
+				break;
+		} 
+		gtk_widget_destroy(fcd);
+		mpd_freeSong(song);
+
+	}
+}

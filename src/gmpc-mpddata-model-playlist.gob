@@ -1,0 +1,520 @@
+/* Gnome Music Player Client (GMPC)
+ * Copyright (C) 2004-2010 Qball Cow <qball@sarine.nl>
+ * Project homepage: http://gmpc.wikia.com/
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+*/
+
+requires 2.0.0
+
+%a{
+#include "gmpc-mpddata-model.h" 
+
+#include "gmpc-extras.h" 
+%}
+%h{
+#include "gmpc-mpddata-model-private.h" 
+%}
+%{
+#define BLOCK_SIZE 200
+#define LOG_DOMAIN "MpdData.Model.Playlist"
+%}
+/**
+ * This is a Special version of Gmpc:MpdData:Model that is made to show the current playlist, and keep in sync with it.
+ * This is to replace the old playlist-lis backend.
+ * Use this model with Gmpc:MpdData:Treeview
+ */
+
+class Gmpc:MpdData:Model:Playlist from Gmpc:MpdData:Model 
+        (interface Gtk:Tree:Model)
+		(interface Gtk:Tree:Drag:Source)
+		(interface Gtk:Tree:Drag:Dest)
+{
+    private GmpcConnection *conn = {NULL};
+    private unsigned int status_changed = 0;
+    private unsigned int connection_changed = 0;
+    private MpdObj *mi;
+    private long long playlist_id = {0};
+    private unsigned long total_time = {0};
+    private unsigned long loaded_songs = {0};
+    private int old_highlight = -1;
+
+		private guint update_timeout = {0};
+		private guint last_pos = {0};
+
+		private gboolean update_callback(self)
+		{
+			static const unsigned int step_size = 100;
+			unsigned int num_rows =  GMPC_MPDDATA_MODEL(self)->num_rows;
+			if(self->_priv->loaded_songs <num_rows)
+			{
+				unsigned int i = 0;
+				MpdData *data =  GMPC_MPDDATA_MODEL(self)->_priv->data;
+				data = mpd_data_get_first(data);
+				if(!data) return TRUE;
+				for(i=0; i < (self->_priv->last_pos);i++)
+				{
+					data = (MpdData *)mpd_data_get_next_real(data,FALSE);
+				}
+
+
+				for(i=0;i< step_size && data;i++)
+				{
+					if(data->song == NULL)
+					{ 
+						data->song = mpd_playlist_get_song_from_pos(self->_priv->mi,i+self->_priv->last_pos);
+						if(data->song)
+						{
+							self->_priv->loaded_songs++;
+							if(data->song->time>0)
+							{
+								self->_priv->total_time += data->song->time;
+								self_total_playtime_changed(self, self->_priv->loaded_songs, self->_priv->total_time);
+							}
+						}
+
+					}
+					data = mpd_data_get_next_real(data, FALSE);
+				}
+				self->_priv->last_pos += step_size;
+			}
+			else 
+			{
+				self->_priv->last_pos = 0;
+			} 
+			return TRUE;
+		}
+
+override (G:Object)
+        void
+        dispose (G:Object *obj)
+        {
+            gmpc_mpddata_model_set_mpd_data(GMPC_MPDDATA_MODEL(obj), NULL);
+        }
+override (G:Object)
+        void 
+        finalize (G:Object *obj)
+        {
+            Self *self = GMPC_MPDDATA_MODEL_PLAYLIST(obj); 
+            if(self->_priv->status_changed > 0)
+            {
+                g_signal_handler_disconnect(G_OBJECT(gmpcconn),self->_priv->status_changed);
+                self->_priv->status_changed = 0;
+            }
+            if(self->_priv->connection_changed > 0)
+            {
+                g_signal_handler_disconnect(G_OBJECT(gmpcconn),self->_priv->connection_changed);
+                self->_priv->connection_changed = 0;
+            }
+            if(self->_priv->update_timeout > 0)
+            {
+                g_source_remove(self->_priv->update_timeout);
+                self->_priv->update_timeout  = 0;
+            }
+            PARENT_HANDLER(obj);
+        }
+    public
+        Gmpc:MpdData:Model:Playlist *new (Gmpc:Connection *conn (check type null), MpdObj *mi(check null))
+        {
+            Self *self = GET_NEW;
+            self->_priv->conn = conn;
+            self->_priv->status_changed = g_signal_connect_swapped(G_OBJECT(conn), "status_changed", G_CALLBACK(self_status_changed), self);
+            self->_priv->connection_changed = g_signal_connect_swapped(G_OBJECT(conn), "connection_changed", G_CALLBACK(self_connection_changed), self);
+            self->_priv->mi = mi;
+						
+						if(cfg_get_single_value_as_int_with_default(config, "playlist", "background-loading", FALSE))
+						{
+							self->_priv->update_timeout  = g_timeout_add_seconds(1, (GSourceFunc)(self_update_callback), self);
+						}
+							return self;
+        }
+    private
+    void
+    status_changed(self, MpdObj *mi, ChangedStatusType what, Gmpc:Connection *conn (check type))
+    {
+        if(what&MPD_CST_PLAYLIST)
+        {
+            MpdData *data  = NULL;
+            int new_length = mpd_playlist_get_playlist_length(mi);
+           
+            int old_length = GMPC_MPDDATA_MODEL(self)->num_rows; 
+            /* if it was empty just add everything */
+            if(new_length == 0)
+            {
+                self->_priv->loaded_songs=0;
+                self->_priv->total_time =0;
+                self_total_playtime_changed(self, self->_priv->loaded_songs, self->_priv->total_time);
+
+                
+                gmpc_mpddata_model_set_mpd_data(GMPC_MPDDATA_MODEL(self), NULL);
+
+
+            }
+            else if(old_length == 0)
+            {
+                int  i;
+                for(i = new_length; i > 0; i--)
+                {
+                    data= mpd_new_data_struct_append(data);
+                    data->type = MPD_DATA_TYPE_SONG;
+                    data->song = NULL;
+                }
+                gmpc_mpddata_model_set_mpd_data(GMPC_MPDDATA_MODEL(self), mpd_data_get_first(data));
+            }
+            else
+            {
+                data = mpd_playlist_get_changes_posid(mi, self->_priv->playlist_id);
+                /* if the new length is shorter then the old, remove rows at the end */
+                if(new_length < old_length)
+                {
+                    int i;
+                    MpdData_real *odata = (MpdData_real *)mpd_data_get_first(GMPC_MPDDATA_MODEL(self)->_priv->data);
+                    while(odata->next)odata = odata->next;
+                    /* data should be last */
+
+                    for(i=old_length-1;i>=new_length;i--)
+                    {
+                        GtkTreePath *path = gtk_tree_path_new(); 
+                        gtk_tree_path_append_index(path, i);
+                        gtk_tree_model_row_deleted(GTK_TREE_MODEL(self), path);
+                        gtk_tree_path_free(path);
+
+                        if(odata->song)
+                        {
+                            self->_priv->loaded_songs--;
+                            if(odata->song->time > 0)
+                            {
+                                self->_priv->total_time -= odata->song->time;
+                                self_total_playtime_changed(self, self->_priv->loaded_songs, self->_priv->total_time);
+                            }
+                        }
+
+                        odata = (MpdData_real *)mpd_data_delete_item((MpdData *)odata);
+                       GMPC_MPDDATA_MODEL(self)->num_rows--;
+                    }
+                }
+                /* if it's longer, append rows */
+                else if ( new_length > old_length)
+                {
+                    int i;
+                    MpdData_real *odata = (MpdData_real *)mpd_data_get_first(GMPC_MPDDATA_MODEL(self)->_priv->data);
+                    /* get the last element */
+                    while(odata->next) odata = odata->next;
+                    for(i=old_length; i< new_length;i++)
+                    {
+                       GtkTreePath *path = gtk_tree_path_new(); 
+                       GtkTreeIter iter;
+                       /* Append node */
+                       odata = (MpdData_real *)mpd_new_data_struct_append((MpdData *)odata);
+                       odata->type = MPD_DATA_TYPE_SONG;
+                       odata->song = NULL;
+                        /* Create iter */
+                       iter.stamp = GMPC_MPDDATA_MODEL(self)->_priv->stamp;
+                       iter.user_data = NULL; 
+                       iter.user_data2 =  GINT_TO_POINTER(GMPC_MPDDATA_MODEL(self)->num_rows);
+                       /* show the path */
+                       gtk_tree_path_append_index(path, i);
+                        /* insert it */
+                       gtk_tree_model_row_inserted(GTK_TREE_MODEL(self), path, &iter);
+                       gtk_tree_path_free(path);
+                       GMPC_MPDDATA_MODEL(self)->num_rows++;
+
+                    }
+                }
+                /* Now mark the changed rows */
+                if(data)
+                {
+                    int i=0;
+                    MpdData_real *list_iter =(MpdData_real *) mpd_data_get_first(GMPC_MPDDATA_MODEL(self)->_priv->data);
+                    MpdData_real *data_iter =(MpdData_real *) mpd_data_get_first(data);
+                    while(data_iter && list_iter)
+                    {
+                        GtkTreeIter iter;
+                        GtkTreePath *path = gtk_tree_path_new(); 
+                       /* get the right entry */
+                        for(;list_iter != NULL && i!= data_iter->song->pos;i++)
+                            list_iter = list_iter->next;
+
+                        if(list_iter)
+                        {
+                            if(list_iter->song)
+                            {
+                                self->_priv->loaded_songs--;
+                                if(list_iter->song->time > 0)
+                                {
+                                    self->_priv->total_time -= list_iter->song->time;
+                                    self_total_playtime_changed(self, self->_priv->loaded_songs, self->_priv->total_time);
+                                }
+                            }
+
+                            if(list_iter->song)
+                                mpd_freeSong(list_iter->song);
+                            list_iter->song = NULL;
+
+                            iter.stamp = GMPC_MPDDATA_MODEL(self)->_priv->stamp;
+                            iter.user_data = NULL; 
+                            iter.user_data2 =  GINT_TO_POINTER(i);
+                            gtk_tree_path_append_index(path, i);
+                            gtk_tree_model_row_changed(GTK_TREE_MODEL(self), path, &iter);
+
+
+                        }
+                        gtk_tree_path_free(path);
+                        data_iter = data_iter->next;
+                    }
+                    mpd_data_free(data);
+                }
+            }
+            if(GMPC_MPDDATA_MODEL(self)->num_rows != new_length)
+            {
+                g_log(LOG_DOMAIN, G_LOG_LEVEL_WARNING, "Playlist out of sync: %i-%i \n",GMPC_MPDDATA_MODEL(self)->num_rows,new_length);
+            }
+            self->_priv->playlist_id = mpd_playlist_get_playlist_id(mi);
+        }
+        if(what&(MPD_CST_SONGID|MPD_CST_SONGPOS|MPD_CST_STATE))
+        {
+            GtkTreeIter iter;
+            GtkTreePath *path = NULL;
+            int i = mpd_player_get_current_song_pos(self->_priv->mi);
+            if(self->_priv->old_highlight >= 0)
+            {
+                /* get the right entry */
+                path = gtk_tree_path_new(); 
+                iter.stamp = GMPC_MPDDATA_MODEL(self)->_priv->stamp;
+                iter.user_data = NULL; 
+                iter.user_data2 =  GINT_TO_POINTER(self->_priv->old_highlight);
+                gtk_tree_path_append_index(path, self->_priv->old_highlight);
+                gtk_tree_model_row_changed(GTK_TREE_MODEL(self), path, &iter);
+                gtk_tree_path_free(path);
+                self->_priv->old_highlight = -1;
+            }
+            if(i >= 0)
+            {
+                /* Needs to be set before updating */
+                self->_priv->old_highlight = i;
+                /* get the right entry */
+                path = gtk_tree_path_new(); 
+                iter.stamp = GMPC_MPDDATA_MODEL(self)->_priv->stamp;
+                iter.user_data = NULL; 
+                iter.user_data2 =  GINT_TO_POINTER(i);
+                gtk_tree_path_append_index(path, i);
+                gtk_tree_model_row_changed(GTK_TREE_MODEL(self), path, &iter);
+                self_current_song_changed(self, path, &iter);
+                gtk_tree_path_free(path);
+            }
+        }
+
+    }
+
+    signal last NONE (POINTER, POINTER)
+    void
+    current_song_changed(self,  GtkTreePath *path,GtkTreeIter *iter)
+    {
+
+    }
+    
+    signal last NONE (LONG, LONG)
+    void
+    total_playtime_changed(self, unsigned long loaded_songs, unsigned long total_playtime)
+    {
+    }
+
+    private
+    void
+    connection_changed(self, MpdObj *mi, int connect, Gmpc:Connection *conn (check type))
+    {
+        if(connect == 0)
+        {
+            gmpc_mpddata_model_set_mpd_data(GMPC_MPDDATA_MODEL(self), NULL);
+            self->_priv->playlist_id = 0;
+            self->_priv->loaded_songs = 0;
+            self->_priv->total_time = 0;
+            self_total_playtime_changed(self, self->_priv->loaded_songs, self->_priv->total_time);
+        }
+    }
+
+    public
+    gboolean
+    is_current_song(Gtk:Tree:Model *model(check null type), GtkTreeIter *iter (check null))
+    {
+        Self *self = GMPC_MPDDATA_MODEL_PLAYLIST(model);
+        int n = GPOINTER_TO_INT(iter->user_data2);
+        if(n == self->_priv->old_highlight)
+            return TRUE;
+        return FALSE;
+    }
+
+
+
+    /**
+     * "override" the get_value method, because we need to fetch the value before it's available.
+     * So after we fetch it, let the Gmpc:MpdData:Model handle the hard work again.
+     */
+    interface Gtk:Tree:Model
+    private void 
+    get_value(Gtk:Tree:Model *model(check null type), GtkTreeIter *iter (check null), gint column (check >= 0 < MPDDATA_MODEL_N_COLUMNS), GValue *value (check null))
+    {
+        Self *self = GMPC_MPDDATA_MODEL_PLAYLIST(model);
+        MpdData_real *data = iter->user_data;	
+        int n = GPOINTER_TO_INT(iter->user_data2);
+        if(data == NULL) {
+            g_warning("data == NULL :: %i:: %i:: %i :: %i",n, GMPC_MPDDATA_MODEL(self)->num_rows,
+            GMPC_MPDDATA_MODEL(self)->_priv->stamp,
+            iter->stamp
+
+            );
+
+            g_value_init(value, GMPC_MPDDATA_MODEL(self)->types[column]);
+            return;
+        }
+        if(data->song == NULL)
+        {
+            int rs = n - n%BLOCK_SIZE;
+            int end = ((rs+(BLOCK_SIZE-1)) >= GMPC_MPDDATA_MODEL(self)->num_rows)? GMPC_MPDDATA_MODEL(self)->num_rows-1:rs+(BLOCK_SIZE-1);
+
+            MpdData_real *edit =(MpdData_real *) data;
+            MpdData_real *miter,*data2 = (MpdData_real *)mpd_playlist_get_song_from_pos_range(self->_priv->mi,rs, end); 
+
+            /* rewind to start block */
+            while(n>rs){ edit = edit->prev; rs++;}
+
+            data2 =(MpdData_real *) mpd_data_get_first((MpdData *)data2);
+            miter =data2;
+            while(data2){
+                if(edit->song == NULL)
+                {
+                    edit->song = data2->song;
+                    data2->song = NULL;
+                    self->_priv->loaded_songs++;
+                    if(edit->song->time>0)
+                    {
+                        self->_priv->total_time += edit->song->time;
+                    }
+                }
+                edit = edit->next;
+                data2  = data2->next;
+            }
+            mpd_data_free((MpdData *)miter);
+
+            self_total_playtime_changed(self, self->_priv->loaded_songs, self->_priv->total_time);
+        }
+        /**
+         * If the fetch failed, return an empty value, otherwise we will get crashes
+         */
+        if(data->song == NULL)
+        {
+            g_value_init(value, GMPC_MPDDATA_MODEL(self)->types[column]);
+            g_log(LOG_DOMAIN, G_LOG_LEVEL_WARNING,"failed to get song entry\n");
+            return;
+        }
+        if(column == MPDDATA_MODEL_COL_ICON_ID)
+        {
+            if(n == mpd_player_get_current_song_pos(self->_priv->mi))
+            {
+                g_value_init(value, GMPC_MPDDATA_MODEL(self)->types[column]);
+                g_value_set_string(value, "gtk-media-play-ltr");
+                return;
+            }
+
+        }
+        /**
+         * Call the parent function again
+         */
+        if(n < GMPC_MPDDATA_MODEL(self)->num_rows)
+            gmpc_mpddata_model_get_value(model, iter, column, value);
+    }
+    /**
+     * Moving interface 
+     */
+		interface Gtk:Tree:Drag:Source
+		private 
+		gboolean row_draggable (Gtk:Tree:Drag:Source *drag_source, Gtk:Tree:Path *path)
+		{
+				return TRUE;
+		}
+
+        interface Gtk:Tree:Drag:Source
+        private 
+		gboolean drag_data_delete (Gtk:Tree:Drag:Source *drag_source, Gtk:Tree:Path *path) 
+		{
+			return TRUE;
+		}
+		interface Gtk:Tree:Drag:Source
+			private 
+		gboolean drag_data_get (Gtk:Tree:Drag:Source *drag_source, Gtk:Tree:Path *path, Gtk:Selection:Data *selection_data)
+		{
+			return FALSE;
+		}
+
+        interface Gtk:Tree:Drag:Dest
+            private gboolean row_drop_possible 
+					(Gtk:Tree:Drag:Dest *drag_dest,
+					 Gtk:Tree:Path 		*dest,
+					 Gtk:Selection:Data *selection_data)
+		{
+			return TRUE;
+		}
+   
+		interface Gtk:Tree:Drag:Dest
+		private gboolean drag_data_received 
+				(Gtk:Tree:Drag:Dest *drag_dest, 
+				 Gtk:Tree:Path *dest,
+				 Gtk:Selection:Data *selection_data) 
+       {
+           GtkTreePath *path=NULL;
+           GtkTreeModel *model=NULL;
+
+           Self *self = NULL;
+           gint *ind = NULL, *ind2 = NULL;
+           if(dest == NULL || !gtk_tree_get_row_drag_data(selection_data, &model, &path))
+           {
+               return FALSE;
+           }
+           if(GMPC_MPDDATA_MODEL(model)->num_rows < 2)
+           {
+               gtk_tree_path_free(path);
+               return FALSE;
+           }
+           self =  GMPC_MPDDATA_MODEL_PLAYLIST(model);
+           ind = gtk_tree_path_get_indices(dest);
+           ind2 = gtk_tree_path_get_indices(path);
+           if(ind && ind2)
+           {
+               int original = ind2[0];
+               int destination = ind[0];
+               /*		if(destination >0 && ind[1] != '\0') destination--; */
+               if(destination > original) destination--;
+               mpd_playlist_move_pos(self->_priv->mi,original,destination);
+           }
+           gtk_tree_path_free(path);
+           return TRUE;
+       } 
+       public 
+       void
+       trigger_total_playtime_signal(self)
+       {
+           self_total_playtime_changed(self, self->_priv->loaded_songs, self->_priv->total_time);
+       }
+       public
+       void
+       get_total_playtime(self, unsigned long *loaded_songs, unsigned long *total_time)
+       {
+            if(loaded_songs)
+                (*loaded_songs) = self->_priv->loaded_songs;
+            if(total_time)
+                (*total_time)= self->_priv->total_time;
+       }
+}
+

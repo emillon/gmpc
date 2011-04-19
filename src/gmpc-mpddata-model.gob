@@ -1,0 +1,1369 @@
+/* Gnome Music Player Client (GMPC)
+ * Copyright (C) 2004-2010 Qball Cow <qball@sarine.nl>
+ * Project homepage: http://gmpc.wikia.com/
+ 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+*/
+
+requires 2.0.0
+
+%ht{
+#include <config.h>
+#include <gtk/gtk.h>
+#include <libmpd/libmpd.h>
+#include <libmpd/libmpd-internal.h>
+%}
+
+%privateheader{
+//#include "playlist3.h"
+#include "config1.h"
+#include "config-defaults.h"
+#include "main.h"
+#include "misc.h"
+
+%}
+%h{
+#define GMPC_MPD_DATA_MODEL(a) GMPC_MPDDATA_MODEL(a)
+	enum
+	{
+		MPDDATA_MODEL_COL_MPDSONG = 0, 		      /* get the mpd_Song */
+		MPDDATA_MODEL_COL_PLAYING,				      /* Shows if this song is the current song */
+		MPDDATA_MODEL_COL_PLAYING_FONT_WEIGHT,	/* Shows if this song is the current song */
+		MPDDATA_MODEL_COL_PATH,					        /* Path to song/file/directory */ 
+		MPDDATA_MODEL_COL_MARKUP, 				      /* a string that has FALSEmarkup */
+		MPDDATA_MODEL_COL_SONG_ARTIST,			    /* artist name */
+		MPDDATA_MODEL_COL_SONG_ALBUM,			      /* album name */
+		MPDDATA_MODEL_COL_SONG_TITLE,			      /* song title */
+		MPDDATA_MODEL_COL_SONG_TITLEFILE,		    /* song title */
+		MPDDATA_MODEL_COL_SONG_GENRE,			      /* song genre */
+		MPDDATA_MODEL_COL_SONG_TRACK,			      /* song track */
+		MPDDATA_MODEL_COL_SONG_NAME,			      /* stream name */
+		MPDDATA_MODEL_COL_SONG_COMPOSER,		    /* composer name */
+		MPDDATA_MODEL_COL_SONG_PERFORMER,		    /* performer */
+		MPDDATA_MODEL_COL_SONG_DATE,			      /* date */
+		MPDDATA_MODEL_COL_SONG_LENGTH_FORMAT,	  /* length formatted */
+		MPDDATA_MODEL_COL_SONG_DISC,			      /* disc */
+		MPDDATA_MODEL_COL_SONG_COMMENT,			    /* comment */
+		MPDDATA_MODEL_COL_SONG_POS,				      /* position */
+        MPDDATA_MODEL_COL_SONG_ALBUMARTIST,
+		MPDDATA_MODEL_COL_PATH_EXTENSION,				/* Extention */
+		MPDDATA_MODEL_COL_PATH_DIRECTORY,				/* Directory */
+		MPDDATA_MODEL_COL_SONG_ID,				      /* col id */
+		MPDDATA_MODEL_COL_ICON_ID,				      /* icon id */
+		MPDDATA_MODEL_COL_SONG_LENGTH,			    /* length */
+		MPDDATA_MODEL_TAG_TYPE,				          /* tag type */
+		MPDDATA_MODEL_ROW_TYPE,					        /* type of the row */
+		MPDDATA_MODEL_META_DATA,                        /* metadata */
+		MPDDATA_MODEL_USERDATA,
+		MPDDATA_MODEL_N_COLUMNS
+	} ;
+%}
+
+%{
+#define LOG_DOMAIN "MpdData.Model"
+%}
+
+ class Gmpc:MpdData:Model from G:Object
+          (interface Gtk:Tree:Sortable)
+          (interface Gtk:Tree:Model)
+{
+    private gint stamp 		= {g_random_int()};
+    public	GType types[MPDDATA_MODEL_N_COLUMNS]; 
+    private MpdData *data 	= NULL;
+    public gint num_rows = 0;
+    private GmpcPixbufLoaderAsync **images = NULL;
+    private gchar *req_artist = {NULL} destroywith g_free;
+    private GdkPixbuf *blank = {NULL} destroywith g_object_unref;
+    public gint icon_size = {cfg_get_single_value_as_int_with_default(config, "gmpc-mpddata-model", "icon-size", 32)};
+
+    /* sorting */
+    private GtkSortType sort_order = GTK_SORT_ASCENDING;
+    private int sort_column = GTK_TREE_SORTABLE_UNSORTED_SORT_COLUMN_ID;
+    private int old_sort_column = GTK_TREE_SORTABLE_UNSORTED_SORT_COLUMN_ID;
+    public gboolean has_up	 = FALSE;
+    private gchar *markup	 = {cfg_get_single_value_as_string_with_default(config, "playlist", "browser_markup",DEFAULT_MARKUP_BROWSER)} destroywith g_free;
+
+    private gulong playtime = {0};
+
+
+    private gboolean use_images = TRUE;
+
+    property BOOLEAN has_up
+        (nick = "Has Up",
+         blurb = "Show an 'up row",
+         default_value = FALSE,
+         export,
+         link);
+
+    init(self)
+    {
+        self->types[MPDDATA_MODEL_COL_MPDSONG] = G_TYPE_POINTER;
+        self->types[MPDDATA_MODEL_COL_MARKUP] = G_TYPE_STRING;
+        self->types[MPDDATA_MODEL_COL_PLAYING] = G_TYPE_BOOLEAN;
+        self->types[MPDDATA_MODEL_COL_PLAYING_FONT_WEIGHT] = G_TYPE_INT;
+        self->types[MPDDATA_MODEL_COL_PATH] = G_TYPE_STRING;
+        self->types[MPDDATA_MODEL_COL_SONG_ARTIST] = G_TYPE_STRING;
+        self->types[MPDDATA_MODEL_COL_SONG_ALBUM] = G_TYPE_STRING;
+        self->types[MPDDATA_MODEL_COL_SONG_TITLE] = G_TYPE_STRING;
+        self->types[MPDDATA_MODEL_COL_SONG_TITLEFILE] = G_TYPE_STRING;
+        self->types[MPDDATA_MODEL_COL_SONG_TRACK] = G_TYPE_STRING;
+        self->types[MPDDATA_MODEL_COL_SONG_GENRE] = G_TYPE_STRING;
+        self->types[MPDDATA_MODEL_COL_SONG_NAME] = G_TYPE_STRING;
+        self->types[MPDDATA_MODEL_COL_SONG_COMPOSER] = G_TYPE_STRING;
+        self->types[MPDDATA_MODEL_COL_SONG_PERFORMER]= G_TYPE_STRING;
+        self->types[MPDDATA_MODEL_COL_SONG_DATE] = G_TYPE_STRING;
+        self->types[MPDDATA_MODEL_COL_SONG_LENGTH] = G_TYPE_INT;
+        self->types[MPDDATA_MODEL_COL_SONG_LENGTH_FORMAT] = G_TYPE_STRING;
+        self->types[MPDDATA_MODEL_COL_SONG_DISC] = G_TYPE_STRING;
+        self->types[MPDDATA_MODEL_COL_SONG_COMMENT] = G_TYPE_STRING;
+        self->types[MPDDATA_MODEL_COL_SONG_POS] = G_TYPE_INT;
+        self->types[MPDDATA_MODEL_COL_SONG_ALBUMARTIST] = G_TYPE_STRING;
+        self->types[MPDDATA_MODEL_COL_PATH_EXTENSION] = G_TYPE_STRING;
+        self->types[MPDDATA_MODEL_COL_PATH_DIRECTORY] = G_TYPE_STRING;
+        self->types[MPDDATA_MODEL_COL_SONG_ID] = G_TYPE_INT;
+        self->types[MPDDATA_MODEL_COL_ICON_ID] = G_TYPE_STRING;
+        self->types[MPDDATA_MODEL_TAG_TYPE] = G_TYPE_INT;
+        self->types[MPDDATA_MODEL_ROW_TYPE] = G_TYPE_INT;
+        self->types[MPDDATA_MODEL_USERDATA] = G_TYPE_POINTER;
+        self->types[MPDDATA_MODEL_META_DATA] = GDK_TYPE_PIXBUF;
+
+
+        self->_priv->blank = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, self->icon_size, self->icon_size);
+        gdk_pixbuf_fill(self->_priv->blank, 0x00000000);
+    }
+    class_init(klass);
+
+    public
+        Gmpc:MpdData:Model *new (void)
+        {
+            return GET_NEW;
+        }
+
+    override (G:Object)
+        void 
+        finalize (G:Object *obj)
+        {
+            int i =0;
+            Self *self = GMPC_MPDDATA_MODEL(obj); 
+
+            if(self->_priv->data)
+            {
+                mpd_data_free(self->_priv->data);
+                self->_priv->data = NULL;
+            }
+            if(self->_priv->images && self->_priv->use_images)
+            {
+                for(i=0;i<self->num_rows;i++)
+                {
+                    if(self->_priv->images[i]) {
+                        g_object_unref(self->_priv->images[i]);
+                        self->_priv->images[i] = NULL;
+                    }
+                }
+                q_free(self->_priv->images);
+                /* q_free should do it, but force it */
+                self->_priv->images = NULL;
+            }
+            PARENT_HANDLER(obj);
+        }
+    /* function implemented for the Gtk:Tree:Model interface */
+    interface Gtk:Tree:Model
+        private GtkTreeModelFlags
+        get_flags (Gtk:Tree:Model *self (check null type))
+        {
+            /* Here would be the implementation */
+            return (GtkTreeModelFlags)GTK_TREE_MODEL_LIST_ONLY;
+        }
+
+
+    interface Gtk:Tree:Model
+        public
+        gboolean iter_children(Gtk:Tree:Model *model, GtkTreeIter *iter, GtkTreeIter *parent)
+        {
+            Self *self  = GMPC_MPDDATA_MODEL(model);
+            if(parent)
+                return FALSE;
+            if(self->num_rows == 0)
+                return FALSE;
+            /* Set iter to first item in list */
+            iter->stamp = self->_priv->stamp; 
+            iter->user_data = self->_priv->data;
+            iter->user_data2 =  GINT_TO_POINTER(0);
+            iter->user_data3 = NULL;	/* unused */
+
+            return TRUE;
+        }
+    /**
+     * Unused, not known in the model directly? 
+     */
+    interface Gtk:Tree:Model	
+        public
+        gint get_n_columns(Gtk:Tree:Model *model)
+        {
+            return MPDDATA_MODEL_N_COLUMNS;
+        }
+
+    interface Gtk:Tree:Model
+        private gboolean
+        get_iter(Gtk:Tree:Model *model (check null type),
+                Gtk:Tree:Iter *iter (check null),
+                Gtk:Tree:Path *path (check null))
+        {
+            Self *self = GMPC_MPDDATA_MODEL(model);
+            MpdData_real *data = NULL;
+            gint i=0;
+            const gint *indices = gtk_tree_path_get_indices(path);
+            gint depth = gtk_tree_path_get_depth(path);
+            gint n = indices[0];	/* the n-th top level row */
+
+            /* No Children */
+            g_assert(depth == 1); 
+
+            if (n >= self->num_rows || n < 0)
+                return FALSE; 
+
+            g_assert(n<self->num_rows);
+            /* If it is the first item in a has_up list, do nothing */
+            if(self->has_up && n == 0){
+                data = NULL;
+                goto end;
+            }
+            data = (MpdData_real *)self->_priv->data;
+
+            if(self->has_up)
+                i=1;
+
+            for(; i < (n);i++)
+            {
+                data = data->next; 
+            }
+end:
+            iter->stamp = self->_priv->stamp;
+            iter->user_data = data; 
+            iter->user_data2 = GINT_TO_POINTER(n);
+            return TRUE;
+        }
+
+    interface Gtk:Tree:Model
+        private gboolean
+        iter_next(Gtk:Tree:Model *model(check null type), GtkTreeIter *iter (check null))
+        {
+            Self *self = GMPC_MPDDATA_MODEL(model);
+            MpdData *data = iter->user_data;
+            int n = GPOINTER_TO_INT(iter->user_data2) ;
+            /* if the row is the last row in the list or bigger then the last row, return FALSE */
+            if(n >= self->num_rows)
+            {
+                return FALSE;
+            }
+            /* if the row is the first row in the list, and it has a "go-up" entry, 
+             * it can have a next entry
+             */
+            if(data == NULL &&  n == 0 && self->has_up == TRUE)
+            {
+                iter->user_data = (MpdData *)self->_priv->data; 
+                iter->user_data2 = GINT_TO_POINTER(1);
+                if(iter->user_data == NULL)
+                    return FALSE;
+                return TRUE;
+            }
+            if(mpd_data_get_next_real(data,FALSE) == NULL)
+            {
+                return FALSE;
+            }
+            iter->user_data = (MpdData *)mpd_data_get_next_real(data,FALSE); 
+            iter->user_data2 = GINT_TO_POINTER(n+1);
+            g_assert(iter->user_data != NULL);
+            return TRUE;
+        }
+
+    interface Gtk:Tree:Model
+        private gboolean
+        iter_has_child(Gtk:Tree:Model *self (check null type), GtkTreeIter *iter)
+        {
+            return FALSE;
+        }
+    interface Gtk:Tree:Model
+        private gint
+        iter_n_children(Gtk:Tree:Model *model (check null type), GtkTreeIter *iter)
+        { 
+            Self *list = GMPC_MPDDATA_MODEL(model);
+            if(iter)
+                return 0;
+            return list->num_rows;
+        }
+
+    interface Gtk:Tree:Model
+        private gboolean
+        iter_parent(Gtk:Tree:Model *model (check null type), Gtk:Tree:Iter *iter, Gtk:Tree:Iter *child)
+        {
+            return FALSE;
+        }
+    private 
+        void
+        cover_art_fetched(mpd_Song *song, MetaDataResult ret,MetaData *met,GtkTreeRowReference *ref)
+        {
+
+            if(ref)
+            {
+                GtkTreePath *path =gtk_tree_row_reference_get_path(ref);
+                GtkTreeModel *model = gtk_tree_row_reference_get_model(ref);
+                if(path && model)
+                {
+					int n;	
+                    Self *self = GMPC_MPDDATA_MODEL(model);
+                    GtkTreeIter iter;
+
+                    g_assert(self->_priv->use_images == TRUE);
+                    
+                    gtk_tree_model_get_iter(model, &iter, path);
+                    n = GPOINTER_TO_INT(iter.user_data2) ;
+
+                    if(self->_priv->images[n] == NULL){
+                        self->_priv->images[n]= gmpc_pixbuf_loader_async_new();
+                        gmpc_pixbuf_loader_async_set_rref(GMPC_PIXBUF_LOADER_ASYNC(self->_priv->images[n]), ref);
+                    }
+
+                    if(ret == META_DATA_AVAILABLE)
+                    {
+                        
+                        GdkPixbuf *pb = NULL;
+                        if(met->content_type == META_DATA_CONTENT_URI)
+                        {
+                            const gchar *coverpath = meta_data_get_uri(met);
+                            MpdData_real *data = iter.user_data;	
+                            gmpc_pixbuf_loader_async_set_from_file(GMPC_PIXBUF_LOADER_ASYNC(self->_priv->images[n]),
+                                    coverpath, self->icon_size, ((data->type == MPD_DATA_TYPE_TAG && data->tag_type == MPD_TAG_ITEM_ALBUM) || (data->type == MPD_DATA_TYPE_SONG)));
+                        }else{
+                            pb = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(), "gmpc-no-cover", self->icon_size, 0,NULL);
+                            gmpc_pixbuf_loader_async_set_pixbuf(self->_priv->images[n], pb);
+                            g_object_unref(pb);
+                        }
+                    }
+                    else   if(ret == META_DATA_UNAVAILABLE)
+                    {
+                        GdkPixbuf *pb2;
+                        pb2 = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(), "gmpc-no-cover", self->icon_size, 0,NULL);
+                        gmpc_pixbuf_loader_async_set_pixbuf(self->_priv->images[n], pb2);
+                        g_object_unref(pb2);
+                    }
+                    gtk_tree_model_row_changed(model,path, &iter);
+                    gtk_tree_path_free(path);
+                }
+
+                if(ret == META_DATA_AVAILABLE || ret == META_DATA_UNAVAILABLE)
+                {
+                    if(ref)
+                    {
+                        gtk_tree_row_reference_free(ref);
+                    }
+                }
+            }
+        }
+
+    interface Gtk:Tree:Model
+        public void
+        get_value(Gtk:Tree:Model *model(check null type), GtkTreeIter *iter (check null), gint column (check >= 0 < MPDDATA_MODEL_N_COLUMNS), GValue *value (check null))
+        {
+            Self *self = GMPC_MPDDATA_MODEL(model);
+            MpdData_real *data = iter->user_data;	
+            int n = GPOINTER_TO_INT(iter->user_data2);
+
+            if(self->_priv->data == NULL)
+                g_warning("self->_priv->data == NULL");
+            /* set value to the correct type */
+            g_value_init(value, self->types[column]);
+
+            /** 
+             * Sanity checks 
+             */
+             g_assert((n < self->num_rows || n == 0));
+            g_assert(!(data == NULL && n != 0));
+
+            /* handle row up */
+            if(data == NULL && n == 0)
+            {
+                switch(column)
+                {
+                    case MPDDATA_MODEL_COL_ICON_ID:
+                        g_value_set_string(value, GTK_STOCK_GO_UP);
+                        break;
+                    case MPDDATA_MODEL_ROW_TYPE:
+                        /**
+                         * Make define 
+                         */
+                        g_value_set_int(value, -1);
+                        break;
+                    case MPDDATA_MODEL_COL_SONG_TITLE:
+                    case MPDDATA_MODEL_COL_MARKUP:
+                        {
+                            g_value_set_string(value,"..");
+                            break;
+                        }
+                    default:
+                        break;
+                }
+                return;
+            }
+
+            if(column == MPDDATA_MODEL_META_DATA)
+            {
+                if(self->_priv->use_images && self->_priv->images)
+                {
+                    if(self->_priv->images[n] == NULL)
+                    {
+                        GtkTreePath *path;
+                        GtkTreeRowReference *ref;
+                        path = gtk_tree_model_get_path(GTK_TREE_MODEL(self), iter);
+                        ref = gtk_tree_row_reference_new(GTK_TREE_MODEL(self),path);
+
+                        self->_priv->images[n]= gmpc_pixbuf_loader_async_new();
+                        gmpc_pixbuf_loader_async_set_rref(GMPC_PIXBUF_LOADER_ASYNC(self->_priv->images[n]), ref);
+                        if(data->type == MPD_DATA_TYPE_TAG && (data->tag_type == MPD_TAG_ITEM_ARTIST || data->tag_type == MPD_TAG_ITEM_ALBUM_ARTIST) )
+                        {
+                            mpd_Song *song;
+                            GdkPixbuf *pb = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(), "gmpc-loading-cover", self->icon_size, 0,NULL);
+                            gmpc_pixbuf_loader_async_set_pixbuf(self->_priv->images[n], pb);
+                            g_object_unref(pb);
+                            song = mpd_newSong();
+                            song->artist = g_strdup(data->tag);
+                            song->album = NULL; 
+                            gmpc_meta_watcher_get_meta_path_callback(gmw,song, META_ARTIST_ART, (MetaDataCallback)self_cover_art_fetched, (gpointer)ref);
+                            mpd_freeSong(song);	
+                        }
+
+                        else if(data->type == MPD_DATA_TYPE_TAG && data->tag_type == MPD_TAG_ITEM_ALBUM && self->_priv->req_artist)
+                        {
+                            mpd_Song *song;
+                            GdkPixbuf *pb = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(), "gmpc-loading-cover", self->icon_size, 0,NULL);
+                            gmpc_pixbuf_loader_async_set_pixbuf(self->_priv->images[n],pb); 
+                            g_object_unref(pb);
+                            song = mpd_newSong();
+                            song->artist = g_strdup(self->_priv->req_artist); 
+                            song->albumartist = g_strdup(self->_priv->req_artist); 
+                            song->album = g_strdup(data->tag);
+                            gmpc_meta_watcher_get_meta_path_callback(gmw,song, META_ALBUM_ART, (MetaDataCallback)self_cover_art_fetched, ref);
+                            mpd_freeSong(song);	
+                        }
+                        else if(data->type == MPD_DATA_TYPE_SONG&& data->song && data->song->album && (data->song->artist || self->_priv->req_artist)) 
+                        {
+                            if(data->prev && data->prev->type == MPD_DATA_TYPE_SONG && data->prev->song->album && g_utf8_collate(data->song->album, data->prev->song->album) ==0)
+                            {
+                                gmpc_pixbuf_loader_async_set_pixbuf(self->_priv->images[n],self->_priv->blank);
+                            }else{
+                                mpd_Song *song;
+                                GdkPixbuf *pb = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(), "gmpc-loading-cover", self->icon_size, 0,NULL);
+                                gmpc_pixbuf_loader_async_set_pixbuf(self->_priv->images[n],pb);
+                                g_object_unref(pb);
+                                song = mpd_newSong();
+                                song->artist = g_strdup((data->song->artist)?data->song->artist:self->_priv->req_artist); 
+                                song->albumartist = g_strdup((data->song->albumartist)?data->song->albumartist:self->_priv->req_artist); 
+                                song->album = g_strdup(data->song->album);
+                                gmpc_meta_watcher_get_meta_path_callback(gmw,song, META_ALBUM_ART, (MetaDataCallback)self_cover_art_fetched, ref);
+                                mpd_freeSong(song);	
+                            }
+                        }
+                        else 
+                        {
+                            GdkPixbuf *pb = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(), "gmpc-no-cover", self->icon_size, 0,NULL);
+                            gmpc_pixbuf_loader_async_set_pixbuf(self->_priv->images[n],pb);
+                            g_object_unref(pb);
+                        }
+                        gtk_tree_path_free(path);
+                    }
+                    g_value_set_object(value, gmpc_pixbuf_loader_async_get_pixbuf(self->_priv->images[n]));
+                }else{
+                    g_value_set_object(value,NULL); 
+                }
+            }
+            if(column == MPDDATA_MODEL_USERDATA)
+            {
+                g_value_set_pointer(value,data->userdata);
+
+            }
+            /* handle row type, this is independent of the row type */
+            if(column == MPDDATA_MODEL_ROW_TYPE)
+            {
+                g_value_set_int(value, data->type);
+                return;
+            } 
+            if (data->type == MPD_DATA_TYPE_TAG) {
+                switch(column)
+                {
+                    case MPDDATA_MODEL_COL_ICON_ID:
+                        switch(data->tag_type) 
+                        {
+                            case MPD_TAG_ITEM_ALBUM:
+                                g_value_set_string(value, "media-album");
+                                break;
+                            case MPD_TAG_ITEM_ARTIST:
+                                g_value_set_string(value, "media-artist");
+                                break;
+                            case MPD_TAG_ITEM_GENRE:
+                                g_value_set_string(value, "media-genre");
+                                break;
+                            case MPD_TAG_ITEM_TRACK:
+                                g_value_set_string(value, "media-num-tracks");
+                                break;
+                            default:
+                                g_value_set_string(value, "media-tag");
+                        }
+                        break;
+                    case MPDDATA_MODEL_COL_SONG_TITLE:
+                    case MPDDATA_MODEL_COL_MARKUP:
+                        {
+                            g_value_set_string(value, data->tag);
+                            break;
+                        }
+                    case MPDDATA_MODEL_COL_PATH:
+                        g_value_set_string(value, data->tag);
+                        break;                                         		
+                    case MPDDATA_MODEL_TAG_TYPE:
+                        g_value_set_int(value, data->tag_type);
+                        break;                                         		
+                    default:
+                        break;
+                }
+            } else if(data->type == MPD_DATA_TYPE_DIRECTORY) {
+                switch(column)
+                {
+                    case MPDDATA_MODEL_COL_ICON_ID:
+                        g_value_set_string(value, GTK_STOCK_OPEN);
+                        break;
+                    case MPDDATA_MODEL_COL_SONG_TITLE:
+                    case MPDDATA_MODEL_COL_SONG_TITLEFILE:
+                    case MPDDATA_MODEL_COL_MARKUP:
+                        {
+                            gchar *basename = g_path_get_basename(data->directory);
+                            g_value_set_string(value, basename);
+                            g_free(basename);
+                            break;
+                        }
+                    case MPDDATA_MODEL_COL_PATH:
+                        g_value_set_string(value, data->directory);
+                        break;                                         		
+                    default:
+                        break;
+                }
+            }
+            else if(data->type == MPD_DATA_TYPE_PLAYLIST)
+            {
+                switch(column)
+                {
+                    case MPDDATA_MODEL_COL_ICON_ID:
+                        g_value_set_string(value, "media-playlist");
+                        break;
+                    case MPDDATA_MODEL_COL_SONG_TITLE:
+                    case MPDDATA_MODEL_COL_SONG_TITLEFILE:
+                    case MPDDATA_MODEL_COL_MARKUP:
+                        {
+                            gchar *basename = g_path_get_basename(data->playlist->path);
+                            g_value_set_string(value, basename);
+                            g_free(basename);
+                            break;
+                        }
+                    case MPDDATA_MODEL_COL_PATH:
+                        g_value_set_string(value, data->playlist->path);
+                        break;                                         		
+                    default:
+                        break;
+                }
+            }
+            else if(data->type == MPD_DATA_TYPE_SONG)
+            {
+                mpd_Song *song = data->song;
+                switch (column) {
+                    case MPDDATA_MODEL_COL_MPDSONG:
+                        g_value_set_pointer(value, song);
+                        break;
+                    case MPDDATA_MODEL_COL_PLAYING:
+                        g_value_set_boolean(value, FALSE);
+                        break;
+                    case MPDDATA_MODEL_COL_PLAYING_FONT_WEIGHT:
+                        g_value_set_int(value, PANGO_WEIGHT_NORMAL);
+                        break;
+                    case MPDDATA_MODEL_COL_MARKUP:
+                        {
+                            /* we want to go cache this stuff */
+                            gchar buffer[1024];
+                            mpd_song_markup(buffer, 1024, GMPC_MPDDATA_MODEL(model)->_priv->markup, song);
+                            g_value_set_string(value, buffer);
+                            break;
+                        }
+                    case MPDDATA_MODEL_COL_PATH:
+                        g_value_set_string(value, song->file);
+                        break;
+										case MPDDATA_MODEL_COL_PATH_EXTENSION:
+												{
+													int j = strlen(song->file);
+													for(;j>0&&song->file[j] != '.';j--);
+													g_value_set_string(value, &(song->file)[j+1]);
+													break;
+												}
+										case MPDDATA_MODEL_COL_PATH_DIRECTORY:
+												{
+													gchar *dir = g_path_get_dirname(song->file);
+													g_value_set_string(value, dir);
+													g_free(dir);
+													break;
+												}
+                    case MPDDATA_MODEL_COL_SONG_ARTIST:
+                        g_value_set_string(value, song->artist);
+                        break;
+                    case MPDDATA_MODEL_COL_SONG_ALBUM:
+                        g_value_set_string(value, song->album);
+                        break;
+                    case MPDDATA_MODEL_COL_SONG_TITLE:
+                        /* If there is a song available use that, else use the filename */
+                        if(song->title) {
+                            g_value_set_string(value, song->title);
+                        } else if (song->name) {
+                            g_value_set_string(value, song->name);
+                        }else {
+                            /* Use the markup stuff, this makes sure it gets processed equaly */
+                            gchar buffer[1024];
+                            mpd_song_markup(buffer, 1024, "%shortfile%", song);
+                            g_value_set_string(value, buffer);
+                        }
+                        break;
+                    case MPDDATA_MODEL_COL_SONG_TITLEFILE:
+                        {
+                            gchar *path = g_path_get_basename(song->file);
+                            g_value_set_string(value, path);
+                            g_free(path);
+                        }
+                        break;                                       			
+                    case MPDDATA_MODEL_COL_SONG_GENRE:
+                        g_value_set_string(value, song->genre);
+                        break;
+                    case MPDDATA_MODEL_COL_SONG_TRACK:
+                        g_value_set_string(value, song->track);
+                        break;
+                    case MPDDATA_MODEL_COL_SONG_NAME:
+                        g_value_set_string(value, song->name);
+                        break;
+                    case MPDDATA_MODEL_COL_SONG_COMPOSER:
+                        g_value_set_string(value, song->composer);
+                        break;
+                    case MPDDATA_MODEL_COL_SONG_PERFORMER:
+                        g_value_set_string(value, song->performer);
+                        break;
+                    case MPDDATA_MODEL_COL_SONG_DATE:
+                        g_value_set_string(value, song->date);
+                        break;
+                    case MPDDATA_MODEL_COL_SONG_LENGTH:
+                        g_value_set_int(value, song->time);
+                        break;
+                    case MPDDATA_MODEL_COL_SONG_LENGTH_FORMAT:
+                        {
+                            if(song->time >= 0) {
+                                gchar *strdata = g_strdup_printf("%02i:%02i",
+                                        song->time/60, song->time%60);
+                                g_value_set_string(value, strdata);
+                                g_free(strdata);
+                            } else {
+                                g_value_set_string(value, "n/a");
+                            }
+                        }
+                        break;                             			
+                    case MPDDATA_MODEL_COL_SONG_DISC:
+                        g_value_set_string(value, song->disc);
+                        break;
+                    case MPDDATA_MODEL_COL_SONG_COMMENT:
+                        g_value_set_string(value, song->comment);
+                        break;                                			
+                    case MPDDATA_MODEL_COL_SONG_POS:
+                        g_value_set_int(value, song->pos+1);
+                        break;
+                    case MPDDATA_MODEL_COL_SONG_ALBUMARTIST:
+                        g_value_set_string(value, song->albumartist);
+                        break;
+                    case MPDDATA_MODEL_COL_SONG_ID:
+                        g_value_set_int(value, song->id);
+                        break;
+
+                    case MPDDATA_MODEL_COL_ICON_ID:
+                        if (strstr(song->file, "://")) {
+                            g_value_set_string(value, "media-stream");
+                        } else {
+                            g_value_set_string(value, "media-audiofile");
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+    interface Gtk:Tree:Model
+        private	gboolean
+        iter_nth_child(Gtk:Tree:Model *model(check null type), GtkTreeIter *iter (check null), GtkTreeIter *parent, gint n (check >=0)) 
+        {
+            Self *self = GMPC_MPDDATA_MODEL(model);
+            int i;
+            MpdData_real *data = NULL;
+            if(parent)
+                return FALSE;
+            if (n >= self->num_rows || n < 0)
+                return FALSE; 
+
+            data = (MpdData_real *)self->_priv->data;
+            i=0;
+            if(self->has_up)
+                i=1;
+            for(; i < (n);i++)
+            {
+                data = data->next;//mpd_data_get_next_real(data, FALSE);
+                g_assert(data != NULL);
+            }
+
+            if(self->has_up && n == 0)
+                data = NULL;
+
+            iter->stamp = self->_priv->stamp;
+            iter->user_data = data; 
+            iter->user_data2 = GINT_TO_POINTER(n);
+            return TRUE;
+        }
+
+    interface Gtk:Tree:Model
+        private GtkTreePath *
+        get_path(Gtk:Tree:Model *self (check null type), GtkTreeIter *iter (check null))
+        {
+            GtkTreePath *path = NULL;
+            path = gtk_tree_path_new();
+            gtk_tree_path_append_index(path, GPOINTER_TO_INT(iter->user_data2));
+            return path;
+        }
+
+    interface Gtk:Tree:Model
+        private GType
+        get_column_type(Gtk:Tree:Model *model(check null type), gint ind (check >= 0))
+        {
+            Self *self = GMPC_MPDDATA_MODEL(model);
+            return self->types[ind];
+        } 
+    public 
+        void 
+        set_request_artist(self, const char *artist)
+        {
+            int i;
+            GtkTreePath *path = NULL;
+            GtkTreeIter iter;
+            if(self->_priv->req_artist) 
+                q_free(self->_priv->req_artist);
+            self->_priv->req_artist = (artist != NULL && artist[0] != '\0')?g_strdup(artist):NULL;
+            /* Free possible stored images */
+            if(self->_priv->images && self->_priv->use_images)
+            {
+                MpdData *data2 = mpd_data_get_first(self->_priv->data); 
+                for(i=0;i<self->num_rows;i++)
+                {
+                    if(self->_priv->images[i]){
+                        g_object_unref(self->_priv->images[i]);
+                        self->_priv->images[i] = NULL;
+                    
+                        /* Update the view */
+                        path = gtk_tree_path_new();
+                        gtk_tree_path_append_index(path,i);
+                        iter.stamp = self->_priv->stamp;
+                        iter.user_data = data2;
+                        iter.user_data2 =  GINT_TO_POINTER(i);
+                        /* propegate change */
+                        gtk_tree_model_row_changed(GTK_TREE_MODEL(self), path, &iter);
+                        gtk_tree_path_free(path);
+                    }
+                    data2 = mpd_data_get_next_real(data2,FALSE);
+                }
+            }
+        }
+        public
+        const char *
+        get_request_artist(self)
+        {
+            return self->_priv->req_artist;
+        }
+    public 
+        long unsigned set_mpd_data(self, MpdData *data2)
+        {
+            int i;
+            long unsigned retval = 0;
+            GtkTreeIter iter;
+            GtkTreePath *path = NULL;
+            int old_num_rows = self->num_rows;
+            /* Do some cleanup, like removing rows, and so */
+            /* loop and remove */
+            while ( self->num_rows > 0 ) {
+                path = gtk_tree_path_new();
+                gtk_tree_path_append_index(path, self->num_rows - 1 );
+                /* propegate change */
+                gtk_tree_model_row_deleted(GTK_TREE_MODEL(self), path);
+                gtk_tree_path_free(path);
+                self->num_rows--;
+            }
+
+
+            /**
+             * Free if there is a list and set it to NULL 
+             */
+            if(self->_priv->data){
+                mpd_data_free(mpd_data_get_first(self->_priv->data));
+            }
+            self->_priv->data = NULL;
+
+            if(self->num_rows != 0)
+                g_log(LOG_DOMAIN, G_LOG_LEVEL_WARNING,"not every row cleared %i\n",self->num_rows);
+            self->num_rows =0;
+            /* Free possible stored images */
+            if(self->_priv->images && self->_priv->use_images)
+            {
+                for(i=0;i< old_num_rows;i++)
+                {
+                    if(self->_priv->images[i])
+                        g_object_unref(self->_priv->images[i]);
+                }
+                q_free(self->_priv->images);
+            }
+            if(data2 == NULL)
+            {
+                self->_priv->playtime = 0;
+                self_playtime_changed(self, self->_priv->playtime);
+                return 0;
+            }
+
+            self->_priv->data = mpd_data_get_first(data2);
+            data2 = NULL;
+            if(self->_priv->sort_column == MPDDATA_MODEL_COL_ICON_ID)
+            {
+                self->_priv->data = misc_sort_mpddata_by_album_disc_track(self->_priv->data);
+            }
+            else if ( self->_priv->sort_column != GTK_TREE_SORTABLE_UNSORTED_SORT_COLUMN_ID )
+            {
+                self->_priv->data = misc_sort_mpddata(self->_priv->data,(GCompareDataFunc)self_sort_func,self ); 
+            }
+
+            if(self->has_up) {
+                path = gtk_tree_path_new();
+                gtk_tree_path_append_index(path, self->num_rows);
+                iter.stamp = self->_priv->stamp;
+                iter.user_data = NULL; 
+                iter.user_data2 =  GINT_TO_POINTER(self->num_rows);
+
+                self->num_rows++;
+                /* propegate change */
+                gtk_tree_model_row_inserted(GTK_TREE_MODEL(self), path, &iter);
+                gtk_tree_path_free(path);
+            }
+            for(data2 = mpd_data_get_first(self->_priv->data);data2; data2 = mpd_data_get_next_real(data2,FALSE)) {
+                path = gtk_tree_path_new();
+                gtk_tree_path_append_index(path,self->num_rows);
+                iter.stamp = self->_priv->stamp;
+                iter.user_data = data2;
+                iter.user_data2 =  GINT_TO_POINTER(self->num_rows);
+
+                self->num_rows++;
+                /* propegate change */
+                gtk_tree_model_row_inserted(GTK_TREE_MODEL(self), path, &iter);
+                gtk_tree_path_free(path);
+                if(data2->type == MPD_DATA_TYPE_SONG)
+                {
+                    if(data2->song && data2->song->time > 0)
+                        retval+= data2->song->time;
+                }
+            }
+            if(self->_priv->use_images)
+            {
+                self->_priv->images = g_malloc0((self->num_rows)*sizeof(*(self->_priv->images)));
+            }
+
+            self->_priv->playtime = retval;
+            self_playtime_changed(self, self->_priv->playtime);
+            return retval;
+        }
+
+    /* Sorting */
+    interface Gtk:Tree:Sortable
+        private 
+        gboolean get_sort_column_id (Gtk:Tree:Sortable *model ,  gint *sort_column_id, GtkSortType *order)
+        {
+            Self *self = GMPC_MPDDATA_MODEL(model);
+            if(sort_column_id) 
+                *sort_column_id = self->_priv->sort_column;
+            if(order)
+                *order = self->_priv->sort_order;
+            return TRUE;
+        }
+
+    interface Gtk:Tree:Sortable
+        private 
+        void set_sort_column_id (Gtk:Tree:Sortable *model ,  gint sort_column_id, GtkSortType order)
+        {
+            Self *self = GMPC_MPDDATA_MODEL(model);
+            gint old_col = self->_priv->sort_column;
+            GtkSortType old_ord = self->_priv->sort_order;
+            self->_priv->sort_column = sort_column_id;
+            self->_priv->sort_order = order;
+            /* trigger signal */
+            if(old_col != sort_column_id || old_ord != order)
+                gtk_tree_sortable_sort_column_changed(model);
+            self->_priv->old_sort_column = self->_priv->sort_column;
+
+        }
+
+    interface Gtk:Tree:Sortable
+        private
+        gboolean
+        has_default_sort_func(Gtk:Tree:Sortable *model)
+        {
+            return FALSE;
+        }
+      private 
+        int sort_func(gpointer ppaa, gpointer ppbb, Self *self)
+        {
+            MpdData_real *a = *(MpdData_real **)ppaa;
+            MpdData_real *b = *(MpdData_real **)ppbb;
+            int fact = (self->_priv->sort_order == GTK_SORT_ASCENDING)?-1:1;
+
+            if(a->type != b->type )
+            {
+                int val = a->type - b->type; 
+                return val; 
+            }
+            else if(a->type == b->type)
+            {
+                int val=0;
+                GtkTreeIter iter;
+                GValue va = {0,},vb = {0,};
+                /* Get values from tree view, so we don't have to replicate code to sort the right entries */
+                iter.user_data = a;
+                iter.user_data2 = GPOINTER_TO_INT(0);
+                gtk_tree_model_get_value(GTK_TREE_MODEL(self), &iter, self->_priv->sort_column, &va);
+                iter.user_data = b;
+                gtk_tree_model_get_value(GTK_TREE_MODEL(self), &iter, self->_priv->sort_column, &vb);
+                /* if the type is a directory or a tag, always sort on the title column */
+                if(a->type == MPD_DATA_TYPE_DIRECTORY || b->type == MPD_DATA_TYPE_TAG)
+                {
+                    const char *ca,*cb;
+                    ca = g_value_get_string(&va);
+                    cb = g_value_get_string(&vb);
+                    if(ca && cb) {
+                        gchar *aa,*bb;
+                        aa = g_utf8_strdown(ca, -1);
+                        bb = g_utf8_strdown(cb, -1);
+                        val = g_utf8_collate(aa,bb);
+                        g_free(aa);
+                        g_free(bb);
+                    } else {
+                        val = (ca == NULL)?((cb==NULL)?0:-1):1;
+                    }
+                    g_value_unset(&va);
+                    g_value_unset(&vb);
+                    /* return */
+                    return val*fact;
+                }
+                if(self->_priv->sort_column == MPDDATA_MODEL_COL_SONG_TRACK)
+                {
+                    const char *ca = g_value_get_string(&va);
+                    const char *cb = g_value_get_string(&vb);
+                    gint ca1 = (ca)?atoi(ca):0;
+                    gint cb1 = (cb)?atoi(cb):0;
+                    g_value_unset(&va);
+                    g_value_unset(&vb);
+                    return fact*(ca1-cb1);
+                }
+                else if(self->types[self->_priv->sort_column] == G_TYPE_INT)
+                {
+                    val = g_value_get_int(&va) - g_value_get_int(&vb);
+                }
+                else if (self->types[self->_priv->sort_column] == G_TYPE_STRING)
+                {
+                    const char *ca = g_value_get_string(&va);
+                    const char *cb = g_value_get_string(&vb);
+                    if(ca && cb) {
+                        gchar *aa,*bb;
+                        aa = g_utf8_normalize(ca, -1,G_NORMALIZE_ALL);
+                        bb = g_utf8_normalize(cb, -1,G_NORMALIZE_ALL);
+                        val = g_utf8_collate(aa,bb);
+                        g_free(aa);
+                        g_free(bb);
+                    } else {
+                        val = (ca == NULL)?((cb==NULL)?0:-1):1;
+                    }
+                }
+                g_value_unset(&va);
+                g_value_unset(&vb);
+                return fact*val; 
+            }
+            return 0;
+        }
+
+    interface Gtk:Tree:Sortable
+        private
+        void 
+        sort_column_changed(Gtk:Tree:Sortable *model)
+        {
+            Self *self = GMPC_MPDDATA_MODEL(model);
+            if(!self->_priv->data || !(((MpdData_real *)self->_priv->data)->next))
+                return; 
+            if(self->_priv->sort_column == MPDDATA_MODEL_COL_ICON_ID)
+            {
+                self->_priv->data = misc_sort_mpddata_by_album_disc_track(self->_priv->data); 
+            }
+            else if(self->_priv->sort_column !=  GTK_TREE_SORTABLE_UNSORTED_SORT_COLUMN_ID)
+            {
+                self->_priv->data = misc_sort_mpddata(self->_priv->data,(GCompareDataFunc)self_sort_func,self ); 
+            }
+            self->_priv->old_sort_column = self->_priv->sort_column;
+
+            /* tell the view that rows have changed  */    
+            {
+                int i=0;
+                GtkTreePath *path = NULL;
+                GtkTreeIter iter;
+                MpdData *data2 = mpd_data_get_first(self->_priv->data); 
+                if(self->has_up) i = 1;
+                for(;data2; data2 = mpd_data_get_next_real(data2,FALSE)) 
+                {
+                    path = gtk_tree_path_new();
+                    gtk_tree_path_append_index(path,i);
+                    iter.stamp = self->_priv->stamp;
+                    iter.user_data = data2;
+                    iter.user_data2 =  GINT_TO_POINTER(i);
+
+                    /* propegate change */
+                    gtk_tree_model_row_changed(GTK_TREE_MODEL(self), path, &iter);
+                    gtk_tree_path_free(path);
+                    i++;
+                }
+            }
+        }
+
+        private
+        int
+        test_sort_func(gpointer ppaa, gpointer ppbb, Self *self)
+        {
+            MpdData_real *a = *(MpdData_real **)ppaa;
+            MpdData_real *b = *(MpdData_real **)ppbb;
+            if(a->type == MPD_DATA_TYPE_TAG && b->type == MPD_DATA_TYPE_TAG)
+            {
+                if(a->tag_type != b->tag_type)
+                    return a->tag_type - b->tag_type;
+                if(a->tag== NULL && b->tag != NULL)
+                    return -1;
+                else if(b->tag == NULL && a->tag != NULL)
+                    return 1;
+                else if (a->tag  && b->tag)
+                {
+                    int val;
+                    if(a->tag && b->tag) {
+                        gchar *sa,*sb;
+                        sa = g_utf8_strdown(a->tag, -1);
+                        sb = g_utf8_strdown(b->tag, -1);
+                        val = g_utf8_collate(sa,sb);
+                        g_free(sa);
+                        g_free(sb);
+                    } else {
+                        val = (a == NULL)?((b==NULL)?0:-1):1;
+                    }
+                    return val;
+                }
+            }
+            return a->type - b->type;
+        }
+        
+        /**
+         * For now this assumes tag list only.
+         */
+    public 
+        long unsigned set_mpd_data_slow (self, MpdData *data2)
+        {                                               
+            MpdData_real *new_list = NULL;
+            int i=0;
+            int items=0;
+            MpdData_real *original = (MpdData_real *)mpd_data_get_first(self->_priv->data);
+            MpdData_real *new = (MpdData_real *) data2;
+            GtkTreePath *path =NULL;
+            GtkTreeIter iter;
+            int old_list_size = self->num_rows;
+
+            /* sort it identical */
+            data2 = misc_sort_mpddata(data2,(GCompareDataFunc)self_test_sort_func,self ); 
+            new = (MpdData_real *)data2;
+
+            if(new) {
+                MpdData_real *n = new->first;
+                while(n) {
+                    items++;
+                    n = n->next;
+                }
+            }
+
+
+            /* Free possible stored images */
+            /**
+             * TODO: Don't free the list, but grow it to MAX(items, self->num_rows);
+             * Then after updating, resize it to new size 
+             */
+            /* Grow the list when needed */
+
+            if(self->_priv->use_images)
+            {
+                /* Clean them, they might not be in the right place anymore */
+                for(i=0;i< old_list_size; i++)
+                {
+                    if(self->_priv->images[i] != NULL) g_object_unref(self->_priv->images[i]);
+                    self->_priv->images[i] = NULL;
+                }
+                if(items > self->num_rows)
+                {
+                    self->_priv->images = g_realloc(self->_priv->images, items*sizeof(GdkPixbuf *));
+                    /* set the new ones to NUll */
+                    for(i=self->num_rows;i<items;i++)
+                    {
+                        self->_priv->images[i] = NULL;
+                    }
+                }
+            }
+
+
+
+
+            i=0;
+            /* compare lists */
+            if(self->_priv->data && original == NULL) g_warning("weirdness\n");
+            if(self->_priv->data)
+            {
+                int has_next;
+                do
+                {
+                    has_next = 0;
+                    if(new == NULL)
+                    {
+                        if(self->num_rows > items)
+                        {
+                            MpdData_real *n = original->next;
+                            /* remove current row */
+                            self->num_rows--;
+
+                            path = gtk_tree_path_new();
+                            gtk_tree_path_append_index(path,i);
+
+                            /* propegate change */
+                            gtk_tree_model_row_deleted(GTK_TREE_MODEL(self), path);
+                            gtk_tree_path_free(path);
+                           
+                            original =(MpdData_real *) mpd_data_delete_item((MpdData *)original); 
+                            self->_priv->data = mpd_data_get_first((MpdData *)original);
+
+                            original=n;
+                            has_next = (original )?1:0;
+                        }
+                    }
+                    else
+                    {
+                        int compare;
+                        gchar *aa,*bb;
+                        aa = g_utf8_strdown(new->tag, -1);
+                        bb = g_utf8_strdown(original->tag, -1);
+                        compare = g_utf8_collate(aa,bb);
+                        g_free(aa);
+                        g_free(bb);
+                        //int compare = //strcmp(new->tag, original->tag);
+                        if(compare < 0)
+                        {
+                            /* add */
+                            MpdData_real *n = (MpdData_real *) mpd_new_data_struct();
+                            n->type = MPD_DATA_TYPE_TAG;
+                            n->tag_type = new->tag_type;
+                            n->tag = new->tag;
+                            new->tag = NULL;
+
+                            /* add */
+
+                            self->num_rows++;
+                            n->prev = original->prev;
+
+                            if(original->prev)
+                                original->prev->next = n;
+                            n->next = original;
+                            n->first = original->first;
+                            original->prev = n;
+                            if(n->prev == NULL){
+                                MpdData_real *fiter;
+                                for(fiter = n;fiter;fiter = fiter->next){
+                                    fiter->first = n;
+                                }
+                            }
+
+                            self->_priv->data = mpd_data_get_first((MpdData *)original);
+                            {
+                                path = gtk_tree_path_new();
+                                gtk_tree_path_append_index(path,i);
+                                iter.stamp = self->_priv->stamp;
+                                iter.user_data = n;
+                                iter.user_data2 =  GINT_TO_POINTER(i);
+
+                                gtk_tree_model_row_inserted(GTK_TREE_MODEL(self), path, &iter);
+                                gtk_tree_path_free(path);
+                            }
+                            /* mark for insert */
+                            new=new->next;
+                            i++;
+                            has_next = 1;
+                        }
+                        else if (compare > 0)
+                        {
+                            MpdData_real *n = original->next;
+                            path = gtk_tree_path_new();
+                            gtk_tree_path_append_index(path,i);
+                            /* propegate change */
+
+                            self->num_rows--;
+                            gtk_tree_model_row_deleted(GTK_TREE_MODEL(self), path);
+                            gtk_tree_path_free(path);
+
+
+                            original = (MpdData_real *)mpd_data_delete_item((MpdData *)original); 
+                            self->_priv->data = mpd_data_get_first((MpdData *)original);
+                            original = n;
+                            //original = original->next; 
+                            has_next = (original )?1:0;
+
+                        }else{
+                            new = new->next;
+                            original = original->next;
+                            has_next = (original )?1:0;
+                            i++;
+                        }
+                    }            
+                }while(has_next);
+            }
+            /* add entries remaining in new */
+            if(new)
+            {
+                
+                new_list = (MpdData_real *) self->_priv->data;
+                while(new_list && new_list->next) new_list = new_list->next;
+                do{
+                    new_list = (MpdData_real *)mpd_new_data_struct_append((MpdData*)new_list); 
+                    new_list->type = MPD_DATA_TYPE_TAG;
+                    new_list->tag_type = new->tag_type;
+                    new_list->tag = new->tag;
+                    new->tag = NULL;
+
+                    self->_priv->data = (MpdData *)new_list->first;
+                    if(self->_priv->data == NULL) g_warning("self->_priv->data == NULL");
+                    self->num_rows++;
+                    {
+                        path = gtk_tree_path_new();
+                        gtk_tree_path_append_index(path,i);
+                        iter.stamp = self->_priv->stamp;
+                        iter.user_data = new_list;
+                        iter.user_data2 =  GINT_TO_POINTER(i);
+
+                        gtk_tree_model_row_inserted(GTK_TREE_MODEL(self), path, &iter);
+                        gtk_tree_path_free(path);
+                    }
+
+                    new = new->next;
+                    i++;
+                }while(new);
+            }
+
+
+            if(self->_priv->use_images){
+                if(self->num_rows < old_list_size){
+                    for(i=self->num_rows;i< old_list_size; i++)
+                    {
+                        /* clean it */
+                        if(self->_priv->images[i] != NULL) g_object_unref(self->_priv->images[i]);
+                    }
+                    self->_priv->images = g_realloc(self->_priv->images, (self->num_rows)*sizeof(GdkPixbuf *));
+                }
+            }
+
+   
+
+            if(data2)
+                mpd_data_free(data2);
+
+            g_assert(items == self->num_rows);
+            return 0;                    
+        }
+
+        signal last NONE (LONG)
+        void
+        playtime_changed(self, gulong playtime)
+        {
+            return;
+        }
+
+    public
+    gulong
+    get_playtime(self)
+    {
+        return self->_priv->playtime;
+    }
+    public
+    gint
+    get_pos( self, GtkTreeIter *iter)
+    {
+	    g_assert(iter->stamp == self->_priv->stamp);
+	    return GPOINTER_TO_INT(iter->user_data2);
+    }
+
+    public
+    void
+    disable_image(self)
+    {
+        g_assert(self->_priv->data == NULL);
+        self->_priv->use_images = FALSE;
+    }
+
+    public
+    MpdData * 
+    steal_mpd_data(self)
+    {
+        GtkTreePath *path;
+        int i;
+        int old_num_rows = self->num_rows;
+        MpdData *data = self->_priv->data; 
+        while ( self->num_rows > 0 ) {
+            path = gtk_tree_path_new();
+            gtk_tree_path_append_index(path, self->num_rows - 1 );
+            /* propegate change */
+            gtk_tree_model_row_deleted(GTK_TREE_MODEL(self), path);
+            gtk_tree_path_free(path);
+            self->num_rows--;
+        }
+
+        /* Clear */
+        self->_priv->data = NULL;
+        /* Free possible stored images */
+        if(self->_priv->images && self->_priv->use_images)
+        {
+            for(i=0;i<  old_num_rows;i++)
+            {
+                if(self->_priv->images[i])
+                    g_object_unref(self->_priv->images[i]);
+            }
+            q_free(self->_priv->images);
+        }
+        self->_priv->playtime = 0;
+        self_playtime_changed(self, self->_priv->playtime);
+
+        return mpd_data_get_first(data);
+    }
+}

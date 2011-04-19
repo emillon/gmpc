@@ -1,0 +1,10 @@
+src/gmpc-metaimage.c
+src/gmpc-mpddata-model-sort.c
+src/gmpc-mpddata-model.c
+src/gmpc-mpddata-treeview.c
+src/gmpc-meta-text-view.c
+src/gmpc-mpddata-model-sort.c
+src/gmpc-clicklabel.c
+src/gmpc-meta-watcher.c
+src/gmpc-profiles.c
+src/gmpc-stats-label.c

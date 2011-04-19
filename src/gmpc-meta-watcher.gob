@@ -1,0 +1,157 @@
+/* Gnome Music Player Client (GMPC)
+ * Copyright (C) 2004-2010 Qball Cow <qball@sarine.nl>
+ * Project homepage: http://gmpc.wikia.com/
+ 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+*/
+
+requires 2.0.0
+%ht{
+#include <gtk/gtk.h>
+#include <libmpd/libmpd.h>
+#include "metadata.h"
+
+%}
+
+
+class Gmpc:Meta:Watcher from  G:Object {
+    init(self)
+    {
+    }
+
+    public
+    GmpcMetaWatcher * new (void)
+    {
+      return GET_NEW;
+    }
+
+    signal last NONE (POINTER, INT, INT, POINTER)
+    void
+    data_changed(self, mpd_Song *song, MetaDataType type,MetaDataResult result, MetaData *met)
+    { 
+    }
+
+    /**
+     * This signal forces metadata widgets to re-display itself
+     * F.e. because stylized is enabled/disabled
+     */
+    signal last NONE (NONE)
+    void
+    force_reload(self)
+    {
+
+    }
+
+
+
+    public
+    gboolean
+    match_data(MetaDataType type, mpd_Song *song1, mpd_Song *song2)
+	{
+		if(song1 == NULL || song2 == NULL)
+			return FALSE;
+		switch(type)
+		{
+            case META_GENRE_SIMILAR:
+				if(song1->genre && song2->genre && !strcmp(song1->genre, song2->genre))
+					return TRUE;
+                return FALSE;
+			case META_SONG_TXT:
+            case META_SONG_GUITAR_TAB:
+				if(song1->artist && song2->artist && !strcmp(song1->artist, song2->artist))
+                    if(song1->title && song2->title && !strcmp(song1->title, song2->title))
+                        return TRUE;
+				return FALSE;
+
+			case META_ALBUM_TXT:
+			case META_ALBUM_ART:
+				if(song1->album == NULL || song2->album == NULL || strcmp(song1->album, song2->album))
+				{
+					return FALSE;
+				}
+			case META_ARTIST_SIMILAR:
+			case META_ARTIST_TXT:
+			case META_ARTIST_ART: 
+                if(song1->albumartist && song2->albumartist && !strcmp(song1->albumartist, song2->albumartist))
+                {
+                    return TRUE;
+                }
+				if(song1->artist && song2->artist  && !strcmp(song1->artist, song2->artist))
+				{
+					return TRUE;
+				}
+                /* if we rewrite the artist, to be various (collection) also "see that" */
+                if((song1->artist && !strcmp(song1->artist, "Various Artists")) &&
+                        (song2->artist && !strcmp(song2->artist, "Various Artists")))
+                {
+                    return TRUE;
+                }
+                break;
+            case META_SONG_SIMILAR:
+                if(song1->title == NULL || song2->title == NULL || strcmp(song1->title, song2->title))
+                {
+                    return FALSE;
+                }
+				if(song1->artist && song2->artist  && !strcmp(song1->artist, song2->artist))
+				{
+
+					return TRUE;
+				}
+                /* if we rewrite the artist, to be various (collection) also "see that" */
+                if((song1->artist && !strcmp(song1->artist, "Various Artists")) ||
+                        (song2->artist && !strcmp(song2->artist, "Various Artists")))
+                {
+                    return TRUE;
+                }
+            case META_QUERY_DATA_TYPES:
+            case META_QUERY_NO_CACHE:
+            default:
+				break;
+		}
+		return FALSE;
+	}
+
+	public
+	void	
+	get_meta_path_callback(self, mpd_Song *song, MetaDataType type,  MetaDataCallback callback, gpointer data)
+	{
+        MetaData *met = NULL;
+		MetaDataResult ret;
+
+		if(!self_match_data(type&META_QUERY_DATA_TYPES, song,song))
+		{
+			callback(song, META_DATA_UNAVAILABLE, NULL, data);			
+            g_warning("Query is invalid");
+            return;
+		}
+		ret = meta_data_get_path(song, type, &met,callback,data);
+		callback(song,ret,met,data);
+		if(met) meta_data_free(met);
+	}
+
+	public 
+	MetaDataResult
+	get_meta_path(self, mpd_Song *song, MetaDataType type, MetaData **met)
+	{
+		g_assert(met != NULL);
+			
+		if(!self_match_data(type&META_QUERY_DATA_TYPES, song,song))
+		{
+			return META_DATA_UNAVAILABLE;
+		}
+
+		return meta_data_get_path(song, type, met,NULL,NULL);
+	}
+}
