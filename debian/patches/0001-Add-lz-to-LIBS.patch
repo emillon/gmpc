@@ -1,0 +1,25 @@
+From: Etienne Millon <etienne.millon@gmail.com>
+Date: Wed, 20 Apr 2011 11:34:45 +0200
+Subject: Add -lz to LIBS
+
+The new toolchain requires that all needed libraries are explicitly listed.
+
+This is a fix for #623439.
+---
+ src/Makefile.in |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/src/Makefile.in b/src/Makefile.in
+index dd991ce..fd5ff2d 100644
+--- a/src/Makefile.in
++++ b/src/Makefile.in
+@@ -425,7 +425,7 @@ gmpc_SOURCES = \
+ nodist_gmpc_SOURCES = \
+     $(gmpc_GOBCFILES)
+ 
+-gmpc_LDADD = libeggsmclient.la $(am__append_1)
++gmpc_LDADD = libeggsmclient.la $(am__append_1) -lz
+ BUILT_SOURCES = \
+               $(gmpc_GOBSTAMPFILES)\
+               revisiont.h
+-- 
