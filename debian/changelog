@@ -1,9 +1,10 @@
 gmpc (0.20.0-2) UNRELEASED; urgency=low
 
+  * New maintainer (Closes: #615245)
   * Switch to 3.0 (quilt) source format
   * source/local-options : add unapply-patches
 
- -- Etienne Millon <etienne.millon@gmail.com>  Wed, 20 Apr 2011 11:28:52 +0200
+ -- Etienne Millon <etienne.millon@gmail.com>  Wed, 20 Apr 2011 11:33:24 +0200
 
 gmpc (0.20.0-1) unstable; urgency=low
 
