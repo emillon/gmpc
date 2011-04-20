@@ -2,9 +2,9 @@ gmpc (0.20.0-2) UNRELEASED; urgency=low
 
   * New maintainer (Closes: #615245)
   * Switch to 3.0 (quilt) source format
-  * source/local-options : add unapply-patches
+  * Explicitly add libraries to fix FTBFS with new toolchain (Closes: #623439)
 
- -- Etienne Millon <etienne.millon@gmail.com>  Wed, 20 Apr 2011 11:33:24 +0200
+ -- Etienne Millon <etienne.millon@gmail.com>  Wed, 20 Apr 2011 13:32:11 +0200
 
 gmpc (0.20.0-1) unstable; urgency=low
 
