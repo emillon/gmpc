@@ -4,8 +4,9 @@ gmpc (0.20.0-2) UNRELEASED; urgency=low
   * Switch to 3.0 (quilt) source format
   * Explicitly add libraries to fix FTBFS with new toolchain (Closes: #623439)
   * Remove build-dep on quilt 
+  * Replace "Conflicts: gmpc-plugins" with "Breaks:".
 
- -- Etienne Millon <etienne.millon@gmail.com>  Wed, 20 Apr 2011 13:36:07 +0200
+ -- Etienne Millon <etienne.millon@gmail.com>  Tue, 26 Apr 2011 10:08:57 +0200
 
 gmpc (0.20.0-1) unstable; urgency=low
 
