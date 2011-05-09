@@ -7,8 +7,9 @@ gmpc (0.20.0-2) UNRELEASED; urgency=low
   * Remove build-dep on quilt 
   * Replace "Conflicts: gmpc-plugins" with "Breaks:"
   * Add watchfile
+  * Bum Standards-Version to 3.9.1 (no changes)
 
- -- Etienne Millon <etienne.millon@gmail.com>  Fri, 29 Apr 2011 18:10:51 +0200
+ -- Etienne Millon <etienne.millon@gmail.com>  Mon, 09 May 2011 17:46:34 +0200
 
 gmpc (0.20.0-1) unstable; urgency=low
 
