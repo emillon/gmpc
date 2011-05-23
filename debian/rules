@@ -2,6 +2,7 @@
 SRC_NAME:=gmpc
 DEV_NAME:=gmpc-dev
 DEB_DH_STRIP_ARGS:=--dbg-package=$(SRC_NAME)-dbg
+export LDFLAGS=-Wl,--as-needed
 
 %:
 	dh $@
