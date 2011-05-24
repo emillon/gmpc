@@ -10,7 +10,7 @@ Vcs-Browser: https://github.com/emillon/gmpc
 
 Package: gmpc
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: gmpc-data (= ${source:Version}), ${shlibs:Depends}, ${misc:Depends}
 Suggests: mpd, gmpc-plugins
 Breaks: gmpc-plugins(<< 0.18.96)
 Enhances: mpd
@@ -52,3 +52,14 @@ Depends: gmpc (= ${binary:Version}), libmpd-dev (>= 0.18.96), pkg-config, ${misc
 Description: Gnome Music Player Client (plugin development files)
  This package contains the necessary header files if you wish to compile
  plugins for gmpc.
+
+Package: gmpc-data
+Architecture: all
+Depends: ${misc:Depends}
+Recommends: gmpc
+Replaces: gmpc (<< 0.20.0-2)
+Breaks: gmpc (<< 0.20.0-2)
+Description: Gnome Music Player Client - data files
+ A GNOME/GTK2.2 client for Music Player Daemon.
+ .
+ This package contains architecture-independent data for gmpc.

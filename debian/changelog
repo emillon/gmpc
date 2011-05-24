@@ -9,8 +9,9 @@ gmpc (0.20.0-2) UNRELEASED; urgency=low
   * Add watchfile
   * Bum Standards-Version to 3.9.1 (no changes)
   * Add -Wl,--as-needed to LDFLAGS 
+  * Split architecture-independent data into gmpc-data
 
- -- Etienne Millon <etienne.millon@gmail.com>  Mon, 23 May 2011 09:16:55 +0200
+ -- Etienne Millon <etienne.millon@gmail.com>  Tue, 24 May 2011 16:26:22 +0200
 
 gmpc (0.20.0-1) unstable; urgency=low
 
