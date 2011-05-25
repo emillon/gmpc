@@ -9,11 +9,9 @@ This is a fix for #623439.
  src/Makefile.in |    2 +-
  1 files changed, 1 insertions(+), 1 deletions(-)
 
-diff --git a/src/Makefile.in b/src/Makefile.in
-index dd991ce..8d67779 100644
 --- a/src/Makefile.in
 +++ b/src/Makefile.in
-@@ -425,7 +425,7 @@ gmpc_SOURCES = \
+@@ -425,7 +425,7 @@
  nodist_gmpc_SOURCES = \
      $(gmpc_GOBCFILES)
  
@@ -22,4 +20,3 @@ index dd991ce..8d67779 100644
  BUILT_SOURCES = \
                $(gmpc_GOBSTAMPFILES)\
                revisiont.h
--- 
