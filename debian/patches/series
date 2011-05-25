@@ -3,3 +3,4 @@
 0003-Trying-to-fix-building-with-vala-0.8.0.patch
 0004-Replace-deprecated-api.patch
 0005-Fix-building-with-vala-0.11-something.patch
+0006-Fix-building-gmpc-with-vala-0.9.X.patch

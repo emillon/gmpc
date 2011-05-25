@@ -1,0 +1,27 @@
+From: Qball Cow <qball@sarine.nl>
+Date: Sun, 27 Jun 2010 11:43:27 +0200
+Subject: Fix building gmpc with vala 0.9.X
+
+from git:7f762dd0d1c484ce5a01e3150202da1e18b9acac
+
+---
+ src/vala/gmpc-liststore-sort.vala |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/vala/gmpc-liststore-sort.vala b/src/vala/gmpc-liststore-sort.vala
+index cd5e728..7046c48 100644
+--- a/src/vala/gmpc-liststore-sort.vala
++++ b/src/vala/gmpc-liststore-sort.vala
+@@ -63,9 +63,9 @@ namespace Gmpc {
+                 if(source_v)
+                 {
+                     if(dest_v)
+-                        this.move_before(source_iter, dest_iter);
++                        this.move_before(ref source_iter, dest_iter);
+                     else
+-                        this.move_before(source_iter, null);
++                        this.move_before(ref source_iter, null);
+                 }
+                 return true;
+             }
+-- 
