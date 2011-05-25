@@ -1,0 +1,24 @@
+From: Etienne Millon <etienne.millon@gmail.com>
+Date: Wed, 25 May 2011 17:15:38 +0200
+Subject: Fix typo : integrety -> integrity
+
+This patch fixes one occurrence of this typo. It was exposed to
+users via a warning message.
+---
+ src/MetaData/metadata-cache.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/src/MetaData/metadata-cache.c b/src/MetaData/metadata-cache.c
+index aee541f..f8c3f84 100644
+--- a/src/MetaData/metadata-cache.c
++++ b/src/MetaData/metadata-cache.c
+@@ -109,7 +109,7 @@ static gboolean sqlite_check_integrity(void)
+ 			if(strcmp(value, "ok") == 0){
+ 				database_check = TRUE;
+ 			}else{
+-				g_log(MDC_LOG_DOMAIN, G_LOG_LEVEL_WARNING, "%s: Sqlite database integrety check failed: %s\n",
++				g_log(MDC_LOG_DOMAIN, G_LOG_LEVEL_WARNING, "%s: Sqlite database integrity check failed: %s\n",
+ 						__FUNCTION__,
+ 						value);
+ 			}
+-- 
