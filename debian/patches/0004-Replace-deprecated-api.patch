@@ -1,10 +1,8 @@
-From eaf1068249c183c92017d13bcc90f42100235d84 Mon Sep 17 00:00:00 2001
 From: Qball Cow <qball@sarine.nl>
 Date: Sat, 26 Jun 2010 22:11:39 +0200
-Subject: [PATCH] Replace deprecated += api.
+Subject: Replace deprecated += api.
 
 ---
- src/Widgets/gmpc-image.vala              |    2 +-
  src/Widgets/gmpc-progress.vala           |   22 ++--
  src/browsers/gmpc-metadata-browser2.vala |  164 +++++++++++++++--------------
  src/browsers/gmpc-nowplaying2.vala       |    8 +-
@@ -14,11 +12,13 @@ Subject: [PATCH] Replace deprecated += api.
  src/vala/gmpc-rating.vala                |    4 +-
  src/vala/gmpc-test-plugin.vala           |   12 +-
  src/vapi/gmpc.vapi                       |    2 +-
- 10 files changed, 127 insertions(+), 121 deletions(-)
+ 9 files changed, 126 insertions(+), 120 deletions(-)
 
+diff --git a/src/Widgets/gmpc-progress.vala b/src/Widgets/gmpc-progress.vala
+index 9193142..3f5ecb1 100644
 --- a/src/Widgets/gmpc-progress.vala
 +++ b/src/Widgets/gmpc-progress.vala
-@@ -63,7 +63,7 @@
+@@ -63,7 +63,7 @@ public class Gmpc.Progress : Gtk.HBox
      /**
       * Paint a nice box around it
       */
@@ -27,7 +27,7 @@ Subject: [PATCH] Replace deprecated += api.
      {
          Gtk.paint_box(tooltip.style, 
                  event.window,
-@@ -76,7 +76,7 @@
+@@ -76,7 +76,7 @@ public class Gmpc.Progress : Gtk.HBox
          return false;
      }
  
@@ -36,7 +36,7 @@ Subject: [PATCH] Replace deprecated += api.
      {
          /* Create tooltip if mouse enters the event window */
          if (event.type == Gdk.EventType.ENTER_NOTIFY)
-@@ -87,7 +87,7 @@
+@@ -87,7 +87,7 @@ public class Gmpc.Progress : Gtk.HBox
              tooltip.add(tooltip_label);
              tooltip.border_width = 4;
              tooltip.set_app_paintable(true);
@@ -45,7 +45,7 @@ Subject: [PATCH] Replace deprecated += api.
          }
          /* Destroy tooltip if mouse leaves the event window */
          if (event.type == Gdk.EventType.LEAVE_NOTIFY)
-@@ -100,7 +100,7 @@
+@@ -100,7 +100,7 @@ public class Gmpc.Progress : Gtk.HBox
          }
          return false;
      }
@@ -54,7 +54,7 @@ Subject: [PATCH] Replace deprecated += api.
      {
          if(event.type == Gdk.EventType.MOTION_NOTIFY)
          {
-@@ -161,13 +161,13 @@
+@@ -161,13 +161,13 @@ public class Gmpc.Progress : Gtk.HBox
          this.scale.add_events((int)Gdk.EventMask.POINTER_MOTION_MASK);
          this.scale.add_events((int)Gdk.EventMask.ENTER_NOTIFY_MASK);
          this.scale.add_events((int)Gdk.EventMask.LEAVE_NOTIFY_MASK);
@@ -73,7 +73,7 @@ Subject: [PATCH] Replace deprecated += api.
  
          this.label = new Gtk.Label("");
          this.label.set_alignment(1.0f,0.5f);
-@@ -191,7 +191,7 @@
+@@ -191,7 +191,7 @@ public class Gmpc.Progress : Gtk.HBox
  	}
      }
  	private int press = 0;
@@ -82,7 +82,7 @@ Subject: [PATCH] Replace deprecated += api.
      {
  		this.press--;
  		return false;
-@@ -230,7 +230,7 @@
+@@ -230,7 +230,7 @@ public class Gmpc.Progress : Gtk.HBox
          return false;
      }
  
@@ -91,9 +91,11 @@ Subject: [PATCH] Replace deprecated += api.
      {
          if(event.direction == Gdk.ScrollDirection.UP)
          {
+diff --git a/src/browsers/gmpc-metadata-browser2.vala b/src/browsers/gmpc-metadata-browser2.vala
+index 6c33019..e816c02 100644
 --- a/src/browsers/gmpc-metadata-browser2.vala
 +++ b/src/browsers/gmpc-metadata-browser2.vala
-@@ -53,7 +53,7 @@
+@@ -53,7 +53,7 @@ public class Gmpc.Widget.SimilarSongs : Gtk.Alignment{
          this.song = song;
          this.set(0.0f, 0.0f, 1.0f, 0.0f);
      }
@@ -102,7 +104,7 @@ Subject: [PATCH] Replace deprecated += api.
      {
          Gtk.TreeView tree = (Gtk.TreeView)this.pchild;
  
-@@ -76,7 +76,7 @@
+@@ -76,7 +76,7 @@ public class Gmpc.Widget.SimilarSongs : Gtk.Alignment{
          MPD.PlayQueue.queue_commit(server);
  
      }
@@ -111,7 +113,7 @@ Subject: [PATCH] Replace deprecated += api.
      {
          Gtk.TreeView tree = (Gtk.TreeView)this.pchild;
  
-@@ -98,7 +98,7 @@
+@@ -98,7 +98,7 @@ public class Gmpc.Widget.SimilarSongs : Gtk.Alignment{
              }
          }
      }
@@ -120,7 +122,7 @@ Subject: [PATCH] Replace deprecated += api.
      {
          bool found = false;
          Gtk.TreeView tree = (Gtk.TreeView)this.pchild;
-@@ -129,9 +129,9 @@
+@@ -129,9 +129,9 @@ public class Gmpc.Widget.SimilarSongs : Gtk.Alignment{
  
          this.play_clicked(item);
      }
@@ -132,7 +134,7 @@ Subject: [PATCH] Replace deprecated += api.
          Gtk.TreeIter iter;
          if(model.get_iter(out iter, path))
          {
-@@ -143,22 +143,22 @@
+@@ -143,22 +143,22 @@ public class Gmpc.Widget.SimilarSongs : Gtk.Alignment{
              }
          }
      }
@@ -159,7 +161,7 @@ Subject: [PATCH] Replace deprecated += api.
              menu.append(item);
  
              menu.popup(null, null, null, event.button, event.time);
-@@ -212,8 +212,8 @@
+@@ -212,8 +212,8 @@ public class Gmpc.Widget.SimilarSongs : Gtk.Alignment{
              model.set_mpd_data((owned)item);
              Gmpc.MpdData.TreeView tree = new Gmpc.MpdData.TreeView("similar-song", true, model);
              tree.enable_click_fix();
@@ -170,7 +172,7 @@ Subject: [PATCH] Replace deprecated += api.
              this.add(tree);
  
              this.pchild = tree;
-@@ -267,7 +267,7 @@
+@@ -267,7 +267,7 @@ public class Gmpc.Widget.SimilarSongs : Gtk.Alignment{
      public void update()
      {
          MetaData.Item item = null;
@@ -179,7 +181,7 @@ Subject: [PATCH] Replace deprecated += api.
          Gmpc.MetaData.Result gm_result = metawatcher.query(song, Gmpc.MetaData.Type.SONG_SIMILAR,out item);
          this.metadata_changed(metawatcher, this.song, Gmpc.MetaData.Type.SONG_SIMILAR, gm_result, item); 
      }
-@@ -470,7 +470,7 @@
+@@ -470,7 +470,7 @@ public class Gmpc.Widget.SimilarArtist : Gtk.Table {
              hbox.pack_start(find,false,false,0);
  
              find.set_data_full("artist",(void *)"%s".printf(artist), (GLib.DestroyNotify) g_free);
@@ -188,7 +190,7 @@ Subject: [PATCH] Replace deprecated += api.
          }
  
          event.add(hbox);
-@@ -487,7 +487,7 @@
+@@ -487,7 +487,7 @@ public class Gmpc.Widget.SimilarArtist : Gtk.Table {
          this.set_row_spacings(6);
          this.set_col_spacings(6);
  
@@ -197,7 +199,7 @@ Subject: [PATCH] Replace deprecated += api.
  	this.size_allocate.connect(size_changed);
  
          Gmpc.MetaData.Result gm_result = metawatcher.query(song, Gmpc.MetaData.Type.ARTIST_SIMILAR,out item);
-@@ -508,13 +508,14 @@
+@@ -508,13 +508,14 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
      private bool theme_colors = (bool) config.get_int_with_default("Now Playing", "use-theme-color",1); 
      private Gdk.Color background;
      private Gdk.Color foreground;
@@ -214,7 +216,7 @@ Subject: [PATCH] Replace deprecated += api.
  
  
          var background = config.get_string_with_default("Now Playing", "background-color", "#000");
-@@ -583,7 +584,7 @@
+@@ -583,7 +584,7 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
      /**
       * Makes gmpc jump to the metadata browser 
       */
@@ -223,7 +225,7 @@ Subject: [PATCH] Replace deprecated += api.
      {
          this.select_browser(null);
      }
-@@ -596,7 +597,7 @@
+@@ -596,7 +597,7 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
          {
              var item = new Gtk.ImageMenuItem.with_mnemonic(_(this.get_name()));
              item.set_image(new Gtk.Image.from_icon_name("gmpc-metabrowser", Gtk.IconSize.MENU));
@@ -232,7 +234,7 @@ Subject: [PATCH] Replace deprecated += api.
              item.add_accelerator("activate", menu.get_accel_group(),0xffc1,0, Gtk.AccelFlags.VISIBLE);
              menu.append(item);
  
-@@ -608,7 +609,7 @@
+@@ -608,7 +609,7 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
      /**
       * This builds the browser
       */
@@ -241,7 +243,7 @@ Subject: [PATCH] Replace deprecated += api.
       {
           this.metadata_box.modify_bg(Gtk.StateType.NORMAL,this.metadata_sw.style.base[Gtk.StateType.NORMAL]);
  
-@@ -620,8 +621,9 @@
+@@ -620,8 +621,9 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
           this.change_color_style(this.metadata_sw);
       }
      /* This hack makes clicking a selected row again, unselect it */
@@ -252,7 +254,7 @@ Subject: [PATCH] Replace deprecated += api.
          Gtk.TreePath path= null;
          if(event.button != 1) return false;
          if(tree.get_path_at_pos((int)event.x,(int)event.y,out path, null, null, null))
-@@ -635,19 +637,19 @@
+@@ -635,19 +637,19 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
       }
      /**
       * Artist tree view functions */
@@ -278,7 +280,7 @@ Subject: [PATCH] Replace deprecated += api.
       {
          string artist = browser_get_selected_artist(); 
          if(artist != null)
-@@ -667,26 +669,27 @@
+@@ -667,26 +669,27 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
              }
          }
       }
@@ -310,7 +312,7 @@ Subject: [PATCH] Replace deprecated += api.
                  menu.append(item);
  
                  menu.popup(null, null, null, event.button, event.time);
-@@ -713,7 +716,7 @@
+@@ -713,7 +716,7 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
  
           return visible;
       }
@@ -319,7 +321,7 @@ Subject: [PATCH] Replace deprecated += api.
       {
          unichar uc = Gdk.keyval_to_unicode(event.keyval);
          if(uc > 0)
-@@ -732,7 +735,7 @@
+@@ -732,7 +735,7 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
       /** 
        * Album tree view
        */
@@ -328,7 +330,7 @@ Subject: [PATCH] Replace deprecated += api.
       {
          string artist = browser_get_selected_artist(); 
          if(artist != null)
-@@ -773,26 +776,26 @@
+@@ -773,26 +776,26 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
              }
          }
       }
@@ -360,7 +362,7 @@ Subject: [PATCH] Replace deprecated += api.
                  menu.append(item);
  
                  menu.popup(null, null, null, event.button, event.time);
-@@ -820,7 +823,7 @@
+@@ -820,7 +823,7 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
       }
  
  
@@ -369,7 +371,7 @@ Subject: [PATCH] Replace deprecated += api.
       {
          unichar uc = Gdk.keyval_to_unicode(event.keyval);
          if(uc > 0)
-@@ -837,8 +840,9 @@
+@@ -837,8 +840,9 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
          return false;
       }
  
@@ -380,7 +382,7 @@ Subject: [PATCH] Replace deprecated += api.
          string text = entry.get_text();
          if(text.size() > 0) {
              entry.show();
-@@ -852,7 +856,7 @@
+@@ -852,7 +856,7 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
       /**
        * Songs 
        */
@@ -389,7 +391,7 @@ Subject: [PATCH] Replace deprecated += api.
       {
          MPD.Song? song = browser_get_selected_song(); 
          if(song != null)
-@@ -860,26 +864,27 @@
+@@ -860,26 +864,27 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
              MPD.PlayQueue.add_song(server,song.file); 
          }
       }
@@ -421,7 +423,7 @@ Subject: [PATCH] Replace deprecated += api.
                  menu.append(item);
  
                  menu.popup(null, null, null, event.button, event.time);
-@@ -908,7 +913,7 @@
+@@ -908,7 +913,7 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
          {
              this.paned = new Gtk.HPaned();
              paned_size_group.add_paned(this.paned); 
@@ -430,7 +432,7 @@ Subject: [PATCH] Replace deprecated += api.
              /* Bow with browsers */
              this.browser_box = new Gtk.VBox(true, 6);
              this.paned.add1(this.browser_box);
-@@ -925,7 +930,7 @@
+@@ -925,7 +930,7 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
              });
  */
              this.artist_filter_entry.set_no_show_all(true);
@@ -439,7 +441,7 @@ Subject: [PATCH] Replace deprecated += api.
  
              box.pack_start(this.artist_filter_entry, false, false, 0);
  
-@@ -942,9 +947,9 @@
+@@ -942,9 +947,9 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
              new Gmpc.MpdData.Treeview.Tooltip(this.tree_artist, Gmpc.MetaData.Type.ARTIST_ART);
  
              this.tree_artist.set_enable_search(false);
@@ -452,7 +454,7 @@ Subject: [PATCH] Replace deprecated += api.
              sw.add(tree_artist);
              /* setup the columns */ 
              var column = new Gtk.TreeViewColumn();
-@@ -960,7 +965,7 @@
+@@ -960,7 +965,7 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
              column.add_attribute(trenderer, "text", 7);
              this.tree_artist.append_column(column);
              column.set_title(_("Artist"));
@@ -461,7 +463,7 @@ Subject: [PATCH] Replace deprecated += api.
  
              /* set fixed height mode */
              column.sizing = Gtk.TreeViewColumnSizing.FIXED;
-@@ -980,7 +985,7 @@
+@@ -980,7 +985,7 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
              });
  */
              this.album_filter_entry.set_no_show_all(true);
@@ -470,7 +472,7 @@ Subject: [PATCH] Replace deprecated += api.
              box.pack_start(this.album_filter_entry, false, false, 0);
  
              sw = new Gtk.ScrolledWindow(null, null);
-@@ -995,9 +1000,9 @@
+@@ -995,9 +1000,9 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
              this.tree_album.set_enable_search(false);
              new Gmpc.MpdData.Treeview.Tooltip(this.tree_album, Gmpc.MetaData.Type.ALBUM_ART);
  
@@ -483,7 +485,7 @@ Subject: [PATCH] Replace deprecated += api.
              sw.add(tree_album);
              /* setup the columns */ 
              column = new Gtk.TreeViewColumn();
-@@ -1025,7 +1030,7 @@
+@@ -1025,7 +1030,7 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
              column.set_title(_("Album"));
  
  
@@ -492,7 +494,7 @@ Subject: [PATCH] Replace deprecated += api.
  
              /* Song list */
              sw = new Gtk.ScrolledWindow(null, null);
-@@ -1035,8 +1040,8 @@
+@@ -1035,8 +1040,8 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
              this.model_songs = new Gmpc.MpdData.Model();
              this.tree_songs = new Gtk.TreeView.with_model(this.model_songs);
              this.tree_songs.rules_hint = true;
@@ -503,7 +505,7 @@ Subject: [PATCH] Replace deprecated += api.
              sw.add(tree_songs);
              /* setup the columns */ 
              column = new Gtk.TreeViewColumn();
-@@ -1064,7 +1069,7 @@
+@@ -1064,7 +1069,7 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
              this.tree_songs.set_search_column(7);
              column.set_title(_("Songs"));
  
@@ -512,7 +514,7 @@ Subject: [PATCH] Replace deprecated += api.
  
              /* The right view */
              this.metadata_sw = new Gtk.ScrolledWindow(null, null);
-@@ -1487,13 +1492,13 @@
+@@ -1487,13 +1492,13 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
  
          var abutton = new Gtk.Button.from_stock("gtk-add");
          abutton.set_relief(Gtk.ReliefStyle.NONE);
@@ -528,7 +530,7 @@ Subject: [PATCH] Replace deprecated += api.
          control_hbox.pack_start(abutton, false, false,0);
  
  
-@@ -1685,10 +1690,10 @@
+@@ -1685,10 +1690,10 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
          /* show it */
          return vbox;
      }
@@ -541,7 +543,7 @@ Subject: [PATCH] Replace deprecated += api.
          if(model.get_iter(out iter, path))
          {
              unowned MPD.Song song = null;
-@@ -1702,7 +1707,7 @@
+@@ -1702,7 +1707,7 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
  
      }
  
@@ -550,7 +552,7 @@ Subject: [PATCH] Replace deprecated += api.
      {
          Gtk.TreeView tree = (Gtk.TreeView)item.get_data<Gtk.TreeView>("tree");
          if(tree != null)
-@@ -1726,7 +1731,7 @@
+@@ -1726,7 +1731,7 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
              }
          }
      }
@@ -559,7 +561,7 @@ Subject: [PATCH] Replace deprecated += api.
      {
          Gtk.TreeView tree = (Gtk.TreeView)item.get_data<Gtk.TreeView>("tree");
          if(tree != null)
-@@ -1750,7 +1755,7 @@
+@@ -1750,7 +1755,7 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
              MPD.PlayQueue.queue_commit(server);
          }
      }
@@ -568,7 +570,7 @@ Subject: [PATCH] Replace deprecated += api.
      {
           MPD.PlayQueue.clear(server);
           album_song_browser_add_clicked(item);
-@@ -1758,27 +1763,28 @@
+@@ -1758,27 +1763,28 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
      }
  
  
@@ -601,7 +603,7 @@ Subject: [PATCH] Replace deprecated += api.
              menu.append(item);
              
              if(tree.get_selection().count_selected_rows() == 1)
-@@ -1872,13 +1878,13 @@
+@@ -1872,13 +1878,13 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
  
          var button = new Gtk.Button.from_stock("gtk-add");
          button.set_relief(Gtk.ReliefStyle.NONE);
@@ -617,7 +619,7 @@ Subject: [PATCH] Replace deprecated += api.
          hbox.pack_start(button, false, false,0);
  
  
-@@ -1952,10 +1958,10 @@
+@@ -1952,10 +1958,10 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
              var data = MPD.Database.search_commit(server);
              data.sort_album_disc_track();
              songs.set_mpd_data((owned)data);
@@ -631,7 +633,7 @@ Subject: [PATCH] Replace deprecated += api.
              sw.add(song_tree);
              var alib = new Gtk.Alignment(0f,0f,1f,0f);
  
-@@ -2130,13 +2136,13 @@
+@@ -2130,13 +2136,13 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
  
          var button = new Gtk.Button.from_stock("gtk-add");
          button.set_relief(Gtk.ReliefStyle.NONE);
@@ -647,7 +649,7 @@ Subject: [PATCH] Replace deprecated += api.
          hbox.pack_start(button, false, false,0);
  
          info_box.attach(hbox, 0,2,i,i+1,Gtk.AttachOptions.SHRINK|Gtk.AttachOptions.FILL, Gtk.AttachOptions.SHRINK|Gtk.AttachOptions.FILL,0,0);
-@@ -2211,10 +2217,10 @@
+@@ -2211,10 +2217,10 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
              var data = MPD.Database.search_commit(server);
              data.sort_album_disc_track();
              songs.set_mpd_data((owned)data);
@@ -661,9 +663,11 @@ Subject: [PATCH] Replace deprecated += api.
              sw.add(song_tree);
              var alib = new Gtk.Alignment(0f,0f,1f,0f);
  
+diff --git a/src/browsers/gmpc-nowplaying2.vala b/src/browsers/gmpc-nowplaying2.vala
+index 756be89..9bf6567 100644
 --- a/src/browsers/gmpc-nowplaying2.vala
 +++ b/src/browsers/gmpc-nowplaying2.vala
-@@ -195,7 +195,7 @@
+@@ -195,7 +195,7 @@ namespace Gmpc {
               * If the style changed because f.e. the user switched theme, make sure the correct colouring is kept preserved.
               */
  
@@ -672,7 +676,7 @@ Subject: [PATCH] Replace deprecated += api.
              {
                  debug("Change style signal");
                  if(this.theme_colors) {
-@@ -247,7 +247,7 @@
+@@ -247,7 +247,7 @@ namespace Gmpc {
                      this.paned.set_shadow_type(Gtk.ShadowType.NONE);
                      this.container = new Gtk.EventBox();
                      this.container.set_visible_window(true);
@@ -681,7 +685,7 @@ Subject: [PATCH] Replace deprecated += api.
                      this.paned.add_with_viewport(this.container);
                      this.paned.get_vadjustment().set("step-increment", 20.0);
  
-@@ -912,7 +912,7 @@
+@@ -912,7 +912,7 @@ namespace Gmpc {
              /**
               * Makes gmpc jump to the now playing browser 
               */
@@ -690,7 +694,7 @@ Subject: [PATCH] Replace deprecated += api.
              {
                  unowned Gtk.TreeView tree = Gmpc.Playlist3.get_category_tree_view();
                  var sel = tree.get_selection();
-@@ -932,7 +932,7 @@
+@@ -932,7 +932,7 @@ namespace Gmpc {
                  {
                      var item = new Gtk.ImageMenuItem.with_mnemonic(_("Now Playing"));
                      item.set_image(new Gtk.Image.from_icon_name("media-audiofile", Gtk.IconSize.MENU));
@@ -699,9 +703,11 @@ Subject: [PATCH] Replace deprecated += api.
                      item.add_accelerator("activate", menu.get_accel_group(),0x069, Gdk.ModifierType.CONTROL_MASK, Gtk.AccelFlags.VISIBLE);
                      menu.append(item);
                      return 1;
+diff --git a/src/vala/gmpc-easy-command.vala b/src/vala/gmpc-easy-command.vala
+index c11b034..e1fc7f2 100644
 --- a/src/vala/gmpc-easy-command.vala
 +++ b/src/vala/gmpc-easy-command.vala
-@@ -210,7 +210,7 @@
+@@ -210,7 +210,7 @@ public class Gmpc.Easy.Command: Gmpc.Plugin.Base {
  			this.window = null;
  		}
  	}
@@ -710,7 +716,7 @@ Subject: [PATCH] Replace deprecated += api.
  		/* Escape */
  		if (event.keyval == 0xff1b) {
  			this.window.destroy();
-@@ -225,7 +225,7 @@
+@@ -225,7 +225,7 @@ public class Gmpc.Easy.Command: Gmpc.Plugin.Base {
  		return false;
  	}
  
@@ -719,7 +725,7 @@ Subject: [PATCH] Replace deprecated += api.
  		var ctx = Gdk.cairo_create(widget.window);
  		int width = widget.allocation.width;
  		int height = widget.allocation.height;
-@@ -292,7 +292,7 @@
+@@ -292,7 +292,7 @@ public class Gmpc.Easy.Command: Gmpc.Plugin.Base {
  				window.set_colormap(colormap);
  			}
  			window.app_paintable = true;
@@ -728,7 +734,7 @@ Subject: [PATCH] Replace deprecated += api.
  
  /*			Disable this as often gmpc is moved and bring to top, not desirable..
  			if (!Gmpc.Playlist.is_hidden()) {
-@@ -302,10 +302,10 @@
+@@ -302,10 +302,10 @@ public class Gmpc.Easy.Command: Gmpc.Plugin.Base {
  */
  			/* setup entry */
  			entry.set_completion(this.completion);
@@ -742,7 +748,7 @@ Subject: [PATCH] Replace deprecated += api.
  
  			window.show_all();
  			window.present();
-@@ -315,7 +315,7 @@
+@@ -315,7 +315,7 @@ public class Gmpc.Easy.Command: Gmpc.Plugin.Base {
  		}
  	}
  	private bool
@@ -751,7 +757,7 @@ Subject: [PATCH] Replace deprecated += api.
  	{
  		this.window.destroy();
  		this.window = null;
-@@ -390,7 +390,7 @@
+@@ -390,7 +390,7 @@ public class Gmpc.Easy.Command: Gmpc.Plugin.Base {
  		window.show_all();
  
  		/* delete event */
@@ -760,9 +766,11 @@ Subject: [PATCH] Replace deprecated += api.
  	}
  }
  
+diff --git a/src/vala/gmpc-favorites.vala b/src/vala/gmpc-favorites.vala
+index b3d0195..9836b71 100644
 --- a/src/vala/gmpc-favorites.vala
 +++ b/src/vala/gmpc-favorites.vala
-@@ -37,8 +37,8 @@
+@@ -37,8 +37,8 @@ namespace Gmpc.Favorites{
      private class List : GLib.Object {
          private MPD.Data.Item? list = null; 
          construct {
@@ -773,7 +781,7 @@ Subject: [PATCH] Replace deprecated += api.
          }
  
          /**
-@@ -165,9 +165,9 @@
+@@ -165,9 +165,9 @@ namespace Gmpc.Favorites{
              this.image = new Gtk.Image();
              this.update(favorites);
              this.add(this.image);
@@ -786,7 +794,7 @@ Subject: [PATCH] Replace deprecated += api.
  
          }
          ~Button() {
-@@ -176,7 +176,7 @@
+@@ -176,7 +176,7 @@ namespace Gmpc.Favorites{
          }
          private
          bool
@@ -795,7 +803,7 @@ Subject: [PATCH] Replace deprecated += api.
          {
              if(event.button == 1 && this.song != null) {
                  favorites.set_favorite(this.song.file, !this.fstate);
-@@ -210,7 +210,7 @@
+@@ -210,7 +210,7 @@ namespace Gmpc.Favorites{
          /* on mouse over, do some pre-highlighting */
          private
          bool
@@ -804,7 +812,7 @@ Subject: [PATCH] Replace deprecated += api.
          {
              var pb2 = pb.copy();
              if(this.fstate){
-@@ -224,7 +224,7 @@
+@@ -224,7 +224,7 @@ namespace Gmpc.Favorites{
          /* Reset default highlighting */
          private
          bool
@@ -813,9 +821,11 @@ Subject: [PATCH] Replace deprecated += api.
          {
              this.update(favorites);
              return false;
+diff --git a/src/vala/gmpc-metadata-prefetcher.vala b/src/vala/gmpc-metadata-prefetcher.vala
+index eed8ba7..d42e782 100644
 --- a/src/vala/gmpc-metadata-prefetcher.vala
 +++ b/src/vala/gmpc-metadata-prefetcher.vala
-@@ -38,7 +38,7 @@
+@@ -38,7 +38,7 @@ public class  Gmpc.Plugin.MetadataPrefetcher : Gmpc.Plugin.Base {
          /* Mark the plugin as an internal dummy */
          this.plugin_type = 8+4;
          /* Attach status changed signal */
@@ -824,9 +834,11 @@ Subject: [PATCH] Replace deprecated += api.
      }
  
  
+diff --git a/src/vala/gmpc-rating.vala b/src/vala/gmpc-rating.vala
+index 9c6206c..00050ad 100644
 --- a/src/vala/gmpc-rating.vala
 +++ b/src/vala/gmpc-rating.vala
-@@ -47,7 +47,7 @@
+@@ -47,7 +47,7 @@ public class Gmpc.Rating : Gtk.Frame
          }
  
      }
@@ -835,7 +847,7 @@ Subject: [PATCH] Replace deprecated += api.
      {
          if(event.type == Gdk.EventType.BUTTON_PRESS)
          {
-@@ -94,7 +94,7 @@
+@@ -94,7 +94,7 @@ public class Gmpc.Rating : Gtk.Frame
          this.add(this.event_box);
          this.event_box.add(this.box);
  
@@ -844,9 +856,11 @@ Subject: [PATCH] Replace deprecated += api.
          this.show_all();
      }
  
+diff --git a/src/vala/gmpc-test-plugin.vala b/src/vala/gmpc-test-plugin.vala
+index fcbf9a1..fcbe30d 100644
 --- a/src/vala/gmpc-test-plugin.vala
 +++ b/src/vala/gmpc-test-plugin.vala
-@@ -558,7 +558,7 @@
+@@ -558,7 +558,7 @@ public class Gmpc.MetaData.EditWindow : Gtk.Window {
          this.bar = new Gtk.ProgressBar();
          vbox.pack_start(this.pbox, false, false, 0);
          this.cancel = new Gtk.Button.from_stock("gtk-cancel");
@@ -855,7 +869,7 @@ Subject: [PATCH] Replace deprecated += api.
          this.pbox.pack_start(this.bar, true, true, 0);
          this.pbox.pack_start(this.cancel, false, false, 0);
          this.bar.show();
-@@ -576,7 +576,7 @@
+@@ -576,7 +576,7 @@ public class Gmpc.MetaData.EditWindow : Gtk.Window {
          var hbox = new Gtk.HBox(false, 6);
  
          var button = new Gtk.Button.from_stock("gtk-quit");
@@ -864,7 +878,7 @@ Subject: [PATCH] Replace deprecated += api.
          hbox.pack_end(button, false, false, 0);
          vbox.pack_end(hbox, false, false,0);
  
-@@ -609,7 +609,7 @@
+@@ -609,7 +609,7 @@ public class Gmpc.MetaData.EditWindow : Gtk.Window {
          this.combo.add_attribute(renderer, "text", 1);
  
          qhbox.pack_start(this.combo, true,true,0);
@@ -873,7 +887,7 @@ Subject: [PATCH] Replace deprecated += api.
  
          vbox.pack_start(qhbox, false, false, 0);
         
-@@ -663,7 +663,7 @@
+@@ -663,7 +663,7 @@ public class Gmpc.MetaData.EditWindow : Gtk.Window {
          var ali = new Gtk.Alignment(1.0f, 0.5f, 0.0f, 0.0f);
          ali.add(button);
          vbox.pack_start(ali, false, false, 0);
@@ -882,7 +896,7 @@ Subject: [PATCH] Replace deprecated += api.
  
  
  
-@@ -794,7 +794,7 @@
+@@ -794,7 +794,7 @@ public class  Gmpc.TestPlugin : Gmpc.Plugin.Base,Gmpc.Plugin.ToolMenuIface, Gmpc
              item.set_data("treeview", tv);
              menu.append(item);
  
@@ -891,7 +905,7 @@ Subject: [PATCH] Replace deprecated += api.
              return 1;
          }
          return 0;
-@@ -809,7 +809,7 @@
+@@ -809,7 +809,7 @@ public class  Gmpc.TestPlugin : Gmpc.Plugin.Base,Gmpc.Plugin.ToolMenuIface, Gmpc
      {
          Gtk.MenuItem item = new Gtk.MenuItem.with_label("Edit metadata current song");
          menu.append(item);
@@ -900,9 +914,11 @@ Subject: [PATCH] Replace deprecated += api.
          return 2;
      }
  }
+diff --git a/src/vapi/gmpc.vapi b/src/vapi/gmpc.vapi
+index c9d40a9..850f1d3 100644
 --- a/src/vapi/gmpc.vapi
 +++ b/src/vapi/gmpc.vapi
-@@ -295,7 +295,7 @@
+@@ -295,7 +295,7 @@ namespace Gmpc {
  
      /* objects */
      namespace MpdData {
@@ -911,3 +927,4 @@ Subject: [PATCH] Replace deprecated += api.
          public class TreeView : Gtk.TreeView {
              [CCode (cname="gmpc_mpddata_treeview_new")]
              public TreeView(string name, bool sort, Gtk.TreeModel model);
+-- 
