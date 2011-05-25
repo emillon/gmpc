@@ -3,7 +3,6 @@ Date: Sun, 27 Jun 2010 11:43:27 +0200
 Subject: Fix building gmpc with vala 0.9.X
 
 from git:7f762dd0d1c484ce5a01e3150202da1e18b9acac
-
 ---
  src/vala/gmpc-liststore-sort.vala |    4 ++--
  1 files changed, 2 insertions(+), 2 deletions(-)

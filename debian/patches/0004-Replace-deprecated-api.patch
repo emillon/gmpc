@@ -857,7 +857,7 @@ index 9c6206c..00050ad 100644
      }
  
 diff --git a/src/vala/gmpc-test-plugin.vala b/src/vala/gmpc-test-plugin.vala
-index fcbf9a1..fcbe30d 100644
+index e7e17ee..459be6d 100644
 --- a/src/vala/gmpc-test-plugin.vala
 +++ b/src/vala/gmpc-test-plugin.vala
 @@ -558,7 +558,7 @@ public class Gmpc.MetaData.EditWindow : Gtk.Window {
