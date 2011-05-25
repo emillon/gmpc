@@ -45,6 +45,9 @@ with it.
  delete mode 100644 src/vala/gmpc-test-plugin.c
  delete mode 100644 src/vala/gmpc-url-fetching-gui.c
 
+diff --git a/src/Providers/music-tree.c b/src/Providers/music-tree.c
+deleted file mode 100644
+index 4b25f6d..0000000
 --- a/src/Providers/music-tree.c
 +++ /dev/null
 @@ -1,835 +0,0 @@
@@ -883,6 +886,9 @@ with it.
 -
 -
 -
+diff --git a/src/Widgets/gmpc-image-async.c b/src/Widgets/gmpc-image-async.c
+deleted file mode 100644
+index 073502f..0000000
 --- a/src/Widgets/gmpc-image-async.c
 +++ /dev/null
 @@ -1,804 +0,0 @@
@@ -1690,6 +1696,9 @@ with it.
 -
 -
 -
+diff --git a/src/Widgets/gmpc-menu-item-rating.c b/src/Widgets/gmpc-menu-item-rating.c
+deleted file mode 100644
+index 8338541..0000000
 --- a/src/Widgets/gmpc-menu-item-rating.c
 +++ /dev/null
 @@ -1,135 +0,0 @@
@@ -1828,6 +1837,9 @@ with it.
 -
 -
 -
+diff --git a/src/Widgets/gmpc-progress.c b/src/Widgets/gmpc-progress.c
+deleted file mode 100644
+index d247a65..0000000
 --- a/src/Widgets/gmpc-progress.c
 +++ /dev/null
 @@ -1,567 +0,0 @@
@@ -2398,6 +2410,9 @@ with it.
 -
 -
 -
+diff --git a/src/browsers/gmpc-metadata-browser2.c b/src/browsers/gmpc-metadata-browser2.c
+deleted file mode 100644
+index 8bf3889..0000000
 --- a/src/browsers/gmpc-metadata-browser2.c
 +++ /dev/null
 @@ -1,5714 +0,0 @@
@@ -8115,6 +8130,9 @@ with it.
 -
 -
 -
+diff --git a/src/browsers/gmpc-nowplaying2.c b/src/browsers/gmpc-nowplaying2.c
+deleted file mode 100644
+index fa93d71..0000000
 --- a/src/browsers/gmpc-nowplaying2.c
 +++ /dev/null
 @@ -1,2003 +0,0 @@
@@ -10121,6 +10139,9 @@ with it.
 -
 -
 -
+diff --git a/src/vala/gmpc-connection.c b/src/vala/gmpc-connection.c
+deleted file mode 100644
+index 3121dfd..0000000
 --- a/src/vala/gmpc-connection.c
 +++ /dev/null
 @@ -1,92 +0,0 @@
@@ -10216,6 +10237,9 @@ with it.
 -
 -
 -
+diff --git a/src/vala/gmpc-database-update-tracker.c b/src/vala/gmpc-database-update-tracker.c
+deleted file mode 100644
+index 0899233..0000000
 --- a/src/vala/gmpc-database-update-tracker.c
 +++ /dev/null
 @@ -1,286 +0,0 @@
@@ -10505,6 +10529,9 @@ with it.
 -
 -
 -
+diff --git a/src/vala/gmpc-easy-command.c b/src/vala/gmpc-easy-command.c
+deleted file mode 100644
+index 969179d..0000000
 --- a/src/vala/gmpc-easy-command.c
 +++ /dev/null
 @@ -1,726 +0,0 @@
@@ -11234,6 +11261,9 @@ with it.
 -
 -
 -
+diff --git a/src/vala/gmpc-favorites.c b/src/vala/gmpc-favorites.c
+deleted file mode 100644
+index d2e3017..0000000
 --- a/src/vala/gmpc-favorites.c
 +++ /dev/null
 @@ -1,606 +0,0 @@
@@ -11843,6 +11873,9 @@ with it.
 -
 -
 -
+diff --git a/src/vala/gmpc-liststore-sort.c b/src/vala/gmpc-liststore-sort.c
+deleted file mode 100644
+index ee16a9d..0000000
 --- a/src/vala/gmpc-liststore-sort.c
 +++ /dev/null
 @@ -1,187 +0,0 @@
@@ -12033,6 +12066,9 @@ with it.
 -
 -
 -
+diff --git a/src/vala/gmpc-metadata-prefetcher.c b/src/vala/gmpc-metadata-prefetcher.c
+deleted file mode 100644
+index e304dbb..0000000
 --- a/src/vala/gmpc-metadata-prefetcher.c
 +++ /dev/null
 @@ -1,162 +0,0 @@
@@ -12198,6 +12234,9 @@ with it.
 -
 -
 -
+diff --git a/src/vala/gmpc-mpddata-treeview-tooltip.c b/src/vala/gmpc-mpddata-treeview-tooltip.c
+deleted file mode 100644
+index 8249802..0000000
 --- a/src/vala/gmpc-mpddata-treeview-tooltip.c
 +++ /dev/null
 @@ -1,371 +0,0 @@
@@ -12572,6 +12611,9 @@ with it.
 -
 -
 -
+diff --git a/src/vala/gmpc-paned-size-group.c b/src/vala/gmpc-paned-size-group.c
+deleted file mode 100644
+index 67f83e2..0000000
 --- a/src/vala/gmpc-paned-size-group.c
 +++ /dev/null
 @@ -1,172 +0,0 @@
@@ -12747,6 +12789,9 @@ with it.
 -
 -
 -
+diff --git a/src/vala/gmpc-plugin.c b/src/vala/gmpc-plugin.c
+deleted file mode 100644
+index d015910..0000000
 --- a/src/vala/gmpc-plugin.c
 +++ /dev/null
 @@ -1,372 +0,0 @@
@@ -13122,6 +13167,9 @@ with it.
 -
 -
 -
+diff --git a/src/vala/gmpc-rating.c b/src/vala/gmpc-rating.c
+deleted file mode 100644
+index bfe392a..0000000
 --- a/src/vala/gmpc-rating.c
 +++ /dev/null
 @@ -1,282 +0,0 @@
@@ -13407,6 +13455,9 @@ with it.
 -
 -
 -
+diff --git a/src/vala/gmpc-song-links.c b/src/vala/gmpc-song-links.c
+deleted file mode 100644
+index 78e090b..0000000
 --- a/src/vala/gmpc-song-links.c
 +++ /dev/null
 @@ -1,555 +0,0 @@
@@ -13965,6 +14016,9 @@ with it.
 -
 -
 -
+diff --git a/src/vala/gmpc-test-plugin.c b/src/vala/gmpc-test-plugin.c
+deleted file mode 100644
+index b0e1acb..0000000
 --- a/src/vala/gmpc-test-plugin.c
 +++ /dev/null
 @@ -1,1591 +0,0 @@
@@ -15559,6 +15613,9 @@ with it.
 -
 -
 -
+diff --git a/src/vala/gmpc-url-fetching-gui.c b/src/vala/gmpc-url-fetching-gui.c
+deleted file mode 100644
+index 3e49e98..0000000
 --- a/src/vala/gmpc-url-fetching-gui.c
 +++ /dev/null
 @@ -1,327 +0,0 @@
@@ -15889,3 +15946,4 @@ with it.
 -
 -
 -
+-- 
