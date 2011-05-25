@@ -22,12 +22,10 @@ Subject: [PATCH] Trying to fix building with vala 0.8.0
  src/vapi/libmpd.vapi                       |    6 +-
  16 files changed, 109 insertions(+), 108 deletions(-)
 
-diff --git a/src/Providers/music-tree.vala b/src/Providers/music-tree.vala
-index b37cd70..c718f61 100644
 --- a/src/Providers/music-tree.vala
 +++ b/src/Providers/music-tree.vala
-@@ -41,11 +41,11 @@ public class Gmpc.Provider.MusicTree : Gmpc.Plugin.Base, Gmpc.Plugin.MetaDataIfa
-     public int[] version = {0,0,2};
+@@ -41,11 +41,11 @@
+     public const int[] version = {0,0,2};
  
      
 -    public override weak int[] get_version() {
@@ -40,7 +38,7 @@ index b37cd70..c718f61 100644
          return N_("Music Tree Provider");
      }
  
-@@ -75,7 +75,7 @@ public class Gmpc.Provider.MusicTree : Gmpc.Plugin.Base, Gmpc.Plugin.MetaDataIfa
+@@ -74,7 +74,7 @@
      {
          List<Gmpc.MetaData.Item> list = null;
          string id =  profiles.get_current_id();
@@ -49,24 +47,9 @@ index b37cd70..c718f61 100644
  
          log("Gmpc.Plugin.MusicTreeProvider", GLib.LogLevelFlags.LEVEL_DEBUG, 
                  "Starting Query");
-diff --git a/src/Widgets/gmpc-image-async.vala b/src/Widgets/gmpc-image-async.vala
-index 5826539..eeb981b 100644
---- a/src/Widgets/gmpc-image-async.vala
-+++ b/src/Widgets/gmpc-image-async.vala
-@@ -31,7 +31,7 @@ public class Gmpc.PixbufLoaderAsync : GLib.Object
-     private Gtk.TreeRowReference rref = null;
- 
- 
--    signal void pixbuf_update(Gdk.Pixbuf? pixbuf);
-+    public signal void pixbuf_update(Gdk.Pixbuf? pixbuf);
- 
-     public void set_rref(Gtk.TreeRowReference rreference)
-     {
-diff --git a/src/Widgets/gmpc-progress.vala b/src/Widgets/gmpc-progress.vala
-index f67c741..adfb053 100644
 --- a/src/Widgets/gmpc-progress.vala
 +++ b/src/Widgets/gmpc-progress.vala
-@@ -178,7 +178,7 @@ public class Gmpc.Progress : Gtk.HBox
+@@ -178,7 +178,7 @@
  
      }
     
@@ -75,11 +58,9 @@ index f67c741..adfb053 100644
  
  
      private void value_changed (Gtk.Scale range)
-diff --git a/src/browsers/gmpc-metadata-browser2.vala b/src/browsers/gmpc-metadata-browser2.vala
-index 373ff69..6c33019 100644
 --- a/src/browsers/gmpc-metadata-browser2.vala
 +++ b/src/browsers/gmpc-metadata-browser2.vala
-@@ -65,7 +65,7 @@ public class Gmpc.Widget.SimilarSongs : Gtk.Alignment{
+@@ -65,7 +65,7 @@
          {
              if(model.get_iter(out iter, path))
              {
@@ -88,7 +69,7 @@ index 373ff69..6c33019 100644
                  model.get(iter, 0, out song, -1);
                  if(song != null)
                  {
-@@ -89,7 +89,7 @@ public class Gmpc.Widget.SimilarSongs : Gtk.Alignment{
+@@ -89,7 +89,7 @@
              Gtk.TreePath path = list.data;
              if(model.get_iter(out iter, path))
              {
@@ -97,7 +78,7 @@ index 373ff69..6c33019 100644
                  model.get(iter, 0, out song, -1);
                  if(song != null)
                  {
-@@ -110,7 +110,7 @@ public class Gmpc.Widget.SimilarSongs : Gtk.Alignment{
+@@ -110,7 +110,7 @@
          {
              if(model.get_iter(out iter, path))
              {
@@ -106,7 +87,7 @@ index 373ff69..6c33019 100644
                  model.get(iter, 0, out song, -1);
                  if(song != null)
                  {
-@@ -135,7 +135,7 @@ public class Gmpc.Widget.SimilarSongs : Gtk.Alignment{
+@@ -135,7 +135,7 @@
          Gtk.TreeIter iter;
          if(model.get_iter(out iter, path))
          {
@@ -115,7 +96,7 @@ index 373ff69..6c33019 100644
              model.get(iter, 0, out song, -1);
              if(song != null)
              {
-@@ -170,7 +170,7 @@ public class Gmpc.Widget.SimilarSongs : Gtk.Alignment{
+@@ -170,7 +170,7 @@
  
      private Gmpc.MetaData.Item copy = null;
      MPD.Data.Item item = null;
@@ -124,7 +105,7 @@ index 373ff69..6c33019 100644
      private bool update_sim_song()
      {
          if(current == null){
-@@ -341,7 +341,7 @@ public class Gmpc.Widget.SimilarArtist : Gtk.Table {
+@@ -341,7 +341,7 @@
          /* Set result */
          else {
              List<Gtk.Widget> in_db_list = null;
@@ -133,7 +114,7 @@ index 373ff69..6c33019 100644
              list.sort((GLib.CompareFunc)string.collate);
  
  
-@@ -349,7 +349,7 @@ public class Gmpc.Widget.SimilarArtist : Gtk.Table {
+@@ -349,7 +349,7 @@
              int i = 0;
              if(list != null)
              {
@@ -142,7 +123,7 @@ index 373ff69..6c33019 100644
                  MPD.Database.search_field_start(server, MPD.Tag.Type.ARTIST);
                  var data = MPD.Database.search_commit(server);
  
-@@ -359,7 +359,7 @@ public class Gmpc.Widget.SimilarArtist : Gtk.Table {
+@@ -359,7 +359,7 @@
                  {
  
                      data.sort_album_disc_track();
@@ -151,7 +132,7 @@ index 373ff69..6c33019 100644
  
                      liter = list.first();
                      string artist = "";
-@@ -429,7 +429,7 @@ public class Gmpc.Widget.SimilarArtist : Gtk.Table {
+@@ -429,7 +429,7 @@
      void
      artist_button_clicked(Gtk.Button button)
      {
@@ -160,7 +141,7 @@ index 373ff69..6c33019 100644
          Gmpc.Browser.Metadata.show_artist(artist);
      }
      public
-@@ -523,12 +523,12 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
+@@ -523,12 +523,12 @@
          Gdk.Color.parse(foreground,out this.foreground);
      }
  
@@ -176,7 +157,7 @@ index 373ff69..6c33019 100644
          return N_("Metadata Browser");
      }
  
-@@ -544,7 +544,7 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
+@@ -544,7 +544,7 @@
          if(this.rref != null) {
              var path = rref.get_path();
              if(path != null) {
@@ -185,7 +166,7 @@ index 373ff69..6c33019 100644
                  config.set_int(this.get_name(), "position", indices[0]);
              }
          }
-@@ -1137,7 +1137,7 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
+@@ -1137,7 +1137,7 @@
          Gtk.TreeModel model;
          if(sel.get_selected(out model, out iter))
          {
@@ -194,7 +175,7 @@ index 373ff69..6c33019 100644
              this.model_songs .get(iter, 0,out songs, -1);
              return songs;
          }
-@@ -1160,7 +1160,7 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
+@@ -1160,7 +1160,7 @@
  
              this.model_albums.set_request_artist(artist);
              MPD.Data.Item list = null;
@@ -203,7 +184,7 @@ index 373ff69..6c33019 100644
              if(iter!= null)
              {
                  do{
-@@ -1174,7 +1174,7 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
+@@ -1174,7 +1174,7 @@
                      MPD.Database.search_add_constraint(server, MPD.Tag.Type.ALBUM, iter.tag);
                      var ydata = MPD.Database.search_commit(server);
                      if(ydata != null) {
@@ -212,7 +193,7 @@ index 373ff69..6c33019 100644
                          while(list.song.date == null && yi != null)
                          {
                              if(yi.tag != null && yi.tag.length > 0) {
-@@ -1518,7 +1518,7 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
+@@ -1518,7 +1518,7 @@
  
          /* Lyrics */
          i = 0;
@@ -221,7 +202,7 @@ index 373ff69..6c33019 100644
          if(config.get_int_with_default("MetaData", "show-lyrics",1) == 1)
          {
              var alib = new Gtk.Alignment(0f,0f,1f,0f);
-@@ -1691,7 +1691,7 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
+@@ -1691,7 +1691,7 @@
          var model = tree.get_model();
          if(model.get_iter(out iter, path))
          {
@@ -230,7 +211,7 @@ index 373ff69..6c33019 100644
              model.get(iter, 0, out song, -1);
              if(song != null)
              {
-@@ -1704,7 +1704,7 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
+@@ -1704,7 +1704,7 @@
  
      private void album_song_browser_play_clicked(Gtk.ImageMenuItem item)
      {
@@ -239,7 +220,7 @@ index 373ff69..6c33019 100644
          if(tree != null)
          {
              Gtk.TreeIter iter;
-@@ -1715,7 +1715,7 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
+@@ -1715,7 +1715,7 @@
              {
                  if(model.get_iter(out iter, path))
                  {
@@ -248,7 +229,7 @@ index 373ff69..6c33019 100644
                      model.get(iter, 0, out song, -1);
                      if(song != null)
                      {
-@@ -1728,7 +1728,7 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
+@@ -1728,7 +1728,7 @@
      }
      private void album_song_browser_add_clicked(Gtk.ImageMenuItem item)
      {
@@ -257,7 +238,7 @@ index 373ff69..6c33019 100644
          if(tree != null)
          {
              Gtk.TreeIter iter;
-@@ -1739,7 +1739,7 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
+@@ -1739,7 +1739,7 @@
              {
                  if(model.get_iter(out iter, path))
                  {
@@ -266,7 +247,7 @@ index 373ff69..6c33019 100644
                      model.get(iter, 0, out song, -1);
                      if(song != null)
                      {
-@@ -1787,9 +1787,9 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
+@@ -1787,9 +1787,9 @@
                  var list = tree.get_selection().get_selected_rows(out model);
                  if(list != null)
                  {
@@ -278,7 +259,7 @@ index 373ff69..6c33019 100644
                      if(model.get_iter(out iter, path))
                      {
                          model.get(iter, 0, out song);
-@@ -1900,7 +1900,7 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
+@@ -1900,7 +1900,7 @@
  
          /* Lyrics */
          i = 0;
@@ -287,7 +268,7 @@ index 373ff69..6c33019 100644
          /* Album information */
          if(config.get_int_with_default("MetaData", "show-album-information",1) == 1)
          {
-@@ -2156,7 +2156,7 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
+@@ -2156,7 +2156,7 @@
          notebook.set_show_tabs(false);
  
          i = 0;
@@ -296,7 +277,7 @@ index 373ff69..6c33019 100644
          /* Artist information */
          if(config.get_int_with_default("MetaData", "show-artist-information",1) == 1)
          {
-@@ -2312,7 +2312,7 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
+@@ -2312,7 +2312,7 @@
              MPD.Data.Item list = null;
              var data = MPD.Database.search_commit(server);
              if(data != null){
@@ -305,7 +286,7 @@ index 373ff69..6c33019 100644
                  do{
                      if(iter.tag == song.album){
                          iter = iter.next(false); 
-@@ -2328,7 +2328,7 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
+@@ -2328,7 +2328,7 @@
                      MPD.Database.search_add_constraint(server, MPD.Tag.Type.ALBUM, iter.tag);
                      var ydata = MPD.Database.search_commit(server);
                      if(ydata != null) {
@@ -314,7 +295,7 @@ index 373ff69..6c33019 100644
                          while(list.song.date == null && yi != null)
                          {
                              if(yi.tag != null && yi.tag.length > 0) {
-@@ -2343,7 +2343,7 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
+@@ -2343,7 +2343,7 @@
  
              list.sort_album_disc_track();
              if(list != null) {
@@ -323,7 +304,7 @@ index 373ff69..6c33019 100644
                  do{
                      button = new Gtk.Button();
                      button.set_relief(Gtk.ReliefStyle.NONE);
-@@ -2525,7 +2525,7 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
+@@ -2525,7 +2525,7 @@
          public MPD.Song song;
      }
      private List<Hitem?> history = null;
@@ -332,7 +313,7 @@ index 373ff69..6c33019 100644
      private void show_hitem(Hitem hi)
      {
          switch(hi.type)
-@@ -2572,7 +2572,7 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
+@@ -2572,7 +2572,7 @@
      }
      private void history_show_list_clicked(Gtk.MenuItem item)
      {
@@ -341,7 +322,7 @@ index 373ff69..6c33019 100644
          if(a != null)
          {
              current = a;
-@@ -2582,7 +2582,7 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
+@@ -2582,7 +2582,7 @@
      private void history_show_list()
      {
          var menu = new Gtk.Menu();
@@ -350,7 +331,7 @@ index 373ff69..6c33019 100644
          while(iter!= null){
              var i = iter.data;
              string label = "";
-@@ -2639,7 +2639,7 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
+@@ -2639,7 +2639,7 @@
      {
          if(history != null)
          {
@@ -359,7 +340,7 @@ index 373ff69..6c33019 100644
              if(a.type == hi.type) {
                  if(Gmpc.Misc.song_checksum(a.song) == Gmpc.Misc.song_checksum(hi.song)){
                      return;
-@@ -2648,7 +2648,7 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
+@@ -2648,7 +2648,7 @@
          }
          history.prepend(hi);
          if(history.length() > 25){
@@ -368,7 +349,7 @@ index 373ff69..6c33019 100644
              history.remove(a.data);
          }
          current = history;
-@@ -2789,7 +2789,7 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
+@@ -2789,7 +2789,7 @@
      {
          if(rref != null)
          {
@@ -377,11 +358,9 @@ index 373ff69..6c33019 100644
              var sel = category_tree.get_selection();
              var path = rref.get_path();
              if(path != null){
-diff --git a/src/browsers/gmpc-nowplaying2.vala b/src/browsers/gmpc-nowplaying2.vala
-index 68664cd..a367f7d 100644
 --- a/src/browsers/gmpc-nowplaying2.vala
 +++ b/src/browsers/gmpc-nowplaying2.vala
-@@ -62,12 +62,12 @@ namespace Gmpc {
+@@ -62,12 +62,12 @@
  
              }
              /* Version of the plugin*/
@@ -397,7 +376,7 @@ index 68664cd..a367f7d 100644
                  return ("Now Playing");
              }
  
-@@ -81,7 +81,7 @@ namespace Gmpc {
+@@ -81,7 +81,7 @@
                      if(this.np_ref != null) {
                          var path = np_ref.get_path();
                          if(path != null) {
@@ -406,7 +385,7 @@ index 68664cd..a367f7d 100644
                              config.set_int(this.get_name(), "position", indices[0]);
                              Gtk.ListStore model = (Gtk.ListStore) np_ref.get_model();
                              Gtk.TreeIter iter;
-@@ -106,7 +106,7 @@ namespace Gmpc {
+@@ -106,7 +106,7 @@
                  if(this.np_ref != null) {
                      var path = np_ref.get_path();
                      if(path != null) {
@@ -415,18 +394,16 @@ index 68664cd..a367f7d 100644
                          config.set_int(this.get_name(), "position", indices[0]);
                      }
                  }
-@@ -407,8 +407,9 @@ namespace Gmpc {
+@@ -407,7 +407,7 @@
  
                      event.set_data_full("artist",(void *)"%s".printf(song.artist), (GLib.DestroyNotify) g_free);
                      event.button_press_event.connect((widget, event) => {
 -                        string artist = (string)widget.get_data("artist");
 +                        string artist = (string)widget.get_data<string>("artist");
                          Gmpc.Browser.Metadata.show_artist(artist);
-+			return false;
+ 			return false;
                      });
-                 }
-                 /* Album */
-@@ -432,11 +433,12 @@ namespace Gmpc {
+@@ -433,8 +433,8 @@
                      event.set_data_full("artist",(void *)"%s".printf(song.artist), (GLib.DestroyNotify) g_free);
                      event.set_data_full("album",(void *)"%s".printf(song.album), (GLib.DestroyNotify) g_free);
                      event.button_press_event.connect((widget, event) => {
@@ -436,12 +413,8 @@ index 68664cd..a367f7d 100644
 +                        string album = (string)widget.get_data<string>("album");
                          if(artist != null && album != null) {
                              Gmpc.Browser.Metadata.show_album(artist,album);
-                             }
-+			return false;
-                             });
-                 }
-                 /* Genre */
-@@ -547,7 +549,7 @@ namespace Gmpc {
+ 			    return true;
+@@ -550,7 +550,7 @@
  
                  /* Lyrics */
                  var i = 0;
@@ -450,7 +423,7 @@ index 68664cd..a367f7d 100644
                  if(config.get_int_with_default("MetaData", "show-lyrics",1) == 1)
                  {
                      var alib = new Gtk.Alignment(0f,0f,1f,0f);
-@@ -772,7 +774,7 @@ namespace Gmpc {
+@@ -775,7 +775,7 @@
                      MPD.Data.Item list = null;
                      var data = MPD.Database.search_commit(server);
                      if(data != null){
@@ -459,7 +432,7 @@ index 68664cd..a367f7d 100644
                          do{
                              if(iter.tag == song.album){
                                  iter = iter.next(false); 
-@@ -796,7 +798,7 @@ namespace Gmpc {
+@@ -799,7 +799,7 @@
  
                      list.sort_album_disc_track();
                      if(list != null) {
@@ -468,7 +441,7 @@ index 68664cd..a367f7d 100644
                          do{
                              var button = new Gtk.Button();
                              button.set_relief(Gtk.ReliefStyle.NONE);
-@@ -911,7 +913,7 @@ namespace Gmpc {
+@@ -914,7 +914,7 @@
               */
              private void select_now_playing_browser(Gtk.ImageMenuItem item)
              {
@@ -477,13 +450,11 @@ index 68664cd..a367f7d 100644
                  var sel = tree.get_selection();
                  var path = np_ref.get_path();
                  if(path != null)
-diff --git a/src/vala/gmpc-database-update-tracker.vala b/src/vala/gmpc-database-update-tracker.vala
-index da3f326..6d2bff4 100644
 --- a/src/vala/gmpc-database-update-tracker.vala
 +++ b/src/vala/gmpc-database-update-tracker.vala
-@@ -28,11 +28,11 @@ public class  Gmpc.Plugin.DatabaseUpdateTracker : Gmpc.Plugin.Base {
+@@ -28,11 +28,11 @@
      private Gtk.Image image = null;
-     public int[] version = {0,0,2};
+     public const int[] version = {0,0,2};
  
 -    public override weak int[] get_version() {
 +    public override unowned int[] get_version() {
@@ -495,11 +466,9 @@ index da3f326..6d2bff4 100644
          return "Database Update Tracker";
      }
  
-diff --git a/src/vala/gmpc-easy-command.vala b/src/vala/gmpc-easy-command.vala
-index bd762d2..c11b034 100644
 --- a/src/vala/gmpc-easy-command.vala
 +++ b/src/vala/gmpc-easy-command.vala
-@@ -49,11 +49,11 @@ public class Gmpc.Easy.Command: Gmpc.Plugin.Base {
+@@ -49,11 +49,11 @@
  	/**
  	 * Required plugin implementation
  	 */
@@ -513,7 +482,7 @@ index bd762d2..c11b034 100644
  	 {
  		return this.version;
  	 }
-@@ -142,7 +142,7 @@ public class Gmpc.Easy.Command: Gmpc.Plugin.Base {
+@@ -142,7 +142,7 @@
  		this.do_query(value_unsplit);
  	}
  	public void do_query(string value_unsplit) {
@@ -522,53 +491,11 @@ index bd762d2..c11b034 100644
  		Gtk.TreeIter iter;
  		if (value_unsplit.length == 0) {
  			if(this.window != null) {
-diff --git a/src/vala/gmpc-favorites.vala b/src/vala/gmpc-favorites.vala
-index 98bc9af..b3d0195 100644
---- a/src/vala/gmpc-favorites.vala
-+++ b/src/vala/gmpc-favorites.vala
-@@ -75,7 +75,7 @@ namespace Gmpc.Favorites{
-         /**
-          * Signal for the widget using the list to see if it needs to recheck status
-          */
--        signal void updated();
-+        public signal void updated();
- 
-         /**
-          * Check if the song (specified by path) is favored
-@@ -84,7 +84,7 @@ namespace Gmpc.Favorites{
-         bool
-         is_favorite(string path)
-         {
--            weak MPD.Data.Item iter = this.list.get_first();
-+            unowned MPD.Data.Item iter = this.list.get_first();
-             while(iter != null)
-             {
-                 if(iter.type == MPD.Data.Type.SONG)
-@@ -115,7 +115,7 @@ namespace Gmpc.Favorites{
-                     /* Remove it */
-                     /* To be able to remove it we have to first lookup the position */
-                     /* This needs libmpd 0.18.1 */
--                    weak MPD.Data.Item iter = this.list.get_first();
-+                    unowned MPD.Data.Item iter = this.list.get_first();
-                     while(iter != null)
-                     {
-                         if(iter.type == MPD.Data.Type.SONG)
-@@ -161,7 +161,7 @@ namespace Gmpc.Favorites{
-             } else {
-                 favorites.ref();
-             }
--            favorites.updated += update;
-+            favorites.updated.connect(update);
-             this.image = new Gtk.Image();
-             this.update(favorites);
-             this.add(this.image);
-diff --git a/src/vala/gmpc-metadata-prefetcher.vala b/src/vala/gmpc-metadata-prefetcher.vala
-index 1149747..2a60ea9 100644
 --- a/src/vala/gmpc-metadata-prefetcher.vala
 +++ b/src/vala/gmpc-metadata-prefetcher.vala
-@@ -26,11 +26,11 @@ private const bool use_transition_mpf = Gmpc.use_transition;
+@@ -26,11 +26,11 @@
  public class  Gmpc.Plugin.MetadataPrefetcher : Gmpc.Plugin.Base {
-     public int[] version = {0,0,2};
+     public const int[] version = {0,0,2};
  
 -    public override weak int[] get_version() {
 +    public override unowned int[] get_version() {
@@ -580,11 +507,9 @@ index 1149747..2a60ea9 100644
          return "Metadata pre-fetcher";
      }
  
-diff --git a/src/vala/gmpc-paned-size-group.vala b/src/vala/gmpc-paned-size-group.vala
-index fa018df..eb0f776 100644
 --- a/src/vala/gmpc-paned-size-group.vala
 +++ b/src/vala/gmpc-paned-size-group.vala
-@@ -23,7 +23,7 @@ using MPD;
+@@ -23,7 +23,7 @@
  
  namespace Gmpc{
  	public class PanedSizeGroup : GLib.Object {
@@ -593,7 +518,7 @@ index fa018df..eb0f776 100644
          private int position = config.get_int_with_default("paned-size-group", "position", 150);
  
  		public 
-@@ -51,7 +51,7 @@ namespace Gmpc{
+@@ -51,7 +51,7 @@
  
  			var pane = (Gtk.Paned) paned;
  			position = pane.get_position();
@@ -602,11 +527,9 @@ index fa018df..eb0f776 100644
  			{
  				if(p != paned)
  				{
-diff --git a/src/vala/gmpc-plugin.vala b/src/vala/gmpc-plugin.vala
-index 667765a..a6025bf 100644
 --- a/src/vala/gmpc-plugin.vala
 +++ b/src/vala/gmpc-plugin.vala
-@@ -33,7 +33,7 @@ namespace Gmpc {
+@@ -33,7 +33,7 @@
              /* This string tell gmpc what translation domain to use when trying to translate the plugins name. 
               * If NULL then gmpc's translation domain is used.
               */
@@ -615,7 +538,7 @@ index 667765a..a6025bf 100644
              /* This is set by gmpc, it contains the full path of the plugin.
               * This is used by gmpc_plugin_get_data_path to calculate the location of the data files.
               */
-@@ -51,11 +51,11 @@ namespace Gmpc {
+@@ -51,11 +51,11 @@
              /**
               * Function should return the version of the plugin
               */
@@ -629,11 +552,9 @@ index 667765a..a6025bf 100644
              /**
               * This is called before the plugin is destroyed. Plugins should save it state here.
               *
-diff --git a/src/vala/gmpc-rating.vala b/src/vala/gmpc-rating.vala
-index b8fe165..9c6206c 100644
 --- a/src/vala/gmpc-rating.vala
 +++ b/src/vala/gmpc-rating.vala
-@@ -30,7 +30,7 @@ using Gmpc;
+@@ -30,7 +30,7 @@
  public class Gmpc.Rating : Gtk.Frame
  {
      private const bool use_transition = Gmpc.use_transition;
@@ -642,11 +563,9 @@ index b8fe165..9c6206c 100644
      private MPD.Song song       = null;
      private Gtk.Image[] rat;
      private Gtk.HBox    box;
-diff --git a/src/vala/gmpc-test-plugin.vala b/src/vala/gmpc-test-plugin.vala
-index e61fae8..f8d9a73 100644
 --- a/src/vala/gmpc-test-plugin.vala
 +++ b/src/vala/gmpc-test-plugin.vala
-@@ -28,7 +28,7 @@ public class Gmpc.MetaData.EditWindow : Gtk.Window {
+@@ -28,7 +28,7 @@
      private MPD.Song song = null;
      private Gmpc.MetaData.Type query_type = Gmpc.MetaData.Type.ALBUM_ART;
  
@@ -655,7 +574,7 @@ index e61fae8..f8d9a73 100644
      /** fetching handles */
      private void *handle = null;
      private void *handle2 = null;
-@@ -172,7 +172,7 @@ public class Gmpc.MetaData.EditWindow : Gtk.Window {
+@@ -172,7 +172,7 @@
          this.bar.pulse();
          if(status == Gmpc.AsyncDownload.Status.DONE)
          {
@@ -664,7 +583,7 @@ index e61fae8..f8d9a73 100644
              if(this.query_type == Gmpc.MetaData.Type.ALBUM_ART || this.query_type == Gmpc.MetaData.Type.ARTIST_ART)
              {
                  try{
-@@ -235,14 +235,14 @@ public class Gmpc.MetaData.EditWindow : Gtk.Window {
+@@ -235,14 +235,14 @@
                  }
              }
          }
@@ -681,7 +600,7 @@ index e61fae8..f8d9a73 100644
                      if(md.content_type == Gmpc.MetaData.ContentType.URI)
                      {
                          if(uri[0] == '/'){
-@@ -290,7 +290,7 @@ public class Gmpc.MetaData.EditWindow : Gtk.Window {
+@@ -290,7 +290,7 @@
  
                  if(md.content_type == Gmpc.MetaData.ContentType.TEXT)
                  {
@@ -690,7 +609,7 @@ index e61fae8..f8d9a73 100644
                      add_entry_text(plugin_name, "n/a", uri);
                  }
                  else 
-@@ -302,7 +302,7 @@ public class Gmpc.MetaData.EditWindow : Gtk.Window {
+@@ -302,7 +302,7 @@
                  else
                  if(md.content_type == Gmpc.MetaData.ContentType.URI)
                  {
@@ -699,7 +618,7 @@ index e61fae8..f8d9a73 100644
                      if(uri[0] == '/'){
                          try {
                              string content;
-@@ -324,7 +324,7 @@ public class Gmpc.MetaData.EditWindow : Gtk.Window {
+@@ -324,7 +324,7 @@
      public void store_image(Gmpc.AsyncDownload.Handle handle, Gmpc.AsyncDownload.Status status)
      {
          if(status == Gmpc.AsyncDownload.Status.PROGRESS){
@@ -708,7 +627,7 @@ index e61fae8..f8d9a73 100644
              this.sensitive = false;
              this.pbox.show();
              int64 total_size = handle.get_content_size(); 
-@@ -338,7 +338,7 @@ public class Gmpc.MetaData.EditWindow : Gtk.Window {
+@@ -338,7 +338,7 @@
          this.downloads.remove(handle);
          if(status == Gmpc.AsyncDownload.Status.DONE)
          {
@@ -717,7 +636,7 @@ index e61fae8..f8d9a73 100644
              var file = Gmpc.MetaData.get_metadata_filename(this.query_type, this.song,null); 
              try {
                  GLib.FileUtils.set_contents(file, (string)data, (long)data.length);
-@@ -369,7 +369,7 @@ public class Gmpc.MetaData.EditWindow : Gtk.Window {
+@@ -369,7 +369,7 @@
          string path = null;
          if(this.query_type == Gmpc.MetaData.Type.ALBUM_ART || this.query_type == Gmpc.MetaData.Type.ARTIST_ART)
          {
@@ -726,24 +645,19 @@ index e61fae8..f8d9a73 100644
              if(path != null)
              {
                  if(path[0]  == '/')
-@@ -393,13 +393,12 @@ public class Gmpc.MetaData.EditWindow : Gtk.Window {
-                         this.downloads.append(h);
-                 }
-             }else{
--                string base64 =(string)button.get_data("data");
-+                string base64 =(string)button.get_data<string>("data");
+@@ -396,10 +396,9 @@
+                 string base64 =(string)button.get_data("data");
                  if(base64 != null) {
                      string filename = Gmpc.MetaData.get_metadata_filename(this.query_type,this.song, null); 
--                    size_t len;
--                    uchar[] data = GLib.Base64.decode(base64, out len);
-+                    uchar[] data = GLib.Base64.decode(base64 );
+-                    size_t len=0;
+                     uchar[] data = GLib.Base64.decode(base64);
                      try{
 -                    GLib.FileUtils.set_contents(filename, (string)data, (ssize_t)len);
 +                    GLib.FileUtils.set_contents(filename, (string)data, (ssize_t)data.length);
  
                      var met = new MetaData.Item();
                      met.type = this.query_type;
-@@ -422,7 +421,7 @@ public class Gmpc.MetaData.EditWindow : Gtk.Window {
+@@ -422,7 +421,7 @@
          }else{
              string lyric;
  
@@ -752,7 +666,7 @@ index e61fae8..f8d9a73 100644
              var file = Gmpc.MetaData.get_metadata_filename(this.query_type, this.song,null); 
              try {
                  GLib.FileUtils.set_contents(file,lyric, -1); 
-@@ -721,7 +720,7 @@ public class Gmpc.MetaData.EditWindow : Gtk.Window {
+@@ -721,7 +720,7 @@
  
  
  public class  Gmpc.TestPlugin : Gmpc.Plugin.Base,Gmpc.Plugin.ToolMenuIface, Gmpc.Plugin.SongListIface {
@@ -761,7 +675,7 @@ index e61fae8..f8d9a73 100644
      /*********************************************************************************
       * Plugin base functions 
       * These functions are required.
-@@ -730,13 +729,13 @@ public class  Gmpc.TestPlugin : Gmpc.Plugin.Base,Gmpc.Plugin.ToolMenuIface, Gmpc
+@@ -730,13 +729,13 @@
          /* Mark the plugin as an internal dummy */
          this.plugin_type = 8+4;
      }
@@ -777,7 +691,7 @@ index e61fae8..f8d9a73 100644
          return "Vala test plugin";
      }
  
-@@ -766,14 +765,14 @@ public class  Gmpc.TestPlugin : Gmpc.Plugin.Base,Gmpc.Plugin.ToolMenuIface, Gmpc
+@@ -766,14 +765,14 @@
      private void menu_activate_tree(Gtk.MenuItem item)
      {
          Gtk.TreeIter iter;
@@ -795,7 +709,7 @@ index e61fae8..f8d9a73 100644
                  model.get(iter,0, out song);
                  if(song != null)
                  {
-@@ -803,7 +802,7 @@ public class  Gmpc.TestPlugin : Gmpc.Plugin.Base,Gmpc.Plugin.ToolMenuIface, Gmpc
+@@ -803,7 +802,7 @@
  
      public void menu_activated_album(Gtk.MenuItem item)
      {
@@ -804,11 +718,9 @@ index e61fae8..f8d9a73 100644
          new Gmpc.MetaData.EditWindow(song,Gmpc.MetaData.Type.ALBUM_ART);
      }
      public int tool_menu_integration(Gtk.Menu menu)
-diff --git a/src/vala/gmpc-url-fetching-gui.vala b/src/vala/gmpc-url-fetching-gui.vala
-index 08b1ef2..cfdd08f 100644
 --- a/src/vala/gmpc-url-fetching-gui.vala
 +++ b/src/vala/gmpc-url-fetching-gui.vala
-@@ -51,7 +51,7 @@ namespace Gmpc.UrlFetching
+@@ -51,7 +51,7 @@
  		private void add_url_dialog_response( int response_id)
  		{
  			if(response_id == 1) {
@@ -817,113 +729,9 @@ index 08b1ef2..cfdd08f 100644
  				string url = entry.get_text();
  				this.parse_callback(this, url);
  				return;
-diff --git a/src/vapi/gmpc.vapi b/src/vapi/gmpc.vapi
-index 735baa5..c9d40a9 100644
---- a/src/vapi/gmpc.vapi
-+++ b/src/vapi/gmpc.vapi
-@@ -21,7 +21,7 @@ namespace Gmpc {
- 
-     [CCode (cheader_filename="gmpc-meta-watcher.h")]
-     public class MetaWatcher {
--        signal void data_changed(MPD.Song song,  Gmpc.MetaData.Type type, Gmpc.MetaData.Result result,MetaData.Item met);
-+        public signal void data_changed(MPD.Song song,  Gmpc.MetaData.Type type, Gmpc.MetaData.Result result,MetaData.Item met);
- 
- 
-         [CCode ( cname="gmpc_meta_watcher_get_meta_path", cheader_filename="gmpc-meta-watcher.h" )]
-@@ -50,7 +50,7 @@ namespace Gmpc {
-             [CCode (cname="meta_data_new")]
-             public Item ();
-             public Gmpc.MetaData.Type type; 
--           public weak string plugin_name;
-+           public unowned string plugin_name;
-            public int size;
-            public Gmpc.MetaData.ContentType content_type;
- 
-@@ -61,25 +61,25 @@ namespace Gmpc {
-            public void set_uri(string uri);
-            /* add accessors? */
-            [CCode (cname="meta_data_get_raw")]
--           public weak uchar[] get_raw();
-+           public unowned uchar[] get_raw();
- 
-            [CCode (cname="meta_data_get_text")]
--           public weak string  get_text();
-+           public unowned string  get_text();
-            [CCode (cname="meta_data_get_text_from_html")]
-            public string get_text_from_html();
-            /* same as get_text */
- 
-            [CCode (cname="meta_data_get_uri")]
--           public weak string get_uri();
-+           public unowned string get_uri();
- 
-            [CCode (cname="meta_data_get_html")]
--           public weak string get_html();
-+           public unowned string get_html();
- 
-            [CCode (cname="meta_data_get_text_vector")]
--           public weak string[] get_text_vector();
-+           public unowned string[] get_text_vector();
- 
-            [CCode (cname="meta_data_get_text_list")]
--           public weak GLib.List<weak string> get_text_list();
-+           public unowned GLib.List<unowned string> get_text_list();
- 
-            [CCode (cname="meta_data_is_text_list")]
-            public bool  is_text_list();
-@@ -198,9 +198,9 @@ namespace Gmpc {
-             public void cancel ();
- 
-             [CCode (cname="gmpc_easy_handler_get_data_vala_wrap", cheader_filename="gmpc_easy_download.h")]
--            public weak uchar[] get_data();
-+            public unowned uchar[] get_data();
-             [CCode (cname="gmpc_easy_handler_get_uri", cheader_filename="gmpc_easy_download.h")]
--            public weak string get_uri();
-+            public unowned string get_uri();
- 
-             [CCode (cname="gmpc_easy_handler_get_user_data", cheader_filename="gmpc_easy_download.h")]
-             public void * get_user_data();
-@@ -217,7 +217,7 @@ namespace Gmpc {
-         public delegate void Callback (Gmpc.AsyncDownload.Handle handle, Gmpc.AsyncDownload.Status status);
- 
-         [CCode (cname="gmpc_easy_async_downloader", cheader_filename="gmpc_easy_download.h")]
--        public weak Gmpc.AsyncDownload.Handle download(string uri, Gmpc.AsyncDownload.Callback callback);
-+        public unowned Gmpc.AsyncDownload.Handle download(string uri, Gmpc.AsyncDownload.Callback callback);
-         
-         [CCode (cname="gmpc_easy_download_uri_escape", cheader_filename="gmpc_easy_download.h")]
-         public string escape_uri(string part);
-@@ -232,7 +232,7 @@ namespace Gmpc {
- 
-     namespace Playlist {
-         [CCode (cname="(GtkWindow *)playlist3_get_window", cheader_filename="plugin.h")]
--        public weak Gtk.Window get_window();
-+        public unowned Gtk.Window get_window();
- [CCode (cname="playlist3_window_is_hidden", cheader_filename="plugin.h")]
-         public bool is_hidden();
- 
-@@ -317,7 +317,7 @@ namespace Gmpc {
-             public void set_request_artist(string? list);
- 
-             [CCode (cname="gmpc_mpddata_model_get_request_artist")]
--            public weak string get_request_artist();
-+            public unowned string get_request_artist();
-             public int icon_size;
-         }
-     }
-@@ -342,7 +342,7 @@ namespace Gmpc {
-             public string? get_current_id();
-             public void set_db_update_time(string id, int value);
-             public int get_db_update_time(string id);
--            public weak string? get_music_directory(string id); 
-+            public unowned string? get_music_directory(string id); 
- 
-     }
- 
-diff --git a/src/vapi/libmpd.vapi b/src/vapi/libmpd.vapi
-index 59424a2..9a5c2c5 100644
 --- a/src/vapi/libmpd.vapi
 +++ b/src/vapi/libmpd.vapi
-@@ -7,7 +7,7 @@ namespace MPD {
+@@ -7,7 +7,7 @@
      public class Server {
  
          public MPD.Song playlist_get_song(int songid);
@@ -932,7 +740,7 @@ index 59424a2..9a5c2c5 100644
          public int player_get_next_song_id();
          [CCode (cname="mpd_server_get_database_update_time")]
          public int get_database_update_time();
-@@ -158,10 +158,10 @@ namespace MPD {
+@@ -158,10 +158,10 @@
                  public void sort_album_disc_track();
  
                  [CCode (cname="mpd_data_get_next_real")] 
@@ -945,6 +753,3 @@ index 59424a2..9a5c2c5 100644
  
                  [CCode (cname="mpd_data_get_first")] 
                  [ReturnsModifiedPointer ()]
--- 
-1.7.4.4
-
