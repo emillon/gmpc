@@ -94,7 +94,7 @@ index a002f2b..2d66ef2 100644
              q_free(full_path);
          }
 diff --git a/src/vapi/gmpc.vapi b/src/vapi/gmpc.vapi
-index ac9a49b..3005592 100644
+index 850f1d3..7fa39a3 100644
 --- a/src/vapi/gmpc.vapi
 +++ b/src/vapi/gmpc.vapi
 @@ -121,7 +121,7 @@ namespace Gmpc {
