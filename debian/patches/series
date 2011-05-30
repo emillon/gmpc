@@ -1,7 +1,7 @@
 0001-Add-lz-and-lX11-to-LIBS.patch
-0003-Trying-to-fix-building-with-vala-0.8.0.patch
-0004-Replace-deprecated-api.patch
-0005-Fix-building-with-vala-0.11-something.patch
-0006-Fix-building-gmpc-with-vala-0.9.X.patch
-0007-Fix-some-more-vala-compile-issues-warnings.patch
-0008-Test-for-possible-vala-fix.patch
+0002-Trying-to-fix-building-with-vala-0.8.0.patch
+0003-Replace-deprecated-api.patch
+0004-Fix-building-with-vala-0.11-something.patch
+0005-Fix-building-gmpc-with-vala-0.9.X.patch
+0006-Fix-some-more-vala-compile-issues-warnings.patch
+0007-Test-for-possible-vala-fix.patch
