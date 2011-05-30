@@ -12,8 +12,10 @@ gmpc (0.20.0-2) UNRELEASED; urgency=low
   * Split architecture-independent data into gmpc-data
   * Better short description for gmpc-dbg
   * Add patches fixing several typos in log messages
+  * Code is now generated from vala at build time
+  * Add a manpage for gmpc-remote-stream(1)
 
- -- Etienne Millon <etienne.millon@gmail.com>  Tue, 24 May 2011 17:11:54 +0200
+ -- Etienne Millon <etienne.millon@gmail.com>  Mon, 30 May 2011 11:35:44 +0200
 
 gmpc (0.20.0-1) unstable; urgency=low
 
