@@ -61,7 +61,7 @@ index 38c40f9..9193142 100644
  
      private void value_changed (Gtk.Scale range)
 diff --git a/src/browsers/gmpc-metadata-browser2.vala b/src/browsers/gmpc-metadata-browser2.vala
-index 373ff69..6c33019 100644
+index 373ff69..a555a4a 100644
 --- a/src/browsers/gmpc-metadata-browser2.vala
 +++ b/src/browsers/gmpc-metadata-browser2.vala
 @@ -65,7 +65,7 @@ public class Gmpc.Widget.SimilarSongs : Gtk.Alignment{
@@ -475,7 +475,7 @@ index 754f32d..6c67dac 100644
      }
  
 diff --git a/src/vala/gmpc-easy-command.vala b/src/vala/gmpc-easy-command.vala
-index bd762d2..c11b034 100644
+index bd762d2..0bf8846 100644
 --- a/src/vala/gmpc-easy-command.vala
 +++ b/src/vala/gmpc-easy-command.vala
 @@ -49,11 +49,11 @@ public class Gmpc.Easy.Command: Gmpc.Plugin.Base {
@@ -787,7 +787,7 @@ index 08b1ef2..cfdd08f 100644
  				this.parse_callback(this, url);
  				return;
 diff --git a/src/vapi/gmpc.vapi b/src/vapi/gmpc.vapi
-index ac9a49b..c9d40a9 100644
+index ac9a49b..862b72e 100644
 --- a/src/vapi/gmpc.vapi
 +++ b/src/vapi/gmpc.vapi
 @@ -50,7 +50,7 @@ namespace Gmpc {

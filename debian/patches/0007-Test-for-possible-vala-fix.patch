@@ -26,7 +26,7 @@ index 3b7a62b..d4e0897 100644
      
      public override unowned int[] get_version() {
 diff --git a/src/browsers/gmpc-metadata-browser2.vala b/src/browsers/gmpc-metadata-browser2.vala
-index e816c02..7623bc8 100644
+index 644ec28..f0e8ba5 100644
 --- a/src/browsers/gmpc-metadata-browser2.vala
 +++ b/src/browsers/gmpc-metadata-browser2.vala
 @@ -524,7 +524,7 @@ public class  Gmpc.MetadataBrowser : Gmpc.Plugin.Base, Gmpc.Plugin.BrowserIface,
@@ -65,7 +65,7 @@ index 6c67dac..fdc3bd6 100644
      public override unowned int[] get_version() {
          return this.version;
 diff --git a/src/vala/gmpc-easy-command.vala b/src/vala/gmpc-easy-command.vala
-index e1fc7f2..9280014 100644
+index a23bc9f..2f2857e 100644
 --- a/src/vala/gmpc-easy-command.vala
 +++ b/src/vala/gmpc-easy-command.vala
 @@ -43,7 +43,7 @@ public class Gmpc.Easy.Command: Gmpc.Plugin.Base {

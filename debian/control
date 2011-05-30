@@ -50,6 +50,17 @@ Package: gmpc-dev
 Architecture: any
 Depends: gmpc (= ${binary:Version}), libmpd-dev (>= 0.18.96), pkg-config, ${misc:Depends}
 Description: Gnome Music Player Client (plugin development files)
+ A GNOME/GTK2.2 client for Music Player Daemon, it began life as traymp,
+ a simple tray notification client and has grown into much more.
+ Current features include:
+  * Support for loading/saving playlists
+  * File Browser
+  * Browser based on ID3 information
+  * Search
+  * Current playlist viewer with search
+  * ID3 Information
+  * Cover art (via plugins)
+ .
  This package contains the necessary header files if you wish to compile
  plugins for gmpc.
 

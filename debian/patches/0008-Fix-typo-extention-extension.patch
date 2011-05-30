@@ -68,7 +68,7 @@ index 4b0cb0f..625263a 100644
  
  
 diff --git a/src/browsers/playlist3-playlist-editor.c b/src/browsers/playlist3-playlist-editor.c
-index 512e58c..53db23f 100644
+index 512e58c..6ce01b0 100644
 --- a/src/browsers/playlist3-playlist-editor.c
 +++ b/src/browsers/playlist3-playlist-editor.c
 @@ -66,7 +66,7 @@ static void playlist_editor_set_enabled(int enabled)
@@ -94,7 +94,7 @@ index a002f2b..2d66ef2 100644
              q_free(full_path);
          }
 diff --git a/src/vapi/gmpc.vapi b/src/vapi/gmpc.vapi
-index 850f1d3..7fa39a3 100644
+index 7da39ef..b03d2c1 100644
 --- a/src/vapi/gmpc.vapi
 +++ b/src/vapi/gmpc.vapi
 @@ -121,7 +121,7 @@ namespace Gmpc {

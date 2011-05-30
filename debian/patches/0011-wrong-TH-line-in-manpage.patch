@@ -1,0 +1,20 @@
+From: Etienne Millon <etienne.millon@gmail.com>
+Date: Mon, 30 May 2011 11:39:17 +0200
+Subject: wrong TH line in manpage
+
+---
+ doc/gmpc-remote.1 |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/doc/gmpc-remote.1 b/doc/gmpc-remote.1
+index bf1eb40..24ece44 100644
+--- a/doc/gmpc-remote.1
++++ b/doc/gmpc-remote.1
+@@ -1,5 +1,5 @@
+ 
+-.TH gmpc 1 "February 21, 2010" "" "Gnome Music Player Client - Remote control"
++.TH gmpc-remote 1 "February 21, 2010" "" "Gnome Music Player Client - Remote control"
+ 
+ .SH NAME
+ gmpc-remote - a remote control for GMPC.
+-- 

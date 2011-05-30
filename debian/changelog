@@ -14,8 +14,10 @@ gmpc (0.20.0-2) UNRELEASED; urgency=low
   * Add patches fixing several typos in log messages
   * Code is now generated from vala at build time
   * Add a manpage for gmpc-remote-stream(1)
+  * Add a patch fixing a wrong TH line in gmpc-remote(1)
+  * Longer extended description for gmpc-dev
 
- -- Etienne Millon <etienne.millon@gmail.com>  Mon, 30 May 2011 11:35:44 +0200
+ -- Etienne Millon <etienne.millon@gmail.com>  Mon, 30 May 2011 11:42:45 +0200
 
 gmpc (0.20.0-1) unstable; urgency=low
 
