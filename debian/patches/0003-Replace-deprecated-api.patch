@@ -624,7 +624,7 @@ index 6c33019..e816c02 100644
              data.sort_album_disc_track();
              songs.set_mpd_data((owned)data);
 -            var song_tree = new Gmpc.MpdData.TreeView("metadata-album-songs", true,songs); 
-+            song_tree = new Gmpc.MpdData.TreeView("metadata-album-songs", true,songs); 
++            song_tree = new Gmpc.MpdData.TreeView("metadata-album-songs", true,songs);
              song_tree.enable_click_fix();
 -            song_tree.button_release_event += album_song_tree_button_press_event;
 -            song_tree.row_activated += album_song_tree_row_activated;
@@ -654,7 +654,7 @@ index 6c33019..e816c02 100644
              data.sort_album_disc_track();
              songs.set_mpd_data((owned)data);
 -            var song_tree = new Gmpc.MpdData.TreeView("metadata-artist-songs", true,songs); 
-+            song_tree = new Gmpc.MpdData.TreeView("metadata-artist-songs", true,songs); 
++            song_tree = new Gmpc.MpdData.TreeView("metadata-artist-songs", true,songs);
              song_tree.enable_click_fix();
 -            song_tree.button_release_event += album_song_tree_button_press_event;
 -            song_tree.row_activated += album_song_tree_row_activated;

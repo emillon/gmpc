@@ -123,7 +123,7 @@ index 373ff69..6c33019 100644
              if(list != null)
              {
 -                weak List<weak string> liter= null;                 
-+                unowned List<unowned string> liter= null;                 
++                unowned List<unowned string> liter= null;
                  MPD.Database.search_field_start(server, MPD.Tag.Type.ARTIST);
                  var data = MPD.Database.search_commit(server);
  
@@ -483,7 +483,7 @@ index bd762d2..c11b034 100644
  	 * Required plugin implementation
  	 */
 -	 public override weak string get_name() 
-+	 public override unowned string get_name() 
++	 public override unowned string get_name()
  	 {
  		return _("Gmpc Easy Command");
  	 }
@@ -875,7 +875,7 @@ index ac9a49b..c9d40a9 100644
              public void set_db_update_time(string id, int value);
              public int get_db_update_time(string id);
 -            public weak string? get_music_directory(string id); 
-+            public unowned string? get_music_directory(string id); 
++            public unowned string? get_music_directory(string id);
  
      }
  

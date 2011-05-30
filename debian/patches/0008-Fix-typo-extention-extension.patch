@@ -76,7 +76,7 @@ index 512e58c..53db23f 100644
  
  /**
 - * Browser extention 
-+ * Browser extension 
++ * Browser extension
   */
  gmpcPlBrowserPlugin playlist_editor_gbp = {
    .add = playlist_editor_browser_add,   /* Add */
