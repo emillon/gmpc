@@ -5,23 +5,9 @@ Subject: Fix typo : childs -> children
 This patch fixes one occurrence of this typo. It was exposed to users via a
 warning message.
 ---
- src/Providers/music-tree.c    |    2 +-
  src/Providers/music-tree.vala |    2 +-
- 2 files changed, 2 insertions(+), 2 deletions(-)
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-diff --git a/src/Providers/music-tree.c b/src/Providers/music-tree.c
-index 4b25f6d..b85fc3a 100644
---- a/src/Providers/music-tree.c
-+++ b/src/Providers/music-tree.c
-@@ -555,7 +555,7 @@ static gboolean gmpc_provider_music_tree_get_album_cover_co (GmpcProviderMusicTr
- 			data->base_path = g_path_get_dirname (data->song->file);
- 			g_log ("Gmpc.Plugin.MusicTreeProvider", G_LOG_LEVEL_DEBUG, "music-tree.vala:229: Got basename: %s", data->base_path);
- 			data->path = g_build_filename (data->directory, data->base_path, NULL);
--			g_log ("Gmpc.Plugin.MusicTreeProvider", G_LOG_LEVEL_DEBUG, "music-tree.vala:234: Got path: %s. Starting to itterate over childs", data->path);
-+			g_log ("Gmpc.Plugin.MusicTreeProvider", G_LOG_LEVEL_DEBUG, "music-tree.vala:234: Got path: %s. Starting to itterate over children", data->path);
- 			data->dir = g_file_new_for_path (data->path);
- 			{
- 				data->_state_ = 4;
 diff --git a/src/Providers/music-tree.vala b/src/Providers/music-tree.vala
 index d4e0897..be1e8bf 100644
 --- a/src/Providers/music-tree.vala
