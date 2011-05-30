@@ -33,6 +33,6 @@ override_dh_clean:
 
 override_dh_auto_clean:
 	grep -v '^.pc' po/POTFILES.skip > po/POTFILES.skip.tmp
-	mv po/POTFILES.skip{.tmp,}
+	mv po/POTFILES.skip.tmp po/POTFILES.skip
 	dh_auto_clean
 
