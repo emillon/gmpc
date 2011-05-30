@@ -1,5 +1,4 @@
 0001-Add-lz-and-lX11-to-LIBS.patch
-0002-Remove-code-generated-from-vala.patch
 0003-Trying-to-fix-building-with-vala-0.8.0.patch
 0004-Replace-deprecated-api.patch
 0005-Fix-building-with-vala-0.11-something.patch

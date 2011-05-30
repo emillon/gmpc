@@ -8,6 +8,7 @@ export LDFLAGS=-Wl,--as-needed
 	dh $@
 
 override_dh_auto_configure:
+	find . -name '*.vala' | grep -v '^./.pc' | sed -s 's/vala$$/c/' | xargs rm
 	dh_auto_configure
 	find .pc -type f -name '*.c' -exec echo '{}' >> po/POTFILES.skip \;
 
