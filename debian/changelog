@@ -1,23 +1,27 @@
 gmpc (0.20.0-2) UNRELEASED; urgency=low
 
   * New maintainer (Closes: #615245)
-  * Switch to 3.0 (quilt) source format
-  * Explicitly add libraries to fix FTBFS with new toolchain (Closes: #554541,
-    thanks to Mahyuddin Susanto)
-  * Remove build-dep on quilt 
-  * Replace "Conflicts: gmpc-plugins" with "Breaks:"
-  * Add watchfile
-  * Bum Standards-Version to 3.9.2 (no changes)
-  * Add -Wl,--as-needed to LDFLAGS 
-  * Split architecture-independent data into gmpc-data
-  * Better short description for gmpc-dbg
-  * Add patches fixing several typos in log messages
-  * Code is now generated from vala at build time
   * Add a manpage for gmpc-remote-stream(1)
-  * Add a patch fixing a wrong TH line in gmpc-remote(1)
-  * Longer extended description for gmpc-dev
+  * Split architecture-independent data into gmpc-data
+  * Packaging changes:
+      - Switch to 3.0 (quilt) source format
+      - Add watchfile
+      - Bum Standards-Version to 3.9.2 (no changes)
+      - Remove build-dep on quilt 
+  * Build changes:
+      - Explicitly add libraries to fix FTBFS with new toolchain
+        (Closes: #554541, thanks to Mahyuddin Susanto)
+      - Add -Wl,--as-needed to LDFLAGS 
+      - Code is now generated from vala at build time
+  * debian/control:
+      - Replace "Conflicts: gmpc-plugins" with "Breaks:"
+      - Better short description for gmpc-dbg
+      - Longer extended description for gmpc-dev
+  * patches:
+      - Fix several typos in log messages
+      - Fix a wrong TH line in gmpc-remote(1)
 
- -- Etienne Millon <etienne.millon@gmail.com>  Mon, 30 May 2011 11:42:45 +0200
+ -- Etienne Millon <etienne.millon@gmail.com>  Tue, 07 Jun 2011 18:09:44 +0200
 
 gmpc (0.20.0-1) unstable; urgency=low
 
