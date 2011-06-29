@@ -1,3 +1,12 @@
+gmpc (0.20.0-3~1.gbp9eff29) unstable; urgency=low
+
+  ** SNAPSHOT build @9eff29edde08f18db0455279f11d37660ff4b46d **
+
+  *
+  * Remove asterisks in debian/NEWS
+
+ -- Etienne Millon <etienne.millon@gmail.com>  Wed, 29 Jun 2011 12:17:01 +0200
+
 gmpc (0.20.0-2) unstable; urgency=low
 
   * New maintainer (Closes: #615245)
