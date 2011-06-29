@@ -1,15 +1,15 @@
 gmpc (0.13.0-1) unstable; urgency=low
 
-  * This new version of gmpc uses a new configuration file.  Your 0.12.0
+    This new version of gmpc uses a new configuration file.  Your 0.12.0
     configuration files will not be compatible with this release.
 
-  * gmpc will work with mpd 0.11.5 in Debian, but it also supports
+    gmpc will work with mpd 0.11.5 in Debian, but it also supports
     features found in the as-yet unreleased mpd 0.12.0.  I've packaged
     SVN snapshots of the in-progress mpd 0.12.0 here:
 
         http://musicpd.org/~normalperson/debian/experimental/
 
-  * This is the first version of gmpc to support plugins.  They are
+    This is the first version of gmpc to support plugins.  They are
     available at:
 
         http://cms.qballcow.nl/index.php?page=Plugins
