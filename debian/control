@@ -17,6 +17,7 @@ Build-Depends:
   libsexy-dev,
   libsqlite3-dev,
   libunique-dev,
+  gnome-doc-utils,
   valac (>= 0.7.10)
 Standards-Version: 3.9.2
 Homepage: http://gmpc.wikia.com/
