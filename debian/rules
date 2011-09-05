@@ -5,7 +5,7 @@ DEB_DH_STRIP_ARGS:=--dbg-package=$(SRC_NAME)-dbg
 export LDFLAGS=-Wl,--as-needed
 
 %:
-	dh $@
+	dh --with autoreconf $@
 
 override_dh_auto_configure:
 	find . -name '*.vala' | grep -v '^./.pc' | sed -s 's/vala$$/c/' | xargs rm

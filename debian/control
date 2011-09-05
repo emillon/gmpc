@@ -4,6 +4,7 @@ Priority: optional
 Maintainer: Etienne Millon <etienne.millon@gmail.com>
 Build-Depends:
   debhelper (>= 7.0.50~),
+  dh-autoreconf,
   libmpd-dev (>= 0.19.2),
   gob2,
   libgtk2.0-dev,
