@@ -1,6 +1,6 @@
 /* Gnome Music Player Client (GMPC)
- * Copyright (C) 2004-2010 Qball Cow <qball@sarine.nl>
- * Project homepage: http://gmpc.wikia.com/
+ * Copyright (C) 2004-2011 Qball Cow <qball@gmpclient.org>
+ * Project homepage: http://gmpclient.org/
  
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@
 using GLib;
 using Gtk;
 using Gdk;
-using Module;
 
 
 private const bool use_transition_ufg = Gmpc.use_transition;
@@ -46,17 +45,20 @@ namespace Gmpc.UrlFetching
 		public delegate bool ValidateUrl(Gui gui, string url);
 
 		/* Function you needs to parse setting */
-		public delegate void ParseUrl (Gui gui, string url); 
+		public delegate void ParseUrl (Gui gui, string? url); 
 
 		private void add_url_dialog_response( int response_id)
 		{
 			if(response_id == 1) {
-				weak Gtk.Entry entry = (Gtk.Entry)this.builder.get_object("url_entry");
+				unowned Gtk.Entry entry = (Gtk.Entry)this.builder.get_object("url_entry");
 				string url = entry.get_text();
 				this.parse_callback(this, url);
 				return;
 			}
-			stdout.printf("destroy callback\n");
+			else
+			{
+				this.parse_callback(this, null);
+			}
 			this.destroy_cb(this);
 		}
 		private void url_entry_changed(Gtk.Editable editable)
@@ -72,7 +74,6 @@ namespace Gmpc.UrlFetching
 
 		~Gui ()
 		{
-			stdout.printf("~Gui\n");
 			if(builder != null)
 			{
 				var dialog = (Gtk.Dialog) builder.get_object("add_url_dialog");

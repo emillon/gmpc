@@ -1,6 +1,6 @@
 /* Gnome Music Player Client (GMPC)
- * Copyright (C) 2004-2010 Qball Cow <qball@sarine.nl>
- * Project homepage: http://gmpc.wikia.com/
+ * Copyright (C) 2004-2011 Qball Cow <qball@gmpclient.org>
+ * Project homepage: http://gmpclient.org/
  
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@
 #define PLUGIN_ID_MARK 1024
 #define PLUGIN_ID_INTERNALL 2048
 /* Usefull signal objects. */
+extern config_obj *config;
 extern MpdObj *connection;
 extern GmpcProfiles *gmpc_profiles;
 extern GmpcConnection 	*gmpcconn;
@@ -184,7 +185,10 @@ typedef struct {
 } gmpcPlugin;
 
 
-
+/**
+ * Allows the plugin to access the EasyCommand
+ */
+extern GmpcEasyCommand *gmpc_easy_command;
 
 /**
  * Playlist function 
@@ -249,11 +253,15 @@ void info2_fill_album_view(const gchar *artist,const gchar *album);
 extern GObject *paned_size_group;
 
 /** Main window */
-/**
- * @param icon  The #GtkWidget to add
- *
- * Add an icon to the status bar.
- */
 
-void main_window_add_status_icon(GtkWidget *icon);
+
+/**
+* show the main window 
+*/
+void create_playlist3(void);
+
+/**
+* hide the main window 
+*/
+int pl3_hide(void);
 #endif

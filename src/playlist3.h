@@ -1,7 +1,7 @@
 /* Gnome Music Player Client (GMPC)
- * Copyright (C) 2004-2010 Qball Cow <qball@sarine.nl>
- * Project homepage: http://gmpc.wikia.com/
- 
+ * Copyright (C) 2004-2011 Qball Cow <qball@gmpclient.org>
+ * Project homepage: http://gmpclient.org/
+
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -21,7 +21,6 @@
 #define __PLAYLIST3_H__
 
 #include <libmpd/libmpd.h>
-#include <glade/glade.h>
 
 extern GtkTreeModel *pl3_tree;
 extern GtkListStore *pl3_store;
@@ -29,10 +28,8 @@ extern GtkListStore *pl3_store;
 
 void pl3_show_window(void);
 void pl3_toggle_hidden(void);
-void create_playlist3(void);
 void pl3_push_statusbar_message(const char *mesg);
 void pl3_push_rsb_message(const gchar *string);
-int pl3_hide(void);
 int pl3_cat_get_selected_browser(void);
 
 typedef enum {
@@ -52,12 +49,16 @@ void playlist_editor_fill_list(void);
 int pl3_window_key_press_event(GtkWidget *, GdkEventKey *);
 
 
-extern GladeXML *pl3_xml;
+extern GtkBuilder *pl3_xml;
 /**
- * Server information 
+ * Server information
  */
 
 void serverinformation_show_popup(void);
 
 void pl3_window_fullscreen(void);
+GtkAccelGroup *playlist3_get_accel_group(void);
+
+
+void open_local_file(void);
 #endif

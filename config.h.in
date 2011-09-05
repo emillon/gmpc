@@ -3,9 +3,6 @@
 /* Enable timing output */
 #undef DEBUG_TIMING
 
-/* Enable Mac integration Support */
-#undef ENABLE_IGE
-
 /* Enable multimedia support */
 #undef ENABLE_MMKEYS
 
@@ -26,6 +23,9 @@
 
 /* "Gmpc's website" */
 #undef GMPC_WEBSITE
+
+/* Have AppIndicator */
+#undef HAVE_APP_INDICATOR
 
 /* Define to 1 if you have the `bind_textdomain_codeset' function. */
 #undef HAVE_BIND_TEXTDOMAIN_CODESET
@@ -72,6 +72,9 @@
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
 
+/* Use libunique */
+#undef HAVE_UNIQUE
+
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
@@ -111,9 +114,6 @@
 
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
-
-/* Use system libsexy instead of bundled */
-#undef USE_SYSTEM_LIBSEXY
 
 /* Version number of package */
 #undef VERSION

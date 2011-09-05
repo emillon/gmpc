@@ -38,11 +38,12 @@ host_triplet = @host@
 subdir = test/GmpcEasyDownload
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/gob2.m4 \
-	$(top_srcdir)/m4/intltool.m4 $(top_srcdir)/m4/libtool.m4 \
-	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
-	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
-	$(top_srcdir)/acinclude.m4 $(top_srcdir)/configure.ac
+am__aclocal_m4_deps = $(top_srcdir)/m4/gnome-doc-utils.m4 \
+	$(top_srcdir)/m4/gob2.m4 $(top_srcdir)/m4/intltool.m4 \
+	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
+	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
+	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/acinclude.m4 \
+	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
@@ -86,6 +87,8 @@ ACLOCAL = @ACLOCAL@
 ALL_LINGUAS = @ALL_LINGUAS@
 AMTAR = @AMTAR@
 AM_MAKEFLAGS = @AM_MAKEFLAGS@
+APP_INDICATOR_CFLAGS = @APP_INDICATOR_CFLAGS@
+APP_INDICATOR_LIBS = @APP_INDICATOR_LIBS@
 AR = @AR@
 AS = @AS@
 AUTOCONF = @AUTOCONF@
@@ -104,7 +107,9 @@ CYGPATH_W = @CYGPATH_W@
 DATADIRNAME = @DATADIRNAME@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
+DISTCHECK_CONFIGURE_FLAGS = @DISTCHECK_CONFIGURE_FLAGS@
 DLLTOOL = @DLLTOOL@
+DOC_USER_FORMATS = @DOC_USER_FORMATS@
 DSYMUTIL = @DSYMUTIL@
 DUMPBIN = @DUMPBIN@
 ECHO_C = @ECHO_C@
@@ -126,6 +131,7 @@ GMSGFMT = @GMSGFMT@
 GOB2 = @GOB2@
 GREP = @GREP@
 GTK_REQUIRED = @GTK_REQUIRED@
+HELP_DIR = @HELP_DIR@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -157,6 +163,7 @@ NM = @NM@
 NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
+OMF_DIR = @OMF_DIR@
 OTOOL = @OTOOL@
 OTOOL64 = @OTOOL64@
 PACKAGE = @PACKAGE@
@@ -170,6 +177,8 @@ PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
+PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
+PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 POFILES = @POFILES@
 POSUB = @POSUB@
 PO_IN_DATADIR_FALSE = @PO_IN_DATADIR_FALSE@
@@ -234,21 +243,19 @@ libdir = @libdir@
 libexecdir = @libexecdir@
 libgio_CFLAGS = @libgio_CFLAGS@
 libgio_LIBS = @libgio_LIBS@
-libglade_CFLAGS = @libglade_CFLAGS@
-libglade_LIBS = @libglade_LIBS@
 libmpd_CFLAGS = @libmpd_CFLAGS@
 libmpd_LIBS = @libmpd_LIBS@
-libsexy_CFLAGS = @libsexy_CFLAGS@
-libsexy_LIBS = @libsexy_LIBS@
 libsoup_CFLAGS = @libsoup_CFLAGS@
 libsoup_LIBS = @libsoup_LIBS@
+libx11_CFLAGS = @libx11_CFLAGS@
+libx11_LIBS = @libx11_LIBS@
+libxml2_CFLAGS = @libxml2_CFLAGS@
+libxml2_LIBS = @libxml2_LIBS@
 libxspf_CFLAGS = @libxspf_CFLAGS@
 libxspf_LIBS = @libxspf_LIBS@
 localedir = @localedir@
 localstatedir = @localstatedir@
 lt_ECHO = @lt_ECHO@
-macint_CFLAGS = @macint_CFLAGS@
-macint_LIBS = @macint_LIBS@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
@@ -267,6 +274,8 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+unique_CFLAGS = @unique_CFLAGS@
+unique_LIBS = @unique_LIBS@
 @ENABLE_TEST_TRUE@gmpc_easy_download_CFLAGS = @CFLAGS@\
 @ENABLE_TEST_TRUE@		@glib_CFLAGS@\
 @ENABLE_TEST_TRUE@		@libmpd_CFLAGS@\
@@ -274,6 +283,8 @@ top_srcdir = @top_srcdir@
 @ENABLE_TEST_TRUE@        @libsoup_CFLAGS@\
 @ENABLE_TEST_TRUE@		-I$(top_srcdir)/src\
 @ENABLE_TEST_TRUE@		-I$(top_srcdir)/src/vala\
+@ENABLE_TEST_TRUE@		-I$(top_srcdir)/src/Tools\
+@ENABLE_TEST_TRUE@		-I$(top_srcdir)/src/Widgets\
 @ENABLE_TEST_TRUE@		-I$(top_srcdir)/src/gob\
 @ENABLE_TEST_TRUE@		-I$(top_srcdir)/src/MetaData\
 @ENABLE_TEST_TRUE@		-DPIXMAP_PATH=\""$(pkgdatadir)/icons/"\" \
@@ -283,14 +294,15 @@ top_srcdir = @top_srcdir@
 @ENABLE_TEST_TRUE@		@libmpd_LIBS@\
 @ENABLE_TEST_TRUE@		@glib_LIBS@\
 @ENABLE_TEST_TRUE@		@gtk_LIBS@\
-@ENABLE_TEST_TRUE@        @libsoup_LIBS@
+@ENABLE_TEST_TRUE@        @libsoup_LIBS@\
+@ENABLE_TEST_TRUE@	-lz
 
 @ENABLE_TEST_TRUE@gmpc_easy_download_SOURCES = \
 @ENABLE_TEST_TRUE@		ged.c 
 
 @ENABLE_TEST_TRUE@nodist_gmpc_easy_download_SOURCES = \
-@ENABLE_TEST_TRUE@		$(top_srcdir)/src/misc.c\
-@ENABLE_TEST_TRUE@		$(top_srcdir)/src/gmpc_easy_download.c
+@ENABLE_TEST_TRUE@		$(top_srcdir)/src/Tools/misc.c\
+@ENABLE_TEST_TRUE@		$(top_srcdir)/src/Tools/gmpc_easy_download.c
 
 all: all-am
 
@@ -384,33 +396,33 @@ gmpc_easy_download-ged.obj: ged.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gmpc_easy_download_CFLAGS) $(CFLAGS) -c -o gmpc_easy_download-ged.obj `if test -f 'ged.c'; then $(CYGPATH_W) 'ged.c'; else $(CYGPATH_W) '$(srcdir)/ged.c'; fi`
 
-gmpc_easy_download-misc.o: $(top_srcdir)/src/misc.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gmpc_easy_download_CFLAGS) $(CFLAGS) -MT gmpc_easy_download-misc.o -MD -MP -MF $(DEPDIR)/gmpc_easy_download-misc.Tpo -c -o gmpc_easy_download-misc.o `test -f '$(top_srcdir)/src/misc.c' || echo '$(srcdir)/'`$(top_srcdir)/src/misc.c
+gmpc_easy_download-misc.o: $(top_srcdir)/src/Tools/misc.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gmpc_easy_download_CFLAGS) $(CFLAGS) -MT gmpc_easy_download-misc.o -MD -MP -MF $(DEPDIR)/gmpc_easy_download-misc.Tpo -c -o gmpc_easy_download-misc.o `test -f '$(top_srcdir)/src/Tools/misc.c' || echo '$(srcdir)/'`$(top_srcdir)/src/Tools/misc.c
 @am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/gmpc_easy_download-misc.Tpo $(DEPDIR)/gmpc_easy_download-misc.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/misc.c' object='gmpc_easy_download-misc.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/Tools/misc.c' object='gmpc_easy_download-misc.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gmpc_easy_download_CFLAGS) $(CFLAGS) -c -o gmpc_easy_download-misc.o `test -f '$(top_srcdir)/src/misc.c' || echo '$(srcdir)/'`$(top_srcdir)/src/misc.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gmpc_easy_download_CFLAGS) $(CFLAGS) -c -o gmpc_easy_download-misc.o `test -f '$(top_srcdir)/src/Tools/misc.c' || echo '$(srcdir)/'`$(top_srcdir)/src/Tools/misc.c
 
-gmpc_easy_download-misc.obj: $(top_srcdir)/src/misc.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gmpc_easy_download_CFLAGS) $(CFLAGS) -MT gmpc_easy_download-misc.obj -MD -MP -MF $(DEPDIR)/gmpc_easy_download-misc.Tpo -c -o gmpc_easy_download-misc.obj `if test -f '$(top_srcdir)/src/misc.c'; then $(CYGPATH_W) '$(top_srcdir)/src/misc.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/misc.c'; fi`
+gmpc_easy_download-misc.obj: $(top_srcdir)/src/Tools/misc.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gmpc_easy_download_CFLAGS) $(CFLAGS) -MT gmpc_easy_download-misc.obj -MD -MP -MF $(DEPDIR)/gmpc_easy_download-misc.Tpo -c -o gmpc_easy_download-misc.obj `if test -f '$(top_srcdir)/src/Tools/misc.c'; then $(CYGPATH_W) '$(top_srcdir)/src/Tools/misc.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/Tools/misc.c'; fi`
 @am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/gmpc_easy_download-misc.Tpo $(DEPDIR)/gmpc_easy_download-misc.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/misc.c' object='gmpc_easy_download-misc.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/Tools/misc.c' object='gmpc_easy_download-misc.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gmpc_easy_download_CFLAGS) $(CFLAGS) -c -o gmpc_easy_download-misc.obj `if test -f '$(top_srcdir)/src/misc.c'; then $(CYGPATH_W) '$(top_srcdir)/src/misc.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/misc.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gmpc_easy_download_CFLAGS) $(CFLAGS) -c -o gmpc_easy_download-misc.obj `if test -f '$(top_srcdir)/src/Tools/misc.c'; then $(CYGPATH_W) '$(top_srcdir)/src/Tools/misc.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/Tools/misc.c'; fi`
 
-gmpc_easy_download-gmpc_easy_download.o: $(top_srcdir)/src/gmpc_easy_download.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gmpc_easy_download_CFLAGS) $(CFLAGS) -MT gmpc_easy_download-gmpc_easy_download.o -MD -MP -MF $(DEPDIR)/gmpc_easy_download-gmpc_easy_download.Tpo -c -o gmpc_easy_download-gmpc_easy_download.o `test -f '$(top_srcdir)/src/gmpc_easy_download.c' || echo '$(srcdir)/'`$(top_srcdir)/src/gmpc_easy_download.c
+gmpc_easy_download-gmpc_easy_download.o: $(top_srcdir)/src/Tools/gmpc_easy_download.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gmpc_easy_download_CFLAGS) $(CFLAGS) -MT gmpc_easy_download-gmpc_easy_download.o -MD -MP -MF $(DEPDIR)/gmpc_easy_download-gmpc_easy_download.Tpo -c -o gmpc_easy_download-gmpc_easy_download.o `test -f '$(top_srcdir)/src/Tools/gmpc_easy_download.c' || echo '$(srcdir)/'`$(top_srcdir)/src/Tools/gmpc_easy_download.c
 @am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/gmpc_easy_download-gmpc_easy_download.Tpo $(DEPDIR)/gmpc_easy_download-gmpc_easy_download.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/gmpc_easy_download.c' object='gmpc_easy_download-gmpc_easy_download.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/Tools/gmpc_easy_download.c' object='gmpc_easy_download-gmpc_easy_download.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gmpc_easy_download_CFLAGS) $(CFLAGS) -c -o gmpc_easy_download-gmpc_easy_download.o `test -f '$(top_srcdir)/src/gmpc_easy_download.c' || echo '$(srcdir)/'`$(top_srcdir)/src/gmpc_easy_download.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gmpc_easy_download_CFLAGS) $(CFLAGS) -c -o gmpc_easy_download-gmpc_easy_download.o `test -f '$(top_srcdir)/src/Tools/gmpc_easy_download.c' || echo '$(srcdir)/'`$(top_srcdir)/src/Tools/gmpc_easy_download.c
 
-gmpc_easy_download-gmpc_easy_download.obj: $(top_srcdir)/src/gmpc_easy_download.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gmpc_easy_download_CFLAGS) $(CFLAGS) -MT gmpc_easy_download-gmpc_easy_download.obj -MD -MP -MF $(DEPDIR)/gmpc_easy_download-gmpc_easy_download.Tpo -c -o gmpc_easy_download-gmpc_easy_download.obj `if test -f '$(top_srcdir)/src/gmpc_easy_download.c'; then $(CYGPATH_W) '$(top_srcdir)/src/gmpc_easy_download.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/gmpc_easy_download.c'; fi`
+gmpc_easy_download-gmpc_easy_download.obj: $(top_srcdir)/src/Tools/gmpc_easy_download.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gmpc_easy_download_CFLAGS) $(CFLAGS) -MT gmpc_easy_download-gmpc_easy_download.obj -MD -MP -MF $(DEPDIR)/gmpc_easy_download-gmpc_easy_download.Tpo -c -o gmpc_easy_download-gmpc_easy_download.obj `if test -f '$(top_srcdir)/src/Tools/gmpc_easy_download.c'; then $(CYGPATH_W) '$(top_srcdir)/src/Tools/gmpc_easy_download.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/Tools/gmpc_easy_download.c'; fi`
 @am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/gmpc_easy_download-gmpc_easy_download.Tpo $(DEPDIR)/gmpc_easy_download-gmpc_easy_download.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/gmpc_easy_download.c' object='gmpc_easy_download-gmpc_easy_download.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/Tools/gmpc_easy_download.c' object='gmpc_easy_download-gmpc_easy_download.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gmpc_easy_download_CFLAGS) $(CFLAGS) -c -o gmpc_easy_download-gmpc_easy_download.obj `if test -f '$(top_srcdir)/src/gmpc_easy_download.c'; then $(CYGPATH_W) '$(top_srcdir)/src/gmpc_easy_download.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/gmpc_easy_download.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(gmpc_easy_download_CFLAGS) $(CFLAGS) -c -o gmpc_easy_download-gmpc_easy_download.obj `if test -f '$(top_srcdir)/src/Tools/gmpc_easy_download.c'; then $(CYGPATH_W) '$(top_srcdir)/src/Tools/gmpc_easy_download.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/Tools/gmpc_easy_download.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo

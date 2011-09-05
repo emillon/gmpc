@@ -38,11 +38,12 @@ host_triplet = @host@
 subdir = test/MetaDataCache
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/gob2.m4 \
-	$(top_srcdir)/m4/intltool.m4 $(top_srcdir)/m4/libtool.m4 \
-	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
-	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
-	$(top_srcdir)/acinclude.m4 $(top_srcdir)/configure.ac
+am__aclocal_m4_deps = $(top_srcdir)/m4/gnome-doc-utils.m4 \
+	$(top_srcdir)/m4/gob2.m4 $(top_srcdir)/m4/intltool.m4 \
+	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
+	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
+	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/acinclude.m4 \
+	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
@@ -60,6 +61,7 @@ am__mtc_test_SOURCES_DIST = mtc_test.c
 @ENABLE_TEST_TRUE@	mtc_test-gmpc_easy_download.$(OBJEXT) \
 @ENABLE_TEST_TRUE@	mtc_test-gmpc-meta-watcher.$(OBJEXT) \
 @ENABLE_TEST_TRUE@	mtc_test-gmpc-plugin.$(OBJEXT) \
+@ENABLE_TEST_TRUE@	mtc_test-metadata-cache-sqlite.$(OBJEXT) \
 @ENABLE_TEST_TRUE@	mtc_test-metadata-cache.$(OBJEXT)
 mtc_test_OBJECTS = $(am_mtc_test_OBJECTS) $(nodist_mtc_test_OBJECTS)
 mtc_test_DEPENDENCIES =
@@ -88,6 +90,8 @@ ACLOCAL = @ACLOCAL@
 ALL_LINGUAS = @ALL_LINGUAS@
 AMTAR = @AMTAR@
 AM_MAKEFLAGS = @AM_MAKEFLAGS@
+APP_INDICATOR_CFLAGS = @APP_INDICATOR_CFLAGS@
+APP_INDICATOR_LIBS = @APP_INDICATOR_LIBS@
 AR = @AR@
 AS = @AS@
 AUTOCONF = @AUTOCONF@
@@ -106,7 +110,9 @@ CYGPATH_W = @CYGPATH_W@
 DATADIRNAME = @DATADIRNAME@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
+DISTCHECK_CONFIGURE_FLAGS = @DISTCHECK_CONFIGURE_FLAGS@
 DLLTOOL = @DLLTOOL@
+DOC_USER_FORMATS = @DOC_USER_FORMATS@
 DSYMUTIL = @DSYMUTIL@
 DUMPBIN = @DUMPBIN@
 ECHO_C = @ECHO_C@
@@ -128,6 +134,7 @@ GMSGFMT = @GMSGFMT@
 GOB2 = @GOB2@
 GREP = @GREP@
 GTK_REQUIRED = @GTK_REQUIRED@
+HELP_DIR = @HELP_DIR@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -159,6 +166,7 @@ NM = @NM@
 NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
+OMF_DIR = @OMF_DIR@
 OTOOL = @OTOOL@
 OTOOL64 = @OTOOL64@
 PACKAGE = @PACKAGE@
@@ -172,6 +180,8 @@ PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
+PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
+PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 POFILES = @POFILES@
 POSUB = @POSUB@
 PO_IN_DATADIR_FALSE = @PO_IN_DATADIR_FALSE@
@@ -236,21 +246,19 @@ libdir = @libdir@
 libexecdir = @libexecdir@
 libgio_CFLAGS = @libgio_CFLAGS@
 libgio_LIBS = @libgio_LIBS@
-libglade_CFLAGS = @libglade_CFLAGS@
-libglade_LIBS = @libglade_LIBS@
 libmpd_CFLAGS = @libmpd_CFLAGS@
 libmpd_LIBS = @libmpd_LIBS@
-libsexy_CFLAGS = @libsexy_CFLAGS@
-libsexy_LIBS = @libsexy_LIBS@
 libsoup_CFLAGS = @libsoup_CFLAGS@
 libsoup_LIBS = @libsoup_LIBS@
+libx11_CFLAGS = @libx11_CFLAGS@
+libx11_LIBS = @libx11_LIBS@
+libxml2_CFLAGS = @libxml2_CFLAGS@
+libxml2_LIBS = @libxml2_LIBS@
 libxspf_CFLAGS = @libxspf_CFLAGS@
 libxspf_LIBS = @libxspf_LIBS@
 localedir = @localedir@
 localstatedir = @localstatedir@
 lt_ECHO = @lt_ECHO@
-macint_CFLAGS = @macint_CFLAGS@
-macint_LIBS = @macint_LIBS@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
@@ -269,6 +277,8 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+unique_CFLAGS = @unique_CFLAGS@
+unique_LIBS = @unique_LIBS@
 @ENABLE_TEST_TRUE@mtc_test_CFLAGS = @CFLAGS@\
 @ENABLE_TEST_TRUE@        @gtk_CFLAGS@\
 @ENABLE_TEST_TRUE@		@glib_CFLAGS@\
@@ -280,6 +290,7 @@ top_srcdir = @top_srcdir@
 @ENABLE_TEST_TRUE@        -DGLADE_PATH="\"\""\
 @ENABLE_TEST_TRUE@		-I$(top_srcdir)/src/gob\
 @ENABLE_TEST_TRUE@		-I$(top_srcdir)/src/vala\
+@ENABLE_TEST_TRUE@		-I$(top_srcdir)/src/Tools\
 @ENABLE_TEST_TRUE@		-I$(top_srcdir)/src/Widgets\
 @ENABLE_TEST_TRUE@		-I$(top_srcdir)/src/MetaData\
 @ENABLE_TEST_TRUE@		-I$(top_srcdir)/src
@@ -289,19 +300,21 @@ top_srcdir = @top_srcdir@
 @ENABLE_TEST_TRUE@        @gtk_LIBS@\
 @ENABLE_TEST_TRUE@        @sqlite3_LIBS@\
 @ENABLE_TEST_TRUE@        @libsoup_LIBS@\
-@ENABLE_TEST_TRUE@		@glib_LIBS@
+@ENABLE_TEST_TRUE@		@glib_LIBS@\
+@ENABLE_TEST_TRUE@		-lz
 
 @ENABLE_TEST_TRUE@mtc_test_SOURCES = \
-@ENABLE_TEST_TRUE@		mtc_test.c 
+@ENABLE_TEST_TRUE@		mtc_test.c
 
 @ENABLE_TEST_TRUE@nodist_mtc_test_SOURCES = \
 @ENABLE_TEST_TRUE@		$(top_srcdir)/src/config1.c\
 @ENABLE_TEST_TRUE@		$(top_srcdir)/src/MetaData/metadata.c\
 @ENABLE_TEST_TRUE@		$(top_srcdir)/src/plugin.c\
-@ENABLE_TEST_TRUE@		$(top_srcdir)/src/misc.c\
-@ENABLE_TEST_TRUE@        $(top_srcdir)/src/gmpc_easy_download.c\
+@ENABLE_TEST_TRUE@		$(top_srcdir)/src/Tools/misc.c\
+@ENABLE_TEST_TRUE@        $(top_srcdir)/src/Tools/gmpc_easy_download.c\
 @ENABLE_TEST_TRUE@        $(top_srcdir)/src/gmpc-meta-watcher.c\
 @ENABLE_TEST_TRUE@        $(top_srcdir)/src/vala/gmpc-plugin.c\
+@ENABLE_TEST_TRUE@		$(top_srcdir)/src/MetaData/metadata-cache-sqlite.c\
 @ENABLE_TEST_TRUE@		$(top_srcdir)/src/MetaData/metadata-cache.c
 
 all: all-am
@@ -361,6 +374,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mtc_test-gmpc-meta-watcher.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mtc_test-gmpc-plugin.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mtc_test-gmpc_easy_download.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mtc_test-metadata-cache-sqlite.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mtc_test-metadata-cache.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mtc_test-metadata.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mtc_test-misc.Po@am__quote@
@@ -444,33 +458,33 @@ mtc_test-plugin.obj: $(top_srcdir)/src/plugin.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(mtc_test_CFLAGS) $(CFLAGS) -c -o mtc_test-plugin.obj `if test -f '$(top_srcdir)/src/plugin.c'; then $(CYGPATH_W) '$(top_srcdir)/src/plugin.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/plugin.c'; fi`
 
-mtc_test-misc.o: $(top_srcdir)/src/misc.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(mtc_test_CFLAGS) $(CFLAGS) -MT mtc_test-misc.o -MD -MP -MF $(DEPDIR)/mtc_test-misc.Tpo -c -o mtc_test-misc.o `test -f '$(top_srcdir)/src/misc.c' || echo '$(srcdir)/'`$(top_srcdir)/src/misc.c
+mtc_test-misc.o: $(top_srcdir)/src/Tools/misc.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(mtc_test_CFLAGS) $(CFLAGS) -MT mtc_test-misc.o -MD -MP -MF $(DEPDIR)/mtc_test-misc.Tpo -c -o mtc_test-misc.o `test -f '$(top_srcdir)/src/Tools/misc.c' || echo '$(srcdir)/'`$(top_srcdir)/src/Tools/misc.c
 @am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/mtc_test-misc.Tpo $(DEPDIR)/mtc_test-misc.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/misc.c' object='mtc_test-misc.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/Tools/misc.c' object='mtc_test-misc.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(mtc_test_CFLAGS) $(CFLAGS) -c -o mtc_test-misc.o `test -f '$(top_srcdir)/src/misc.c' || echo '$(srcdir)/'`$(top_srcdir)/src/misc.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(mtc_test_CFLAGS) $(CFLAGS) -c -o mtc_test-misc.o `test -f '$(top_srcdir)/src/Tools/misc.c' || echo '$(srcdir)/'`$(top_srcdir)/src/Tools/misc.c
 
-mtc_test-misc.obj: $(top_srcdir)/src/misc.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(mtc_test_CFLAGS) $(CFLAGS) -MT mtc_test-misc.obj -MD -MP -MF $(DEPDIR)/mtc_test-misc.Tpo -c -o mtc_test-misc.obj `if test -f '$(top_srcdir)/src/misc.c'; then $(CYGPATH_W) '$(top_srcdir)/src/misc.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/misc.c'; fi`
+mtc_test-misc.obj: $(top_srcdir)/src/Tools/misc.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(mtc_test_CFLAGS) $(CFLAGS) -MT mtc_test-misc.obj -MD -MP -MF $(DEPDIR)/mtc_test-misc.Tpo -c -o mtc_test-misc.obj `if test -f '$(top_srcdir)/src/Tools/misc.c'; then $(CYGPATH_W) '$(top_srcdir)/src/Tools/misc.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/Tools/misc.c'; fi`
 @am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/mtc_test-misc.Tpo $(DEPDIR)/mtc_test-misc.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/misc.c' object='mtc_test-misc.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/Tools/misc.c' object='mtc_test-misc.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(mtc_test_CFLAGS) $(CFLAGS) -c -o mtc_test-misc.obj `if test -f '$(top_srcdir)/src/misc.c'; then $(CYGPATH_W) '$(top_srcdir)/src/misc.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/misc.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(mtc_test_CFLAGS) $(CFLAGS) -c -o mtc_test-misc.obj `if test -f '$(top_srcdir)/src/Tools/misc.c'; then $(CYGPATH_W) '$(top_srcdir)/src/Tools/misc.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/Tools/misc.c'; fi`
 
-mtc_test-gmpc_easy_download.o: $(top_srcdir)/src/gmpc_easy_download.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(mtc_test_CFLAGS) $(CFLAGS) -MT mtc_test-gmpc_easy_download.o -MD -MP -MF $(DEPDIR)/mtc_test-gmpc_easy_download.Tpo -c -o mtc_test-gmpc_easy_download.o `test -f '$(top_srcdir)/src/gmpc_easy_download.c' || echo '$(srcdir)/'`$(top_srcdir)/src/gmpc_easy_download.c
+mtc_test-gmpc_easy_download.o: $(top_srcdir)/src/Tools/gmpc_easy_download.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(mtc_test_CFLAGS) $(CFLAGS) -MT mtc_test-gmpc_easy_download.o -MD -MP -MF $(DEPDIR)/mtc_test-gmpc_easy_download.Tpo -c -o mtc_test-gmpc_easy_download.o `test -f '$(top_srcdir)/src/Tools/gmpc_easy_download.c' || echo '$(srcdir)/'`$(top_srcdir)/src/Tools/gmpc_easy_download.c
 @am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/mtc_test-gmpc_easy_download.Tpo $(DEPDIR)/mtc_test-gmpc_easy_download.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/gmpc_easy_download.c' object='mtc_test-gmpc_easy_download.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/Tools/gmpc_easy_download.c' object='mtc_test-gmpc_easy_download.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(mtc_test_CFLAGS) $(CFLAGS) -c -o mtc_test-gmpc_easy_download.o `test -f '$(top_srcdir)/src/gmpc_easy_download.c' || echo '$(srcdir)/'`$(top_srcdir)/src/gmpc_easy_download.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(mtc_test_CFLAGS) $(CFLAGS) -c -o mtc_test-gmpc_easy_download.o `test -f '$(top_srcdir)/src/Tools/gmpc_easy_download.c' || echo '$(srcdir)/'`$(top_srcdir)/src/Tools/gmpc_easy_download.c
 
-mtc_test-gmpc_easy_download.obj: $(top_srcdir)/src/gmpc_easy_download.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(mtc_test_CFLAGS) $(CFLAGS) -MT mtc_test-gmpc_easy_download.obj -MD -MP -MF $(DEPDIR)/mtc_test-gmpc_easy_download.Tpo -c -o mtc_test-gmpc_easy_download.obj `if test -f '$(top_srcdir)/src/gmpc_easy_download.c'; then $(CYGPATH_W) '$(top_srcdir)/src/gmpc_easy_download.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/gmpc_easy_download.c'; fi`
+mtc_test-gmpc_easy_download.obj: $(top_srcdir)/src/Tools/gmpc_easy_download.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(mtc_test_CFLAGS) $(CFLAGS) -MT mtc_test-gmpc_easy_download.obj -MD -MP -MF $(DEPDIR)/mtc_test-gmpc_easy_download.Tpo -c -o mtc_test-gmpc_easy_download.obj `if test -f '$(top_srcdir)/src/Tools/gmpc_easy_download.c'; then $(CYGPATH_W) '$(top_srcdir)/src/Tools/gmpc_easy_download.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/Tools/gmpc_easy_download.c'; fi`
 @am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/mtc_test-gmpc_easy_download.Tpo $(DEPDIR)/mtc_test-gmpc_easy_download.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/gmpc_easy_download.c' object='mtc_test-gmpc_easy_download.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/Tools/gmpc_easy_download.c' object='mtc_test-gmpc_easy_download.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(mtc_test_CFLAGS) $(CFLAGS) -c -o mtc_test-gmpc_easy_download.obj `if test -f '$(top_srcdir)/src/gmpc_easy_download.c'; then $(CYGPATH_W) '$(top_srcdir)/src/gmpc_easy_download.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/gmpc_easy_download.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(mtc_test_CFLAGS) $(CFLAGS) -c -o mtc_test-gmpc_easy_download.obj `if test -f '$(top_srcdir)/src/Tools/gmpc_easy_download.c'; then $(CYGPATH_W) '$(top_srcdir)/src/Tools/gmpc_easy_download.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/Tools/gmpc_easy_download.c'; fi`
 
 mtc_test-gmpc-meta-watcher.o: $(top_srcdir)/src/gmpc-meta-watcher.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(mtc_test_CFLAGS) $(CFLAGS) -MT mtc_test-gmpc-meta-watcher.o -MD -MP -MF $(DEPDIR)/mtc_test-gmpc-meta-watcher.Tpo -c -o mtc_test-gmpc-meta-watcher.o `test -f '$(top_srcdir)/src/gmpc-meta-watcher.c' || echo '$(srcdir)/'`$(top_srcdir)/src/gmpc-meta-watcher.c
@@ -499,6 +513,20 @@ mtc_test-gmpc-plugin.obj: $(top_srcdir)/src/vala/gmpc-plugin.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/vala/gmpc-plugin.c' object='mtc_test-gmpc-plugin.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(mtc_test_CFLAGS) $(CFLAGS) -c -o mtc_test-gmpc-plugin.obj `if test -f '$(top_srcdir)/src/vala/gmpc-plugin.c'; then $(CYGPATH_W) '$(top_srcdir)/src/vala/gmpc-plugin.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/vala/gmpc-plugin.c'; fi`
+
+mtc_test-metadata-cache-sqlite.o: $(top_srcdir)/src/MetaData/metadata-cache-sqlite.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(mtc_test_CFLAGS) $(CFLAGS) -MT mtc_test-metadata-cache-sqlite.o -MD -MP -MF $(DEPDIR)/mtc_test-metadata-cache-sqlite.Tpo -c -o mtc_test-metadata-cache-sqlite.o `test -f '$(top_srcdir)/src/MetaData/metadata-cache-sqlite.c' || echo '$(srcdir)/'`$(top_srcdir)/src/MetaData/metadata-cache-sqlite.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/mtc_test-metadata-cache-sqlite.Tpo $(DEPDIR)/mtc_test-metadata-cache-sqlite.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/MetaData/metadata-cache-sqlite.c' object='mtc_test-metadata-cache-sqlite.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(mtc_test_CFLAGS) $(CFLAGS) -c -o mtc_test-metadata-cache-sqlite.o `test -f '$(top_srcdir)/src/MetaData/metadata-cache-sqlite.c' || echo '$(srcdir)/'`$(top_srcdir)/src/MetaData/metadata-cache-sqlite.c
+
+mtc_test-metadata-cache-sqlite.obj: $(top_srcdir)/src/MetaData/metadata-cache-sqlite.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(mtc_test_CFLAGS) $(CFLAGS) -MT mtc_test-metadata-cache-sqlite.obj -MD -MP -MF $(DEPDIR)/mtc_test-metadata-cache-sqlite.Tpo -c -o mtc_test-metadata-cache-sqlite.obj `if test -f '$(top_srcdir)/src/MetaData/metadata-cache-sqlite.c'; then $(CYGPATH_W) '$(top_srcdir)/src/MetaData/metadata-cache-sqlite.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/MetaData/metadata-cache-sqlite.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/mtc_test-metadata-cache-sqlite.Tpo $(DEPDIR)/mtc_test-metadata-cache-sqlite.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/src/MetaData/metadata-cache-sqlite.c' object='mtc_test-metadata-cache-sqlite.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(mtc_test_CFLAGS) $(CFLAGS) -c -o mtc_test-metadata-cache-sqlite.obj `if test -f '$(top_srcdir)/src/MetaData/metadata-cache-sqlite.c'; then $(CYGPATH_W) '$(top_srcdir)/src/MetaData/metadata-cache-sqlite.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/MetaData/metadata-cache-sqlite.c'; fi`
 
 mtc_test-metadata-cache.o: $(top_srcdir)/src/MetaData/metadata-cache.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(mtc_test_CFLAGS) $(CFLAGS) -MT mtc_test-metadata-cache.o -MD -MP -MF $(DEPDIR)/mtc_test-metadata-cache.Tpo -c -o mtc_test-metadata-cache.o `test -f '$(top_srcdir)/src/MetaData/metadata-cache.c' || echo '$(srcdir)/'`$(top_srcdir)/src/MetaData/metadata-cache.c

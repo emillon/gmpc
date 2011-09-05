@@ -1,6 +1,6 @@
 /* Gnome Music Player Client (GMPC)
- * Copyright (C) 2004-2010 Qball Cow <qball@sarine.nl>
- * Project homepage: http://gmpc.wikia.com/
+ * Copyright (C) 2004-2011 Qball Cow <qball@gmpclient.org>
+ * Project homepage: http://gmpclient.org/
  
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -670,5 +670,25 @@ class Gmpc:Profiles from G:Object
 			self->_priv->profiles=  NULL;
 		}
 		PARENT_HANDLER(obj);
+	}
+	
+	public
+	void
+	set_profile_from_name(self, const gchar *name (check null))
+	{
+        GList *iter, *items = gmpc_profiles_get_profiles_ids(gmpc_profiles);
+        for (iter = g_list_first(items); iter; iter = g_list_next(iter))
+        {
+			const char *pname = gmpc_profiles_get_name(gmpc_profiles, 
+					(const gchar *)iter->data);
+			if (pname != NULL && 
+				g_utf8_collate(name, pname) == 0)
+            {
+                connection_set_current_profile((const gchar *)iter->data);
+                break;
+            }
+        }
+        g_list_foreach(items, (GFunc) g_free, NULL);
+        g_list_free(items);
 	}
 }
