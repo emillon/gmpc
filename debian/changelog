@@ -1,11 +1,10 @@
-gmpc (0.20.0-3~1.gbp9eff29) unstable; urgency=low
+gmpc (11.8.16-1) UNRELEASED; urgency=low
 
-  ** SNAPSHOT build @9eff29edde08f18db0455279f11d37660ff4b46d **
-
-  *
+  * New upstream version (Closes: #640311)
+    - new versioning scheme YY.MM.DD, compatible with the former
   * Remove asterisks in debian/NEWS
 
- -- Etienne Millon <etienne.millon@gmail.com>  Wed, 29 Jun 2011 12:17:01 +0200
+ -- Etienne Millon <etienne.millon@gmail.com>  Mon, 05 Sep 2011 13:17:20 +0200
 
 gmpc (0.20.0-2) unstable; urgency=low
 
