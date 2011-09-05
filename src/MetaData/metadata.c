@@ -1,6 +1,6 @@
 /* Gnome Music Player Client (GMPC)
- * Copyright (C) 2004-2010 Qball Cow <qball@sarine.nl>
- * Project homepage: http://gmpc.wikia.com/
+ * Copyright (C) 2004-2011 Qball Cow <qball@gmpclient.org>
+ * Project homepage: http://gmpclient.org/
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,10 +20,12 @@
 #include <string.h>
 #include <glib.h>
 #include <glib/gstdio.h>
+#include <ctype.h>
 #include "main.h"
 
 #include "metadata.h"
 #include "metadata-cache.h"
+#include "preferences.h"
 
 #include "gmpc_easy_download.h"
 
@@ -982,7 +984,7 @@ gchar * gmpc_get_metadata_filename(MetaDataType  type, mpd_Song *song, char *ext
 	{
 		GError *error = NULL;
 		gchar *filename = NULL, *dirname = NULL;
-		const gchar *extention= (type&(META_ALBUM_TXT|META_ARTIST_TXT|META_SONG_TXT|META_SONG_GUITAR_TAB))?"txt":((ext == NULL)?((type&(META_ALBUM_ART|META_ARTIST_ART))?"jpg":""):ext);
+		const gchar *extension= (type&(META_ALBUM_TXT|META_ARTIST_TXT|META_SONG_TXT|META_SONG_GUITAR_TAB))?"txt":((ext == NULL)?((type&(META_ALBUM_ART|META_ARTIST_ART))?"jpg":""):ext);
 
 		/* Convert it so the filesystem likes it */
 		/* TODO: Add error checking */
@@ -1030,23 +1032,23 @@ gchar * gmpc_get_metadata_filename(MetaDataType  type, mpd_Song *song, char *ext
 			gchar *temp ;
 			g_assert(song->album != NULL);
 			temp =g_filename_from_utf8(song->album,-1,NULL,NULL,NULL); 
-			filename = g_strdup_printf("%s.%s", temp,extention);
+			filename = g_strdup_printf("%s.%s", temp,extension);
 			g_free(temp);
 		}else if(type&META_ARTIST_ART){
-			filename = g_strdup_printf("artist_IMAGE.%s", extention);
+			filename = g_strdup_printf("artist_IMAGE.%s", extension);
 		}else if (type&META_ARTIST_TXT){
-			filename = g_strdup_printf("artist_BIOGRAPHY.%s", extention);
+			filename = g_strdup_printf("artist_BIOGRAPHY.%s", extension);
 		}else if (type&META_SONG_TXT) {
 			gchar *temp ;
 			g_assert(song->title != NULL);
 			temp =g_filename_from_utf8(song->title,-1,NULL,NULL,NULL); 
-			filename = g_strdup_printf("%s_LYRIC.%s", temp,extention);
+			filename = g_strdup_printf("%s_LYRIC.%s", temp,extension);
 			g_free(temp);
 		}else if (type&META_SONG_GUITAR_TAB) {
 			gchar *temp ;
 			g_assert(song->title != NULL);
 			temp =g_filename_from_utf8(song->title,-1,NULL,NULL,NULL); 
-			filename = g_strdup_printf("%s_GUITAR_TAB.%s", temp,extention);
+			filename = g_strdup_printf("%s_GUITAR_TAB.%s", temp,extension);
 			g_free(temp);
 		}
 		filename = strip_invalid_chars(filename);
@@ -1068,6 +1070,43 @@ static void metadata_pref_priority_changed(GtkCellRenderer *renderer, char *path
 			gmpc_plugin_metadata_set_priority(plug,(gint)g_ascii_strtoull(new_text, NULL, 0));
 			gtk_list_store_set(GTK_LIST_STORE(store), &iter, 2, gmpc_plugin_metadata_get_priority(plug),-1);
 			meta_data_sort_plugins();
+		}
+	}
+}
+/**
+ * Get the enabled state directly from the plugin
+ */
+static void __column_data_func_enabled(GtkTreeViewColumn *column, 
+										GtkCellRenderer *cell,
+										GtkTreeModel *model,
+										GtkTreeIter *iter,
+										gpointer data)
+{
+		gmpcPluginParent *plug;
+		gtk_tree_model_get(GTK_TREE_MODEL(model), iter, 0, &plug, -1);
+		if(plug)
+		{
+			gboolean active = gmpc_plugin_get_enabled(plug);
+			g_object_set(G_OBJECT(cell), "active", active, NULL);
+		}
+}
+/**
+ * Set enabled
+ */
+static void __column_toggled_enabled(GtkCellRendererToggle *renderer,
+										char *path,
+										gpointer store)
+{
+	GtkTreeIter iter;
+	if(gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(store), &iter, path))
+	{
+		gmpcPluginParent *plug;
+		gtk_tree_model_get(GTK_TREE_MODEL(store), &iter, 0, &plug, -1);
+		if(plug)
+		{
+			gboolean state = !gtk_cell_renderer_toggle_get_active(renderer);
+			gmpc_plugin_set_enabled(plug,state);
+			preferences_window_update();
 		}
 	}
 }
@@ -1096,6 +1135,20 @@ static void metadata_construct_pref_pane(GtkWidget *container)
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(sw), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	treeview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
 	gtk_container_add(GTK_CONTAINER(sw), treeview);
+
+
+	/* enable column */
+	renderer = gtk_cell_renderer_toggle_new();
+	gtk_tree_view_insert_column_with_data_func(GTK_TREE_VIEW(treeview),
+			-1,
+			"Enabled",
+			renderer,
+			(GtkTreeCellDataFunc)__column_data_func_enabled,
+			NULL,
+			NULL);
+	g_object_set(G_OBJECT(renderer), "activatable", TRUE, NULL);
+	g_signal_connect(G_OBJECT(renderer), "toggled" ,
+			G_CALLBACK(__column_toggled_enabled), store);
 
 	/* Build the columns */
 	renderer = gtk_cell_renderer_text_new();
@@ -1127,14 +1180,11 @@ static void metadata_construct_pref_pane(GtkWidget *container)
 	for(i=0; i< meta_num_plugins;i++)
 	{
 		GtkTreeIter iter;
-		if(gmpc_plugin_get_enabled(meta_plugins[i]))
-		{
-			gtk_list_store_insert_with_values(store, &iter, -1, 
-					0, meta_plugins[i],
-					1, gmpc_plugin_get_name(meta_plugins[i]),
-					2, gmpc_plugin_metadata_get_priority(meta_plugins[i]),
-					-1);
-		}
+		gtk_list_store_insert_with_values(store, &iter, -1, 
+				0, meta_plugins[i],
+				1, gmpc_plugin_get_name(meta_plugins[i]),
+				2, gmpc_plugin_metadata_get_priority(meta_plugins[i]),
+				-1);
 	}
 
 	label = gtk_label_new("Plugins are evaluated from low priority to high");
@@ -1286,6 +1336,8 @@ void meta_data_free(MetaData *data)
 		data->content = NULL;
 		data->size = 0;
 	}
+	if(data->thumbnail_uri) g_free(data->thumbnail_uri);
+	data->thumbnail_uri = NULL;
 	g_free(data);
 }
 
@@ -1333,6 +1385,9 @@ MetaData *meta_data_dup(MetaData *data)
 			retv->content = g_strdup((gchar *)data->content);
 		}
 	}
+	if(data->thumbnail_uri != NULL) {
+		retv->thumbnail_uri = g_strdup(data->thumbnail_uri);
+	}
 	return retv;
 }
 MetaData *meta_data_dup_steal(MetaData *data)
@@ -1350,6 +1405,8 @@ MetaData *meta_data_dup_steal(MetaData *data)
 	retv->content = data->content;
 	data->size  = 0;
 	data->content = NULL;
+	retv->thumbnail_uri = data->thumbnail_uri;
+	data->thumbnail_uri = NULL;
 	return retv;
 }
 gboolean meta_data_is_empty(const MetaData *data)
@@ -1371,10 +1428,50 @@ void meta_data_set_uri(MetaData *data, const gchar *uri)
 	if(data->content) g_free(data->content);
 	data->content = g_strdup(uri);
 }
+void meta_data_set_raw(MetaData *item, guchar *data, gsize len)
+{
+	g_assert(meta_data_is_raw(item));
+	if(item->content) g_free(item->content);
+	item->content = g_memdup(data, len);
+	item->size = len;
+}
+void meta_data_set_raw_owned(MetaData *item, guchar **data, gsize *len)
+{
+	g_assert(meta_data_is_raw(item));
+	if(item->content) g_free(item->content);
+	item->content = *data;
+	*data = NULL;
+	item->size = *len;
+	*len = 0;
+}
+void meta_data_set_thumbnail_uri(MetaData *data, const gchar *uri)
+{
+	g_assert(meta_data_is_uri(data));
+	if(data->thumbnail_uri) g_free(data->thumbnail_uri);
+	data->thumbnail_uri = g_strdup(uri);
+}
+const gchar * meta_data_get_thumbnail_uri(const MetaData *data)
+{
+	g_assert(meta_data_is_uri(data));
+	/* Only valid for images. */
+	g_assert((data->type&(META_ALBUM_ART|META_ARTIST_ART)) != 0);
+
+	return (const gchar *)data->thumbnail_uri;
+}
 
 gboolean meta_data_is_text(const MetaData *data)
 {
 	return data->content_type == META_DATA_CONTENT_TEXT;
+}
+
+void meta_data_set_text(MetaData *data, const gchar *text)
+{
+	if(meta_data_is_text(data))
+	{
+		if(data->content) g_free(data->content);
+		data->content = g_strdup(text);
+		data->size = -1;
+	}
 }
 const gchar * meta_data_get_text(const MetaData *data)
 {
@@ -1780,6 +1877,7 @@ gboolean meta_data_is_raw(const MetaData *data)
 {
 	return data->content_type == META_DATA_CONTENT_RAW;
 }
+
 const guchar * meta_data_get_raw(const MetaData *data, gsize *length)
 {
 	g_assert(meta_data_is_raw(data));

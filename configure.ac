@@ -1,15 +1,15 @@
 #Define the version
-m4_define([package_major_version], [0])
-m4_define([package_minor_version], [20])
-m4_define([package_micro_version], [0])
+m4_define([package_major_version], [11])
+m4_define([package_minor_version], [8])
+m4_define([package_micro_version], [16])
 m4_define([package_version], [package_major_version.package_minor_version.package_micro_version])
 
-AC_INIT([gmpc], [0.20.0], [qball@sarine.nl])
+AC_INIT([gmpc], [11.8.16], [qball@sarine.nl])
 
 #Define variable
-m4_define([package_tagline],       "  ")
-m4_define([package_website],       "http://gmpc.wikia.com")
-m4_define([package_copyright],     "Copyright 2003-2010 Qball Cow")
+m4_define([package_tagline],       "All hail the Greg")
+m4_define([package_website],       "http://gmpclient.org")
+m4_define([package_copyright],     "Copyright 2003-2011 Qball Cow")
 m4_define([package_bugtracker],    "http://gmpc.wikia.com/wiki/GMPC_HELP")
 
 
@@ -41,6 +41,7 @@ AC_DEFINE(GMPC_COPYRIGHT,       package_copyright,	["Gmpc's Copyright"])
 AC_PREREQ(2.59)
 
 # Remove the check for c++ and fortran compiler
+LT_INIT
 m4_defun([_LT_AC_LANG_CXX_CONFIG], [:])
 m4_defun([_LT_AC_LANG_F77_CONFIG], [:])
 AC_REPLACE_FUNCS(strndup)
@@ -49,7 +50,7 @@ AC_REPLACE_FUNCS(strndup)
 #intltool, libtool. Check for CC compiler
 AC_PROG_INTLTOOL([0.21])
 
-# Check for intltool version, needed for make dist. 
+# Check for intltool version, needed for make dist.
 AM_CONDITIONAL([INTLTOOL_HIGHER_04000], [test ${INTLTOOL_APPLIED_VERSION_AS_INT} -ge 4000])
 
 
@@ -71,12 +72,22 @@ fi
 
 
 PKG_PROG_PKG_CONFIG
-# libxspf 
+unique=0;
+AC_ARG_ENABLE([unique],
+              [--enable-unique Use unique.],
+	          [case "${enableval}" in
+		            yes)    enable_unique=true;;
+		             no)    enable_unique=false;;
+		              *)    AC_MSG_ERROR([bad value ${enableval} for --enable-unique]);;
+               esac],
+               [enable_unique=true])
+# libxspf
 libxspf=0;
 libspiff=0;
 
+
 AC_ARG_ENABLE([libxspf],
-              [--enable-libxspf Use libxspf.], 
+              [--enable-libxspf Use libxspf.],
 	          [case "${enableval}" in
 		            yes)    enable_libxspf=true;;
 		             no)    enable_libxspf=false;;
@@ -103,14 +114,14 @@ AC_ARG_ENABLE(libspiff,
      esac],
      [enable_libspiff=auto])
 
-if test "x${enable_libspiff}" != xno; then 
+if test "x${enable_libspiff}" != xno; then
     AC_CHECK_HEADER(spiff/spiff_c.h, AC_CHECK_LIB(spiff, spiff_parse,libspiff=1,libspiff=0),libspiff=0)
     if test "x${libspiff}" = "x1";
     then
         AC_DEFINE(SPIFF,1,["Use or don't use libspiff"])
         SPIFF_LIBS=-lspiff
         AC_SUBST(SPIFF_LIBS)
-    else 
+    else
         if test "x${enable_libspiff}" = "xyes"; then
             AC_MSG_ERROR([libspiff not found])
         fi
@@ -118,6 +129,15 @@ if test "x${enable_libspiff}" != xno; then
 fi
 fi
 
+# Checking for libunique.
+if test "x$enable_unique" = "xtrue"; then
+	PKG_CHECK_MODULES([unique], unique-1.0)
+	AC_SUBST(unique_LIBS)
+	AC_SUBST(unique_CFLAGS)
+    unique=true;
+	AC_DEFINE([HAVE_UNIQUE], 1, [Use libunique])
+fi
+AM_CONDITIONAL(HAVE_UNIQUE, test "x$unique" = "xtrue")
 # Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS([stdlib.h string.h unistd.h])
@@ -130,7 +150,7 @@ AC_SUBST(GLIB_REQUIRED)
 AC_SUBST(GTK_REQUIRED)
 
 ##
-# User params 
+# User params
 ##
 
 # Maintainer mode
@@ -187,7 +207,7 @@ AC_SUBST(gobject_LIBS)
 AC_SUBST(gobject_CFLAGS)
 
 #gtk
-PKG_CHECK_MODULES([gtk], gtk+-2.0 >= 2.12)
+PKG_CHECK_MODULES([gtk], gtk+-2.0 >= 2.18)
 AC_SUBST(gtk_LIBS)
 AC_SUBST(gtk_CFLAGS)
 
@@ -197,14 +217,10 @@ AC_SUBST(gmodule_LIBS)
 AC_SUBST(gmodule_CFLAGS)
 
 # libmpd
-PKG_CHECK_MODULES([libmpd], libmpd >= 0.19.2)
+PKG_CHECK_MODULES([libmpd], libmpd >= 0.20.95)
 AC_SUBST(libmpd_LIBS)
 AC_SUBST(libmpd_CFLAGS)
 
-# libglade
-PKG_CHECK_MODULES([libglade], libglade-2.0)
-AC_SUBST(libglade_LIBS)
-AC_SUBST(libglade_CFLAGS)
 
 # gthread
 PKG_CHECK_MODULES([gthread], gthread-2.0)
@@ -227,26 +243,12 @@ PKG_CHECK_MODULES([sqlite3], sqlite3)
 AC_SUBST(sqlite3_LIBS)
 AC_SUBST(sqlite3_CFLAGS)
 
-# libsexy 
-AC_ARG_ENABLE([system-libsexy],
-              [--enable-system-libsexy Use system libsexy instead of bundles.], 
-	          [case "${enableval}" in
-		            yes)    system_libsexy=true;;
-		             no)    system_libsexy=false;;
-		              *)    AC_MSG_ERROR([bad value ${enableval} for --enable-system-libsexy]);;
-               esac],
-               [system_libsexy=detect])
-if test "x$system_libsexy" = "xdetect"; then
-	PKG_CHECK_MODULES([libsexy], libsexy, system_libsexy=true, system_libsexy=false)
-fi
-if test "x$system_libsexy" = "xtrue"; then
-	PKG_CHECK_MODULES([libsexy], libsexy)
-	AC_SUBST(libsexy_LIBS)
-	AC_SUBST(libsexy_CFLAGS)
-	AC_DEFINE([USE_SYSTEM_LIBSEXY], 1, [Use system libsexy instead of bundled])
-fi
 
-AM_CONDITIONAL(USE_SYSTEM_LIBSEXY, [test x$system_libsexy = xtrue])
+#libxml2
+PKG_CHECK_MODULES([libxml2], libxml-2.0)
+AC_SUBST(libxml2_LIBS)
+AC_SUBST(libxml2_CFLAGS)
+
 
 # installation paths
 AC_MSG_CHECKING(prefix)
@@ -260,7 +262,7 @@ AC_MSG_RESULT($PACKAGE_PREFIX)
 
 # i18n support
 dnl please keep them in alphabetical order
-ALL_LINGUAS="ar bg bn bs cs da de el en_CA en_GB es fi fr gl he hi hu hy id it ja jv lv ml ms nb ne nl pl pt pt_BR ro ru sq sv th tr zh_CN zh_TW"
+ALL_LINGUAS="ar bg bn bs cs da de el et en_CA en_GB es fi fr gl he hi hu hy id it ja jv lv ml ms nb ne nl oc pl pt pt_BR ro ru sq sv th tr zh_CN zh_TW"
 
 
 AM_GLIB_GNU_GETTEXT
@@ -283,6 +285,8 @@ AC_DEFINE_UNQUOTED(PACKAGE_LOCALE_DIR,"$PACKAGE_LOCALE_DIR",[The package's local
 AC_SUBST(PACKAGE_LOCALE_DIR)
 AC_SUBST(PACKAGE_LIBS)
 
+
+
 #Win32 compile support
 
 EXTRA_CFLAGS=
@@ -295,7 +299,6 @@ esac
 
 win32=no
 macosx=no
-macige=no
 case $host in
   *-*-mingw32* | *-*-windows)
     win32=yes
@@ -305,38 +308,20 @@ case $host in
     win32=yes
     EXTRA_LDFLAGS="-export-all-symbols -mms-bitfields" ;;
   *-apple-darwin*)
-    EXTRA_LDFLAGS="-framework Carbon" 
+    EXTRA_LDFLAGS="-framework Carbon"
     macosx=yes;;
 esac
 AM_CONDITIONAL(WIN32, test x$win32 = xyes)
 AM_CONDITIONAL(OSX, test x$macosx = xyes)
-# for smclient 
-AM_CONDITIONAL(PLATFORM_WIN32, test x$win32 = xyes) 
-AM_CONDITIONAL(PLATFORM_OSX, test x$macosx = xyes) 
-
-
-AC_ARG_ENABLE(macige,
-              [  --enable-macige      Enable Mac integration on mac.],
-              [ case "${enableval}" in
-                    yes)    macige=yes;;
-                     no)    macige=no;;
-                      *)    AC_MSG_ERROR([bad value ${enableval} for --enable-macige]);;
-                esac],
-              [macige=no])
-
-if test x$macosx = xyes && test x$macige = xyes; then
-# mac integration 
-PKG_CHECK_MODULES([macint],ige-mac-integration)
-AC_SUBST(macint_CFLAGS)
-AC_SUBST(macint_LIBS)
-AC_DEFINE(ENABLE_IGE, 1, [Enable Mac integration Support])
-fi
+# for smclient
+AM_CONDITIONAL(PLATFORM_WIN32, test x$win32 = xyes)
+AM_CONDITIONAL(PLATFORM_OSX, test x$macosx = xyes)
 
 ##
 # These depend on if we are or are not on windows or osX
 
 ##
-# Session support             
+# Session support
 if test x$macosx = xno && test x$win32 = xno ; then
 # Multimedia keys
 AC_ARG_ENABLE([mmkeys],
@@ -350,6 +335,12 @@ AC_ARG_ENABLE([mmkeys],
 if test x${enable_mmkeys} = xyes; then
 	AC_DEFINE(ENABLE_MMKEYS, 1, [Enable multimedia support])
 fi
+
+#libx11
+PKG_CHECK_MODULES([libx11], x11)
+AC_SUBST(libx11_LIBS)
+AC_SUBST(libx11_CFLAGS)
+
 else
 # force them off
 enable_mmkeys=no;
@@ -361,15 +352,38 @@ AC_SUBST(EXTRA_LDFLAGS)
 GOB2_CHECK(2.0.0)
 # Make the gob2 check fatal
 if test x${GOB2} = x""; then
-	exit 0;
+	exit 1;
 fi
 
-AM_PROG_VALAC([0.7.10])
+AM_PROG_VALAC([0.11.0])
 
 if test x${VALAC} = x""; then
-    exit 0;
+    exit 1;
 fi
 
+APPINDICATOR_REQUIRED=0.3
+
+AC_ARG_ENABLE(appindicator,
+                        AS_HELP_STRING([--enable-appindicator[=@<:@no/auto/yes@:>@]],[Build support for application indicators ]),
+                        [enable_appindicator=$enableval],
+                        [enable_appindicator="auto"])
+
+if test x$enable_appindicator = xauto ; then
+        PKG_CHECK_EXISTS([appindicator-0.1 >= $APPINDICATOR_REQUIRED],
+                         enable_appindicator="yes",
+                         enable_appindicator="no")
+fi
+
+if test x$enable_appindicator = xyes ; then
+        PKG_CHECK_EXISTS([appindicator-0.1 >= $APPINDICATOR_REQUIRED],,
+                         AC_MSG_ERROR([appindicator-0.1 is not installed]))
+        PKG_CHECK_MODULES(APP_INDICATOR,
+                        appindicator-0.1 >= $APPINDICATOR_REQUIRED)
+        AC_SUBST(APP_INDICATOR_CFLAGS)
+        AC_SUBST(APP_INDICATOR_LIBS)
+        AC_DEFINE(HAVE_APP_INDICATOR, 1, [Have AppIndicator])
+fi
+AM_CONDITIONAL(HAVE_APP_INDICATOR, test x"$enable_appindicator" = xyes)
 
 AC_ARG_ENABLE([shave],
             [  --disable-shave			Use shave output cleaner when building.],
@@ -380,8 +394,10 @@ AC_ARG_ENABLE([shave],
                 esac],
               [enable_shave=no])
 if test x$enable_shave = xyes; then
-SHAVE_INIT([./]) 
+SHAVE_INIT([./])
 fi
+
+GNOME_DOC_INIT([0.18.0], [have_gdu=yes], [have_gdu=no])
 
 AC_OUTPUT([
 shave
@@ -396,6 +412,7 @@ po/Makefile
 data/gmpc.pc
 remote/Makefile
 doc/Makefile
+doc/Mallard/Makefile
 pixmaps/Makefile
 pixmaps/icons/Makefile
 pixmaps/icons/hicolor/Makefile
@@ -483,6 +500,10 @@ test/MpdDataModel/Makefile
 test/GmpcEasyDownload/Makefile
 test/MetaDataCache/Makefile
 test/PixbufCache/Makefile
+test/AsyncImage/Makefile
+test/Misc/Makefile
+test/DiscoGS/Makefile
+test/LastFM/Makefile
 ])
 echo ""
 echo ""
@@ -497,15 +518,10 @@ if test x${enable_mmkeys} = xyes; then
 else
 	echo "Multimedia keys support is:       disabled"
 fi
-if test "x$system_libsexy" = "xtrue"; then 
-	echo "Use system libsexy:               enabled"
+if test x"$enable_appindicator" = xyes; then
+    echo "AppIndicator Support is:          enabled"
 else
-	echo "Use system libsexy:               disabled"
-fi
-if test "x$macige" = "xyes"; then 
-	echo "Use mac integration library:      enabled"
-else
-	echo "Use mac integration library:      disabled"
+    echo "AppIndicator Support is:          disabled"
 fi
 if test "x$libspiff" = "x1"; then
 	echo "Use libspiff library:             enabled"
@@ -516,6 +532,16 @@ if test "x$libxspf" = "x1"; then
 	echo "Use libxspf library:              enabled"
 else
 	echo "Use libxspf library:              disabled"
+fi
+if test "x$unique" = "xtrue"; then
+	echo "Use unique library:               enabled"
+else
+	echo "Use unique library:               disabled"
+fi
+if test "x$have_gdu" = "xyes"; then
+	echo "Use Gnome Documentation:          enabled"
+else
+	echo "Use Gnome Documentation:          disabled"
 fi
 echo "";
 echo "Now type make to build"

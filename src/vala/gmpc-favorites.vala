@@ -1,7 +1,7 @@
 
 /* Gnome Music Player Client (GMPC)
- * Copyright (C) 2004-2010 Qball Cow <qball@sarine.nl>
- * Project homepage: http://gmpc.wikia.com/
+ * Copyright (C) 2004-2011 Qball Cow <qball@gmpclient.org>
+ * Project homepage: http://gmpclient.org/
  
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,19 +26,23 @@ using MPD;
 /* trick to get config.h included */
 static const string some_unique_name_fav = Config.VERSION;
 private const bool use_transition_fav = Gmpc.use_transition;
-static Gmpc.Favorites.List favorites = null;
+public static Gmpc.Favorites.List favorites = null;
 
+private const string LOG_DOMAIN_FAV = "Gmpc.Favorites";
 namespace Gmpc.Favorites{
     /**
      * This class is created, and stays active until the last GmpcFavoritesButton gets removed
-     * POSSIBLE ISSUE: setting favorites list back to NULL seems to fail. It is no issue as 
-     * I know atleast one will be active.
      */
-    private class List : GLib.Object {
-        private MPD.Data.Item? list = null; 
+    public class List : GLib.Object {
+        private MPD.Data.Item?  list = null; 
+        public  bool            disable {get; set; default = false;}
         construct {
-            gmpcconn.connection_changed += con_changed;
-            gmpcconn.status_changed += status_changed;
+            gmpcconn.connection_changed.connect(con_changed);
+            gmpcconn.status_changed.connect(status_changed);
+            GLib.log(LOG_DOMAIN_FAV, GLib.LogLevelFlags.LEVEL_DEBUG, "Favorites object created");
+            if(Gmpc.server.connected) {
+                con_changed(gmpcconn, server, 1);
+            }
         }
 
         /**
@@ -50,7 +54,10 @@ namespace Gmpc.Favorites{
         con_changed(Gmpc.Connection conn, MPD.Server server, int connect)
         {
             if(connect == 1){
+                GLib.log(LOG_DOMAIN_FAV, GLib.LogLevelFlags.LEVEL_DEBUG, "Update list");
                 list = MPD.Database.get_playlist_content(server, _("Favorites"));
+                // Enable plugin.
+                disable = false;
                 this.updated();
             }else{
                 list = null;
@@ -63,8 +70,9 @@ namespace Gmpc.Favorites{
         void
         status_changed(Gmpc.Connection conn, MPD.Server server, MPD.Status.Changed what)
         {
-            if((what&MPD.Status.Changed.STORED_PLAYLIST) == MPD.Status.Changed.STORED_PLAYLIST)
+            if(!disable && (what&MPD.Status.Changed.STORED_PLAYLIST) == MPD.Status.Changed.STORED_PLAYLIST)
             {
+                GLib.log(LOG_DOMAIN_FAV, GLib.LogLevelFlags.LEVEL_DEBUG, "Update list");
                 list = MPD.Database.get_playlist_content(server, _("Favorites"));
                 this.updated();
             }
@@ -84,7 +92,7 @@ namespace Gmpc.Favorites{
         bool
         is_favorite(string path)
         {
-            weak MPD.Data.Item iter = this.list.get_first();
+            unowned MPD.Data.Item iter = this.list.get_first();
             while(iter != null)
             {
                 if(iter.type == MPD.Data.Type.SONG)
@@ -93,7 +101,7 @@ namespace Gmpc.Favorites{
                         return true;
                     }
                 }
-                iter = iter.next(false);
+                iter.next(false);
             }
             return false;
         }
@@ -106,7 +114,7 @@ namespace Gmpc.Favorites{
         {
             bool current = this.is_favorite(path);
             /* Do nothing if state does not change */
-            if(current != favorite)
+            if(!disable && current != favorite)
             {
                 if(favorite){
                     /* Add it */
@@ -115,7 +123,7 @@ namespace Gmpc.Favorites{
                     /* Remove it */
                     /* To be able to remove it we have to first lookup the position */
                     /* This needs libmpd 0.18.1 */
-                    weak MPD.Data.Item iter = this.list.get_first();
+                    unowned MPD.Data.Item iter = this.list.get_first();
                     while(iter != null)
                     {
                         if(iter.type == MPD.Data.Type.SONG)
@@ -125,7 +133,7 @@ namespace Gmpc.Favorites{
                                 return;
                             }
                         }
-                        iter = iter.next(false);
+                        iter.next(false);
                     }
                 }
             }
@@ -154,20 +162,29 @@ namespace Gmpc.Favorites{
             try {
                 pb = it.load_icon("emblem-favorite",24, 0);
             }catch(Error e) {
-                stdout.printf("error: %s\n", e.message);
+                GLib.error("error: %s\n", e.message);
             }
             if(favorites == null){
                 favorites = new List();
+                /* make sure favorites is set to NULL again when destroyed */
+                favorites.add_weak_pointer(&favorites);
             } else {
                 favorites.ref();
             }
-            favorites.updated += update;
+            favorites.notify["disable"].connect((source)=>{
+                if(favorites.disable) {
+                    this.set_sensitive(false);
+                }else{
+                    this.set_sensitive(true);
+                }
+            });
+            favorites.updated.connect(update);
             this.image = new Gtk.Image();
             this.update(favorites);
             this.add(this.image);
-            this.button_press_event += button_press_event_callback;
-            this.enter_notify_event += enter_notify_event_callback;
-            this.leave_notify_event += leave_notify_event_callback;
+            this.button_press_event.connect(button_press_event_callback);
+            this.enter_notify_event.connect(enter_notify_event_callback);
+            this.leave_notify_event.connect(leave_notify_event_callback);
 
         }
         ~Button() {
@@ -176,7 +193,7 @@ namespace Gmpc.Favorites{
         }
         private
         bool
-        button_press_event_callback(Gmpc.Favorites.Button button,Gdk.EventButton event)
+        button_press_event_callback(Gtk.Widget button,Gdk.EventButton event)
         {
             if(event.button == 1 && this.song != null) {
                 favorites.set_favorite(this.song.file, !this.fstate);
@@ -184,7 +201,8 @@ namespace Gmpc.Favorites{
             }
             else if (event.button == 3 && this.song != null) {
                 var menu = new Gtk.Menu();
-                MPD.Data.Item ? item = MPD.Database.get_playlist_list(server);
+				int items = 0;
+				MPD.Data.Item ? item = MPD.Database.get_playlist_list(server);
                 while(item != null)
                 {
                     string pp = item.playlist.path;
@@ -199,18 +217,23 @@ namespace Gmpc.Favorites{
                             });
                     menu.append(entry);
                     item.next_free();
+					items++;
                 }
-                menu.show_all();
-                menu.popup(null, null, null, event.button, event.time);
-
-            }
+				if(items > 0)
+				{
+	                menu.show_all();
+    	            menu.popup(null, null, null, event.button, event.time);
+				}
+				else menu.destroy();
+				return true;
+			}
             return false;
         }
 
         /* on mouse over, do some pre-highlighting */
         private
         bool
-        enter_notify_event_callback(Gmpc.Favorites.Button button, Gdk.EventCrossing motion)
+        enter_notify_event_callback(Gtk.Widget button, Gdk.EventCrossing motion)
         {
             var pb2 = pb.copy();
             if(this.fstate){
@@ -224,7 +247,7 @@ namespace Gmpc.Favorites{
         /* Reset default highlighting */
         private
         bool
-        leave_notify_event_callback(Gmpc.Favorites.Button button, Gdk.EventCrossing motion)
+        leave_notify_event_callback(Gtk.Widget button, Gdk.EventCrossing motion)
         {
             this.update(favorites);
             return false;

@@ -1,6 +1,6 @@
 /* Gnome M usic Player Client (GMPC)
- * Copyright (C) 2004-2010 Qball Cow <qball@sarine.nl>
- * Project homepage: http://gmpc.wikia.com/
+ * Copyright (C) 2004-2011 Qball Cow <qball@gmpclient.org>
+ * Project homepage: http://gmpclient.org/
  
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -70,7 +70,7 @@ class Gmpc:Meta:Text:View from Gtk:Text:View {
 	}
 	
 	public 
-	GtkWidget * new (int type)
+	Gmpc:Meta:Text:View * new (int type)
 	{
 		Self *gmi =  GET_NEW;
 		gmi->_priv->type = type;
@@ -82,7 +82,7 @@ class Gmpc:Meta:Text:View from Gtk:Text:View {
                 "family", "Monospace",
                 "family-set", TRUE,
                 NULL);
-		return (GtkWidget *)gmi;
+		return gmi;
 	}
 
 	private 

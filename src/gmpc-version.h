@@ -1,5 +1,5 @@
 /* libmpd (high level libmpdclient library)
- * Copyright (C) 2004-2009 Qball Cow <qball@sarine.nl>
+ * Copyright (C) 2004-2009 Qball Cow <qball@gmpclient.org>
  * Project homepage: http://gmpcwiki.sarine.nl/
  
  * This program is free software; you can redistribute it and/or modify
@@ -18,9 +18,9 @@
 */
 
 #ifndef GMPC_VERSION
-#define GMPC_VERSION "0.20.0"
+#define GMPC_VERSION "11.8.16"
 
-#define GMPC_MAJOR_VERSION (0)
-#define GMPC_MINOR_VERSION (20)
-#define GMPC_MICRO_VERSION (0)
+#define GMPC_MAJOR_VERSION (11)
+#define GMPC_MINOR_VERSION (8)
+#define GMPC_MICRO_VERSION (16)
 #endif

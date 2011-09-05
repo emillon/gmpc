@@ -6,8 +6,14 @@ namespace MPD {
     [Compact]
     public class Server {
 
+        [CCode (cname="mpd_check_connected")]
+        public bool check_connected();
+
+        public bool connected { get { return check_connected();}}
+
+
         public MPD.Song playlist_get_song(int songid);
-        public weak MPD.Song playlist_get_current_song();
+        public unowned MPD.Song playlist_get_current_song();
         public int player_get_next_song_id();
         [CCode (cname="mpd_server_get_database_update_time")]
         public int get_database_update_time();
@@ -21,7 +27,7 @@ namespace MPD {
     [CCode (cname = "mpd_Song",
     free_function = "mpd_freeSong",
     copy_function = "mpd_songDup",
-    cheader_filename = "libmpd/libmpdclient.h,libmpd/libmpd.h")]
+    cheader_filename = "libmpd/libmpdclient.h,libmpd/libmpd.h,misc.h")]
     [Compact]
     [Immutable]
     public class Song {
@@ -42,12 +48,10 @@ namespace MPD {
         public int    time;
         public int    pos;
         public int    id;
-        [CCode (cname="mpd_songDup")]
-        public unowned MPD.Song copy ();
+        [CCode (cname="mpd_songDup0")]
+        public static Song copy (Song? s);
         [CCode (instance_pos = -1)]
         public void markup (char[] buffer, int length, string markup);
-        [CCode (cname = "mpd_freeSong")]
-        public static void free;
     }
     namespace Sticker {
         namespace Song {
@@ -141,7 +145,6 @@ namespace MPD {
                 free_function = "mpd_data_free", 
                 cheader_filename = "libmpd/libmpd.h")]
             [Compact]
-            [Immutable]
             public class Item {
                 public Data.Type type;
                 public MPD.Song  song;
@@ -157,11 +160,16 @@ namespace MPD {
                 [ReturnsModifiedPointer ()]
                 public void sort_album_disc_track();
 
-                [CCode (cname="mpd_data_get_next_real")] 
-                public weak Item? next(bool free);
+                [CCode (cname="misc_mpddata_remove_duplicate_songs")]
+                [ReturnsModifiedPointer ()]
+                public void remove_duplicate_songs();
+
+                [CCode (cname="mpd_data_get_next_real", cheader_filename="libmpd/libmpd-internal.h")] 
+                [ReturnsModifiedPointer ()]
+                public void next(bool free);
 
                 [CCode (cname="mpd_data_get_first")] 
-                public weak Item? get_first();
+                public unowned Item? get_first();
 
                 [CCode (cname="mpd_data_get_first")] 
                 [ReturnsModifiedPointer ()]
@@ -186,6 +194,39 @@ namespace MPD {
         public void queue_commit(MPD.Server server);
         [CCode (cname="mpd_playlist_clear")]
         public void clear(MPD.Server server);
+        
+        public void add_artist(MPD.Server server, string artist)
+        {
+            MPD.Database.search_start(server,true);
+            MPD.Database.search_add_constraint(server, MPD.Tag.Type.ARTIST, artist);
+            var data = MPD.Database.search_commit(server);
+            if(data != null) {
+                data.sort_album_disc_track();
+                while(data != null){ 
+                    MPD.PlayQueue.queue_add_song(server, data.song.file);
+                    data.next_free();
+                }
+                MPD.PlayQueue.queue_commit(server);
+            }
+        }
+        public void add_album(MPD.Server server, string? artist, string? album, string? album_artist=null)
+        {
+            MPD.Database.search_start(server,true);
+            if(album_artist != null)
+                MPD.Database.search_add_constraint(server, MPD.Tag.Type.ALBUM_ARTIST, album_artist);
+            else
+                MPD.Database.search_add_constraint(server, MPD.Tag.Type.ARTIST, artist);
+            MPD.Database.search_add_constraint(server, MPD.Tag.Type.ALBUM, album);
+            var data = MPD.Database.search_commit(server);
+            if(data != null) {
+                data.sort_album_disc_track();
+                while(data != null){ 
+                    MPD.PlayQueue.queue_add_song(server, data.song.file);
+                    data.next_free();
+                }
+                MPD.PlayQueue.queue_commit(server);
+            }
+        }
     }
 
     namespace Player {
@@ -196,7 +237,7 @@ namespace MPD {
         public void pause(MPD.Server server);
         public void stop(MPD.Server server);
         public MPD.Player.State get_state(MPD.Server server);
-        [CCode (cprefix="MPD_STATUS_STATE_")]
+        [CCode (cprefix="MPD_STATUS_STATE_", cname="int")]
         public enum State{
             UNKNOWN = 0,
             STOP    = 1,

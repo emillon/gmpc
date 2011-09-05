@@ -1,6 +1,6 @@
 /* Gnome Music Player Client (GMPC)
- * Copyright (C) 2004-2010 Qball Cow <qball@sarine.nl>
- * Project homepage: http://gmpc.wikia.com/
+ * Copyright (C) 2004-2011 Qball Cow <qball@gmpclient.org>
+ * Project homepage: http://gmpclient.org/
  
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,7 +46,6 @@
 #include "gmpc-profiles.h"
 #include "smclient/eggsmclient.h"
 
-extern GmpcEasyCommand *gmpc_easy_command;
 extern int 				gmpc_connected;
 extern GtkTreeModel 	*playlist;
 
@@ -77,8 +76,14 @@ void meta_data_add_plugin(gmpcPluginParent *plug);
  * TODO move this 
  */
 void url_start_real(const gchar *url);
+void url_start_easy_command(void *data,char *param, void *d );
 void url_start(void);
 
+void url_start_custom(const gchar *url, 
+	void (*error_callback)(const gchar *error_msg, gpointer user_data),
+	void (*result_callback)(GList *result,gpointer user_data),
+	void (*progress_callback)(gdouble progress, gpointer user_data),
+	gpointer user_data);
 /*
  * functions to get patch to different files.
  * This is needed to make the windows port work.
@@ -94,6 +99,7 @@ char *gmpc_get_full_image_path(void);
 /* tray stuff */
 gboolean tray_icon2_get_available(void);
 void tray_icon2_create_tooltip(void);
+void tray_icon2_update_menu(void);
 
 /* tag stuff */
 
@@ -110,6 +116,7 @@ void gmpc_easy_async_quit(void);
 /**Hack Handle status changed */
 void   GmpcStatusChangedCallback(MpdObj *mi, ChangedStatusType what, void *userdata);
 
+
 #ifdef DEBUG_TIMING
 /* Tic Tac system */
 #define TIMER_SUB(start,stop,diff)  diff.tv_usec = stop.tv_usec - start.tv_usec;\
@@ -124,7 +131,7 @@ void   GmpcStatusChangedCallback(MpdObj *mi, ChangedStatusType what, void *userd
 
 #define TAC(a,ARGS...) g_get_current_time(&stop123);\
     TIMER_SUB(start123, stop123, diff123);\
-    printf(a": %lu s, %lu us\n",##ARGS, (unsigned long)( diff123.tv_sec),(unsigned long)( diff123.tv_usec));    
+    printf("%lu.%06lu:%s: "a"\n", (unsigned long)( diff123.tv_sec),(unsigned long)( diff123.tv_usec),__FUNCTION__,##ARGS);    
 
 #define TOC(a,ARGS...) TAC(a,##ARGS);\
     start123 = stop123;

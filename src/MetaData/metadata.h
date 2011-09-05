@@ -1,6 +1,6 @@
 /* Gnome Music Player Client (GMPC)
- * Copyright (C) 2004-2010 Qball Cow <qball@sarine.nl>
- * Project homepage: http://gmpc.wikia.com/
+ * Copyright (C) 2004-2011 Qball Cow <qball@gmpclient.org>
+ * Project homepage: http://gmpclient.org/
  
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,6 +80,11 @@ typedef struct {
      * null terminated anyway.
      */
     gsize size;
+    /**
+     * If type is an image (album art/artist art). 
+     */
+    /** This allows us to be a bit more friendly for image providers */
+    char *thumbnail_uri;
 }MetaData;
 
 
@@ -108,6 +113,8 @@ gboolean meta_data_is_empty(const MetaData *data);
 gboolean meta_data_is_uri(const MetaData *data);
 const gchar *meta_data_get_uri(const MetaData *data);
 void meta_data_set_uri(MetaData *data, const gchar *uri);
+void meta_data_set_thumbnail_uri(MetaData *data, const gchar *uri);
+const gchar *meta_data_get_thumbnail_uri(const MetaData *data);
 /* TEXT */
 gboolean meta_data_is_text(const MetaData *data);
 const gchar * meta_data_get_text(const MetaData *data);
@@ -119,12 +126,17 @@ const gchar * meta_data_get_html(const MetaData *data);
 /* RAW */
 gboolean meta_data_is_raw(const MetaData *data);
 const guchar * meta_data_get_raw(const MetaData *data, gsize *length);
+/* set raw data (makes copy) */
+void meta_data_set_raw(MetaData *item, guchar *data, gsize len);
+/* Take ownershit of data. (so no copy) */
+void meta_data_set_raw_owned(MetaData *item, guchar **data, gsize *len);
 /* TEXT VECTOR */
 gboolean meta_data_is_text_vector(const MetaData *data);
 const gchar **meta_data_get_text_vector(const MetaData *data);
 /* TEXT LIST */
 gboolean meta_data_is_text_list(const MetaData *data);
 const GList *meta_data_get_text_list (const MetaData *data);
+void meta_data_set_text(MetaData *data, const gchar *text);
 
 /* ****************************************** */
 void metadata_import_old_db(char *url);
@@ -142,7 +154,7 @@ void meta_data_destroy(void);
 MetaDataResult meta_data_get_path(mpd_Song *tsong, MetaDataType type, MetaData **met,MetaDataCallback callback, gpointer data);
 
 
-gchar * gmpc_get_metadata_filename(MetaDataType  type, mpd_Song *song, char *extention);
+gchar * gmpc_get_metadata_filename(MetaDataType  type, mpd_Song *song, char *extension);
 
 
 

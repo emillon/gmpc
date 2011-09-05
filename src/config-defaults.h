@@ -1,6 +1,6 @@
 /* Gnome Music Player Client (GMPC)
- * Copyright (C) 2004-2010 Qball Cow <qball@sarine.nl>
- * Project homepage: http://gmpc.wikia.com/
+ * Copyright (C) 2004-2011 Qball Cow <qball@gmpclient.org>
+ * Project homepage: http://gmpclient.org/
  
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,8 @@
 #define DEFAULT_PLAYER_MARKUP 	"[%name%: &[%artist% - ]%title%]|%name%|[%artist% - ]%title%|%shortfile%|"
 #define DEFAULT_HIDE_ON_STARTUP 0
 #define DEFAULT_TRAY_ICON_ENABLE 1
-#define DEFAULT_AUTOCONNECT 0
+#define DEFAULT_TRAY_ICON_USE_APPINDICATOR 1
+#define DEFAULT_AUTOCONNECT 1
 #define DEFAULT_TRAY_MARKUP "[<span size=\"small\">%name%</span>\n][<span size=\"large\" weight=\"bold\">%title%</span>\n][%artist%][\n<span size=\"small\">%album% [(track %track%)]</span>]|%shortfile%|"
 
 

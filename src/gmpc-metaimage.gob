@@ -1,6 +1,6 @@
 /* Gnome Music Player Client (GMPC)
- * Copyright (C) 2004-2010 Qball Cow <qball@sarine.nl>
- * Project homepage: http://gmpc.wikia.com/
+ * Copyright (C) 2004-2011 Qball Cow <qball@gmpclient.org>
+ * Project homepage: http://gmpclient.org/
  
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -196,7 +196,7 @@ class Gmpc:MetaImage from Gtk:Event:Box{
             {
                 if(GMPC_META_IMAGE_ASYNC(self->_priv->tooltip_image)->uri == NULL || 
 				strcmp(GMPC_META_IMAGE_ASYNC(self->_priv->tooltip_image)->uri, self->_priv->image_url) != 0)
-			gmpc_meta_image_async_set_from_file(GMPC_META_IMAGE_ASYNC(self->_priv->tooltip_image), self->_priv->image_url, 350, FALSE); 
+			gmpc_meta_image_async_set_from_file(GMPC_META_IMAGE_ASYNC(self->_priv->tooltip_image), self->_priv->image_url, 350, GMPC_MODIFICATION_TYPE_NONE); 
                 gtk_widget_show(self->_priv->tooltip_image);
                 return TRUE;
             }
@@ -296,7 +296,7 @@ class Gmpc:MetaImage from Gtk:Event:Box{
         }
 
         public
-        GtkWidget *new_size(int type, int size)
+        Gmpc:Meta:Image *new_size(int type, int size)
         {
             Self *gmi =  GET_NEW;
             gmi->image_type = type;
@@ -314,7 +314,7 @@ class Gmpc:MetaImage from Gtk:Event:Box{
 
             gmi->_priv->metadata_force_reload = g_signal_connect_swapped(G_OBJECT(gmw), "force-reload", G_CALLBACK(self_reload_image), gmi);
 
-            return (GtkWidget *)gmi;
+            return gmi;
         }
 	public 
 		GtkWidget * new (int type)
@@ -404,7 +404,7 @@ class Gmpc:MetaImage from Gtk:Event:Box{
 
 	public 
 		void
-		update_cover_from_song(self, mpd_Song *song)
+		update_cover_from_song(self, const mpd_Song *song)
 		{
 			MetaDataResult ret;
             MetaData *met= NULL;
@@ -421,7 +421,7 @@ class Gmpc:MetaImage from Gtk:Event:Box{
 			}
             self->_priv->song = mpd_songDup(song);
 
-			ret = gmpc_meta_watcher_get_meta_path(gmw,song, self->image_type, &met);
+			ret = gmpc_meta_watcher_get_meta_path(gmw,self->_priv->song, self->image_type, &met);
 			if(ret == META_DATA_FETCHING)
 			{
 				self_set_cover_fetching(self);
@@ -661,7 +661,10 @@ class Gmpc:MetaImage from Gtk:Event:Box{
             }
             self->_priv->image_url = g_strdup(path); 
             gmpc_meta_image_async_set_from_file(GMPC_META_IMAGE_ASYNC(self->_priv->image), self->_priv->image_url, self->size,
-                    (cfg_get_single_value_as_int_with_default(config, "metaimage", "addcase",TRUE) && self->image_type == META_ALBUM_ART));
+                    ((cfg_get_single_value_as_int_with_default(config, "metaimage", "addcase",TRUE) && self->image_type == META_ALBUM_ART))?
+                    GMPC_MODIFICATION_TYPE_CASING:GMPC_MODIFICATION_TYPE_BORDER
+                    
+                    );
             if(self->squared) {
                 gtk_widget_set_size_request(GTK_WIDGET(self), self->size, self->size);
             }
@@ -692,21 +695,21 @@ class Gmpc:MetaImage from Gtk:Event:Box{
 		if(self->_priv->song)
 		{
 			MetaDataResult ret;
-            MetaData *met = NULL;
+			MetaData *met = NULL;
 
 			ret = gmpc_meta_watcher_get_meta_path(gmw,self->_priv->song, self->image_type|META_QUERY_NO_CACHE, &met);
 			if(ret == META_DATA_FETCHING)
 			{
 				self_set_cover_fetching(self);
 			}else if (ret == META_DATA_AVAILABLE) {
-                    if(met->content_type == META_DATA_CONTENT_URI)
-                    {
-                        const gchar *path = meta_data_get_uri(met);
-                        self_set_cover_from_path(self,path); 
-                    }else{
-                        g_log(LOG_DOMAIN, G_LOG_LEVEL_WARNING, "Not implemented");
-                        self_set_cover_na(self);
-                    }
+				if(met->content_type == META_DATA_CONTENT_URI)
+				{
+					const gchar *path = meta_data_get_uri(met);
+					self_set_cover_from_path(self,path); 
+				}else{
+					g_log(LOG_DOMAIN, G_LOG_LEVEL_WARNING, "Not implemented");
+					self_set_cover_na(self);
+				}
 			} else {
 				self_set_cover_na(self);
 			}
@@ -864,11 +867,4 @@ class Gmpc:MetaImage from Gtk:Event:Box{
 					break;
 		}
 	}
-
-    public
-    void
-    set_image_text(self, gchar *text)
-    {
-
-    }
 }

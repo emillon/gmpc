@@ -10,10 +10,11 @@ appglade_DATA =\
 		preferences-server.ui\
 		preferences-connection.ui\
 		preferences-proxy.ui\
+        preferences-metadata-appearance.ui\
 		password-dialog.ui\
 		playlist-save-dialog.ui\
 		playlist-message-window.ui\
-		playlist3.glade\
+		playlist3.ui\
         gmpc-add-url.ui
 
 EXTRA_DIST = ${appglade_DATA} 

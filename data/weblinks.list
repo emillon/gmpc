@@ -14,3 +14,15 @@ search-and-replace=( )::+
 [Last.FM]
 type=artist
 url=http://last.fm/music/%ARTIST%
+
+[Musicbrainz Recordings]
+type=song
+url=http://musicbrainz.org/search?query="%TITLE%"+AND+artist%3A"%ARTIST%"+AND+release%3A"%ALBUM%"&type=recording&advanced=1
+
+[Musicbrainz Album]
+type=album
+url=http://musicbrainz.org/search?query="%ALBUM%"+AND+artist%3A"%ARTIST%"&type=release&advanced=1
+
+[Musicbrainz Artist]
+type=artist
+url=http://musicbrainz.org/search?query="%ARTIST%"&type=artist

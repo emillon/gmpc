@@ -1,6 +1,6 @@
 /* Gnome Music Player Client (GMPC)
- * Copyright (C) 2004-2010 Qball Cow <qball@sarine.nl>
- * Project homepage: http://gmpc.wikia.com/
+ * Copyright (C) 2004-2011 Qball Cow <qball@gmpclient.org>
+ * Project homepage: http://gmpclient.org/
  
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -78,6 +78,7 @@ class Gmpc:MpdData:Model:Sort from Gmpc:MpdData:Model
 			GtkTreePath *path=NULL;
 			GtkTreeModel *model=NULL;
 			gint *ind = NULL, *ind2 = NULL;
+            printf("Got drop\n");
 			if(dest == NULL || !gtk_tree_get_row_drag_data(selection_data, &model, &path))
 			{
 				return FALSE;

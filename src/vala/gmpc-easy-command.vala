@@ -1,6 +1,6 @@
 /* Gnome Music Player Client (GMPC)
- * Copyright (C) 2004-2010 Qball Cow <qball@sarine.nl>
- * Project homepage: http://gmpc.wikia.com/
+ * Copyright (C) 2004-2011 Qball Cow <qball@gmpclient.org>
+ * Project homepage: http://gmpclient.org/
  
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,27 +33,29 @@ using Gmpc;
  */
 private const bool use_transition_ec = Gmpc.use_transition;
 private const string some_unique_name_ec = Config.VERSION;
+private const string log_domain_ec = "EasyCommand";
+
 public class Gmpc.Easy.Command: Gmpc.Plugin.Base {
 	/* hack to make gettext happy */
 	private Gtk.EntryCompletion completion = null;
-	private Gtk.ListStore store = null;
+	public Gtk.ListStore store = null;
 	private uint signals = 0;
 	private Gtk.Window window = null;
 
 	/***
 	 * plugin setup
 	 */
-	private int[] version = {0,0,1};
+	private const int[] version = {0,0,1};
 
 
 	/**
 	 * Required plugin implementation
 	 */
-	 public override weak string get_name() 
+	 public override unowned string get_name() 
 	 {
 		return _("Gmpc Easy Command");
 	 }
-	 public override weak int[] get_version()
+	 public override unowned int[] get_version()
 	 {
 		return this.version;
 	 }
@@ -66,8 +68,7 @@ public class Gmpc.Easy.Command: Gmpc.Plugin.Base {
     public override void set_enabled(bool state) {
 		/* if disabling and popup is open, close it */
 		if(!state && this.window != null) {
-			this.window.destroy();
-			this.window = null;
+			popup_destroy();
 		}
        config.set_int(this.get_name(), "enabled", (int)state); 
     }
@@ -75,14 +76,24 @@ public class Gmpc.Easy.Command: Gmpc.Plugin.Base {
 	/************************************************
 	 * private
 	 */
-	private bool completion_function(Gtk.EntryCompletion comp, string key, Gtk.TreeIter iter) {
+	public static bool completion_function(Gtk.EntryCompletion comp, string key, Gtk.TreeIter iter) {
 		string value;
+		string pattern;
 		var model = comp.model;
 
-		 model.get(iter, 1, out value);
+		 model.get(iter, 1, out value,2, out pattern);
 		if (value != null) {
-			string a = "^%s.*".printf(key);
-			 return GLib.Regex.match_simple(a, value, GLib.RegexCompileFlags.CASELESS, 0);
+			string a;
+			if(key.length < value.length) {
+				a= "^%s".printf(value.substring(0,(long)key.length));
+			}else{
+				a= "^%s".printf(value);
+				if(pattern != null && pattern.length > 0) {
+					a+= "[ ]*(%s)".printf(pattern);
+				}
+			}
+			a+="$";
+			return GLib.Regex.match_simple(a.down(), key.down(),GLib.RegexCompileFlags.CASELESS, 0);
 		}
 
 		return false;
@@ -93,8 +104,11 @@ public class Gmpc.Easy.Command: Gmpc.Plugin.Base {
         this.plugin_type = 8+4;
 
 		this.store =
-			new Gtk.ListStore(6, typeof(uint), typeof(string), typeof(string), typeof(void *), typeof(void *),
-							  typeof(string));
+			new Gtk.ListStore(8,
+				typeof(uint),   typeof(string), 
+				typeof(string), typeof(void *), 
+				typeof(void *), typeof(string),
+				typeof(string), typeof(string));
 		this.completion = new Gtk.EntryCompletion();
 		this.completion.model = this.store;
 		this.completion.text_column = 1;
@@ -103,13 +117,22 @@ public class Gmpc.Easy.Command: Gmpc.Plugin.Base {
 		this.completion.popup_completion = true;
 
 		this.completion.set_match_func(completion_function);
+		var rpixbuf = new Gtk.CellRendererPixbuf();
+		this.completion.pack_start(rpixbuf, false);
+		/* Make sure it is at the start */
+		this.completion.reorder(rpixbuf, 0);
+
+		rpixbuf.set("stock-size", Gtk.IconSize.MENU,null);
+		this.completion.add_attribute(rpixbuf, "icon-name",6);
+		this.completion.add_attribute(rpixbuf, "stock-id", 7);
 
 		var renderer = new Gtk.CellRendererText();
 		this.completion.pack_end(renderer, false);
 		this.completion.add_attribute(renderer, "text", 5);
 		renderer.set("foreground", "grey", null);
 
-		this.add_entry(_("Help"), "", _("Get a list of available commands"), (Callback *)help_window,this);
+		this.add_entry_stock_id(_("Help"), "", _("Get a list of available commands"), (Callback *)help_window,this,
+		"gtk-info");
 	}
 
 	/**
@@ -137,22 +160,50 @@ public class Gmpc.Easy.Command: Gmpc.Plugin.Base {
 		return this.signals;
 	}
 
+	/**
+     * Add a match entry to the Easy command object.
+     * param self the GmpcEasyCommand object.
+     * param name the name of the command. This is the "prefix" that needs to be matched.
+     * param pattern the pattern where the parameters need to match.
+     * param callback a GmpcEasyCommandCallback that returns when a entry is matched.
+     * param userdata a pointer that is passed to callback.
+	 * param icon a icon-name to be displayed
+     *
+     * return an unique id for the entry.
+     */
+	public uint add_entry_stock_id(string name, string pattern, string hint, Callback * callback, void *userdata, string icon) {
+		Gtk.TreeIter iter;
+		this.signals++;
+		this.store.append(out iter);
+		this.store.set(iter, 0, this.signals, 1, name, 2, pattern, 3, callback, 4, userdata, 5, hint, 7, icon);
+		return this.signals;
+	}
+	public uint add_entry_icon_name(string name, string pattern, string hint, Callback * callback, void *userdata, string icon) {
+		Gtk.TreeIter iter;
+		this.signals++;
+		this.store.append(out iter);
+		this.store.set(iter, 0, this.signals, 1, name, 2, pattern, 3, callback, 4, userdata, 5, hint, 6, icon);
+		return this.signals;
+	}
 	private void activate(Gtk.Entry entry) {
 		string value_unsplit = entry.get_text();
+		popup_destroy();
 		this.do_query(value_unsplit);
 	}
 	public void do_query(string value_unsplit) {
-		weak Gtk.TreeModel model = this.store;
+		unowned Gtk.TreeModel model = this.store;
 		Gtk.TreeIter iter;
+		GLib.log(log_domain_ec, GLib.LogLevelFlags.LEVEL_DEBUG, "doing query: %s", value_unsplit);
 		if (value_unsplit.length == 0) {
 			if(this.window != null) {
-				this.window.destroy();
-				this.window = null;
+				popup_destroy();
 			}
 			return;
 		}
 		foreach(string value in value_unsplit.split(";")) {
 			bool found = false;
+			value = value.strip();
+			GLib.log(log_domain_ec, GLib.LogLevelFlags.LEVEL_DEBUG, "doing query: %s", value);
 			/* ToDo: Make this nicer... maybe some fancy parsing */
 			if (model.get_iter_first(out iter)) {
 				do {
@@ -161,9 +212,12 @@ public class Gmpc.Easy.Command: Gmpc.Plugin.Base {
 					void *data;
 					model.get(iter, 1, out name, 2, out pattern, 3, out callback, 4, out data);
 
-					test = "%s[ ]*%s$".printf(name, pattern);
-					if (GLib.Regex.match_simple(test, value.strip(), GLib.RegexCompileFlags.CASELESS, 0)) {
+					test = "^%s[ ]*%s$".printf(name, pattern);
+					GLib.log(log_domain_ec, GLib.LogLevelFlags.LEVEL_DEBUG, "doing query: %s-%s", test,value);
+					if (GLib.Regex.match_simple(test, value, GLib.RegexCompileFlags.CASELESS, 0)) {
 						string param;
+
+						GLib.log(log_domain_ec, GLib.LogLevelFlags.LEVEL_DEBUG, "Found match");
 						if (value.length > name.length)
 							param = value.substring(name.length, -1);
 						else
@@ -174,47 +228,19 @@ public class Gmpc.Easy.Command: Gmpc.Plugin.Base {
 					}
 				} while (model.iter_next(ref iter) && !found);
 			}
-			/* If now exact match is found, use the partial matching that is
-			 * also used by the completion popup.
-			 * First, partial, match is taken.
-			 */
-			if(!found) {
-				if (model.get_iter_first(out iter)) {
-					do {
-						string name, pattern, test;
-						Callback callback = null;
-						void *data;
-						model.get(iter, 1, out name, 2, out pattern, 3, out callback, 4, out data);
-
-						test = "^%s.*".printf(value.strip());
-						if (GLib.Regex.match_simple(test, name,GLib.RegexCompileFlags.CASELESS, 0)) {
-							string param;
-							if (value.length > name.length)
-								param = value.substring(name.length, -1);
-							else
-								param = "";
-							var param_str = param.strip();
-							callback(data, param_str);
-							found = true;
-						}
-					} while (model.iter_next(ref iter) && !found);
-				}
-			}
 			/* If we still cannot match it, give a message */
 			if (!found)
-				Gmpc.Messages.show("Unknown command: '%s'".printf(value.strip()), Gmpc.Messages.Level.INFO);
+				Gmpc.Messages.show("Unknown command: '%s'".printf(value), Gmpc.Messages.Level.INFO);
 		}
 
 		if(this.window != null) {
-			this.window.destroy();
-			this.window = null;
+			popup_destroy();
 		}
 	}
-	private bool key_press_event(Gtk.Entry widget, Gdk.EventKey event) {
+	private bool key_press_event(Gtk.Widget widget, Gdk.EventKey event) {
 		/* Escape */
 		if (event.keyval == 0xff1b) {
-			this.window.destroy();
-			this.window = null;
+			popup_destroy();
 			return true;
 		}
 		/* Tab key */
@@ -225,39 +251,60 @@ public class Gmpc.Easy.Command: Gmpc.Plugin.Base {
 		return false;
 	}
 
-	private bool popup_expose_handler(Gtk.Window widget, Gdk.EventExpose event) {
+	private bool popup_expose_handler(Gtk.Widget widget, Gdk.EventExpose event) {
 		var ctx = Gdk.cairo_create(widget.window);
 		int width = widget.allocation.width;
 		int height = widget.allocation.height;
+		Gdk.Color light = widget.style.bg[Gtk.StateType.ACTIVE];
+		Gdk.Color dark = widget.style.dark[Gtk.StateType.ACTIVE];
+
+		ctx.set_antialias(Cairo.Antialias.DEFAULT);
+		ctx.set_line_width(1.1);
 
 		if (widget.is_composited()) {
 			ctx.set_operator(Cairo.Operator.SOURCE);
 			ctx.set_source_rgba(1.0, 1.0, 1.0, 0.0);
 		} else {
-			ctx.set_source_rgb(1.0, 1.0, 1.0);
+			Gdk.cairo_set_source_color(ctx,widget.style.bg[Gtk.StateType.ACTIVE]);
 		}
 
 		ctx.paint();
 		/* */
+		if (widget.is_composited()) {
+			ctx.move_to(0.5, 20.5);
+			ctx.arc(20+0.5,20+0.5,20, -GLib.Math.PI, -GLib.Math.PI/2.0); 
+			ctx.line_to(width-20-0.5, 0.5);
+			ctx.arc(width-20-0.5, 20+0.5, 20,-GLib.Math.PI/2.0,0);
+			ctx.line_to(width-0.5, height-20-0.5);
+			ctx.arc(width-20-0.5, height-20-0.5, 20, 0, GLib.Math.PI/2.0);
+			ctx.line_to(20-0.5,height-0.5);
+			ctx.arc(20+0.5, height-20-0.5, 20, GLib.Math.PI/2.0, -GLib.Math.PI);
+			ctx.close_path();
 
-		ctx.rectangle(1.0, 1.0, width - 2, height - 2);
-		var pattern = new Cairo.Pattern.linear(0.0, 0.0, 0.0, height);
-
-		pattern.add_color_stop_rgba(0.0, 0.0, 0.0, 0.2, 0.5);
-		pattern.add_color_stop_rgba(0.5, 0.0, 0.0, 0.0, 1.0);
-		pattern.add_color_stop_rgba(1.0, 0.0, 0.0, 0.2, 0.5);
+		}else{
+			ctx.rectangle(1.0, 1.0, width - 2, height - 2);
+		}
+		var pattern = new Cairo.Pattern.linear(0.0, 0.0, 0.0, (double)height);
+		pattern.add_color_stop_rgb(0.4,light.red/65535.0, light.green/65535.0,light.blue/65535.0);
+		pattern.add_color_stop_rgb(0.8,dark.red/65535.0, dark.green/65535.0,dark.blue/65535.0);
 		ctx.set_source(pattern);
 		ctx.fill_preserve();
-		ctx.set_source_rgba(1.0, 1.0, 1.0, 1.0);
-		ctx.stroke();
 
-		ctx.rectangle(0.0, 0.0, width, height);
-		ctx.set_source_rgba(0.0, 0.0, 0.0, 1.0);
+
+		Gdk.cairo_set_source_color(ctx,widget.style.fg[Gtk.StateType.ACTIVE]);
 		ctx.stroke();
 
 		return false;
 	}
 
+	public void
+	popup_destroy()
+	{
+		Gdk.keyboard_ungrab(Gtk.get_current_event_time());
+		Gdk.pointer_ungrab(Gtk.get_current_event_time());
+		this.window.destroy();
+		this.window = null;
+	}
 	/** 
      * Tell gmpc-easy-command to popup.
      * @param self The GmpcEasyCommand object to popup
@@ -273,17 +320,31 @@ public class Gmpc.Easy.Command: Gmpc.Plugin.Base {
 			this.window = new Gtk.Window(Gtk.WindowType.TOPLEVEL);
 			var entry = new Gtk.Entry();
 
+
+			entry.set_icon_from_icon_name(Gtk.EntryIconPosition.PRIMARY, "gmpc");
+			entry.set_icon_from_stock(Gtk.EntryIconPosition.SECONDARY, "gtk-clear");
+			entry.icon_release.connect((source, pos, event) =>{
+				if(pos == Gtk.EntryIconPosition.SECONDARY) {
+					source.set_text("");
+				}else{
+					popup_destroy();
+				}
+			});
 			/* Setup window */
 			window.role = "easy command";
-			window.type_hint = Gdk.WindowTypeHint.DIALOG;
+			window.type_hint = Gdk.WindowTypeHint.UTILITY;
+			window.set_position(Gtk.WindowPosition.CENTER_ALWAYS);
 			window.decorated = false;
 			window.modal = true;
 			window.set_keep_above(true);
+			window.stick();
 
 			window.border_width = 24;
 			entry.width_chars = 50;
 
 			window.add(entry);
+
+
 
 			/* Composite */
 			if (window.is_composited()) {
@@ -292,34 +353,58 @@ public class Gmpc.Easy.Command: Gmpc.Plugin.Base {
 				window.set_colormap(colormap);
 			}
 			window.app_paintable = true;
-			window.expose_event += popup_expose_handler;
+			window.expose_event.connect(popup_expose_handler);
 
-/*			Disable this as often gmpc is moved and bring to top, not desirable..
-			if (!Gmpc.Playlist.is_hidden()) {
-				window.set_transient_for(Gmpc.Playlist.get_window());
-				window.position = Gtk.WindowPosition.CENTER_ON_PARENT;
-			}
-*/
 			/* setup entry */
 			entry.set_completion(this.completion);
-			entry.activate += this.activate;
-			entry.key_press_event += this.key_press_event;
+			entry.activate.connect(this.activate);
+			entry.key_press_event.connect(this.key_press_event);
 
-			entry.focus_out_event += this.focus_out_event;
 
+			window.button_press_event.connect((source, event) => {
+				popup_destroy();
+				return false;
+			});
 			window.show_all();
 			window.present();
+			window.window.raise();
 			entry.grab_focus();
 		} else {
 			this.window.present();
 		}
-	}
-	private bool
-	focus_out_event(Gtk.Entry entry, Gdk.EventFocus event)
-	{
-		this.window.destroy();
-		this.window = null;
-		return false;
+		{	
+			/* Make gmpc easy command grab the keyboard. Do this somewhat aggrasive. */
+			uint32 _time = Gtk.get_current_event_time();
+			int i = 10;
+			while(i>0 && this.window != null)
+			{
+				if(Gdk.keyboard_grab(this.window.window, true, _time) != Gdk.GrabStatus.SUCCESS) {
+					GLib.debug("Failed to grab keyboard\n");
+				}
+				else break;
+				GLib.Thread.usleep(100000);
+				i--;
+			}
+
+			/* Grab pointer too! */
+			while(i>0 && this.window != null)
+			{
+				if(Gdk.pointer_grab(this.window.window, true, 
+						Gdk.EventMask.BUTTON_PRESS_MASK |
+						Gdk.EventMask.BUTTON_RELEASE_MASK |
+						Gdk.EventMask.POINTER_MOTION_MASK,
+						null, null, _time) 
+						!= Gdk.GrabStatus.SUCCESS) 
+				{
+					GLib.debug("Failed to grab pointer\n");
+				}
+				else break;
+				GLib.Thread.usleep(100000);
+				i--;
+
+				
+			}
+		}
 	}
 	public static void 
 	help_window_destroy(Gtk.Dialog window,int response)
@@ -358,9 +443,16 @@ public class Gmpc.Easy.Command: Gmpc.Plugin.Base {
 		/* add sw */
 		sw.add(tree);
 		/* Add columns */
+		var prenderer = new Gtk.CellRendererPixbuf();
+		var column = new Gtk.TreeViewColumn ();
+		tree.append_column(column);
+		column.set_title(_(""));
+		column.pack_start(prenderer, false);
+		column.add_attribute(prenderer, "icon-name", 6);
+		column.add_attribute(prenderer, "stock-id", 7);
 		/* Command column */
 		var renderer = new Gtk.CellRendererText();
-		var column = new Gtk.TreeViewColumn ();
+		column = new Gtk.TreeViewColumn ();
 		tree.append_column(column);
 		column.set_title(_("Command"));
 		column.pack_start(renderer, false);
@@ -390,7 +482,7 @@ public class Gmpc.Easy.Command: Gmpc.Plugin.Base {
 		window.show_all();
 
 		/* delete event */
-		window.response += help_window_destroy;
+		window.response.connect(help_window_destroy);
 	}
 }
 

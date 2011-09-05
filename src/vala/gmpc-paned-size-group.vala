@@ -1,6 +1,6 @@
 /* Gnome Music Player Client (GMPC)
- * Copyright (C) 2004-2010 Qball Cow <qball@sarine.nl>
- * Project homepage: http://gmpc.wikia.com/
+ * Copyright (C) 2004-2011 Qball Cow <qball@gmpclient.org>
+ * Project homepage: http://gmpclient.org/
  
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ using MPD;
 
 namespace Gmpc{
 	public class PanedSizeGroup : GLib.Object {
-		private List<weak Gtk.Paned> list = null;
+		private List<unowned Gtk.Paned> list = null;
         private int position = config.get_int_with_default("paned-size-group", "position", 150);
 
 		public 
@@ -51,7 +51,7 @@ namespace Gmpc{
 
 			var pane = (Gtk.Paned) paned;
 			position = pane.get_position();
-			foreach(weak Gtk.Paned p in list)
+			foreach(unowned Gtk.Paned p in list)
 			{
 				if(p != paned)
 				{

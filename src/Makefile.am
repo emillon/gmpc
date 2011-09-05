@@ -8,7 +8,7 @@ CONF_VERSION=0
 
 bin_PROGRAMS=gmpc
 
-gmpc_VALAFLAGS=--pkg=gmodule-2.0 --pkg=config --pkg=gtk+-2.0 --pkg=gmpc --pkg=libmpd --vapidir=$(top_srcdir)/src/vapi/ --basedir=$(top_builddir)/src/ -H gmpc-extras.h --library=gmpc-extras --use-header
+gmpc_VALAFLAGS=--pkg=gmodule-2.0 --pkg=config --pkg=gtk+-2.0 --pkg=gmpc --pkg=libmpd --pkg=libxml-2.0 --vapidir=$(top_srcdir)/src/vapi/ --basedir=$(top_builddir)/src/ -H gmpc-extras.h --library=gmpc-extras --use-header
 
 VALA_VAPI_FILES=\
     vapi/gmpc.vapi\
@@ -16,48 +16,96 @@ VALA_VAPI_FILES=\
     vapi/config.vapi
 
 
-gmpc_SOURCES=\
-    Widgets/pixbuf-cache.c\
-    vala/gmpc-connection.vala\
+PLUGIN_FILES=\
+    Providers/music-tree.vala\
+    Providers/HTBackdrops.vala\
+    Providers/RenderCover.vala\
+    Providers/LyrDB.vala\
+    Providers/ChartLyrics.vala\
+    Providers/DiscoGS.c\
+    Providers/LastFM.c\
+    Plugins/extraplaylist.c
+
+
+
+gmpc_WIDGETS_FILES=\
+    Widgets/GmpcVolume.vala\
     Widgets/gmpc-progress.vala\
+    Widgets/mpd-async-request.c\
+    Widgets/gmpc-song-list.vala\
+    Widgets/gmpc-clicklabel.vala\
+    Widgets/playlist3-messages.c\
+    Widgets/gmpc-song-links.vala\
+    Widgets/gmpc-image-async.vala\
+    Widgets/advanced_settings.vala\
+    Widgets/gmpc-widgets-qtable.vala\
+    Widgets/gmpc-widgets-popupmenu.vala\
+    Widgets/gmpc-metadata-backdrop.vala\
+    Widgets/gmpc-metadata-text-label.vala\
+    Widgets/gmpc-metadata-similarsongs.vala\
+    Widgets/gmpc-metadata-similarartists.vala\
+    GUI/control_window.c\
+    GUI/title_header.c\
+    GUI/status_icon.c\
+    GUI/cmd.c\
+    GUI/thv.c
+
+gmpc_TOOLS_FILES=\
+    Tools/gmpc-database-update-tracker.vala\
+    Tools/gmpc-metadata-prefetcher.vala\
+    Tools/gmpc-liststore-sort.vala\
+    Tools/gmpc-metadata-appearance.vala \
+    Tools/gmpc_easy_download.c\
+    Tools/mpd-easy-commands.c\
+    Tools/advanced-search.c\
+    Tools/setup-assistant.c\
+    Tools/bug-information.c\
+    Tools/mpdinteraction.c\
+    Tools/pixbuf-cache.c\
+    Tools/url-fetcher.c\
+    Tools/plugin-man.c\
+    Tools/mm-keys.c\
+    Tools/misc.c\
+    Tools/log.c\
+    Tools/ipc.c
+
+## 
+# Browsers
+##
+gmpc_BROWSERS_FILES=\
+	browsers/playlist3-current-playlist-browser.c\
+    browsers/gmpc-metadata-browser2.vala\
+	browsers/playlist3-playlist-editor.c\
+	browsers/playlist3-find2-browser.c\
+	browsers/playlist3-tag2-browser.c\
+	browsers/playlist3-file-browser.c\
+    browsers/gmpc-nowplaying2.vala\
+	browsers/server-information.c
+
+gmpc_SOURCES=\
+    $(gmpc_WIDGETS_FILES)\
+    $(gmpc_BROWSERS_FILES)\
+    $(gmpc_TOOLS_FILES)\
+	$(gmpc_egg_FILES)\
+    $(PLUGIN_FILES)\
+    vala/gmpc-connection.vala\
     vala/gmpc-easy-command.vala\
     vala/gmpc-favorites.vala\
-    Widgets/gmpc-image-async.vala\
-    Widgets/mpd-async-request.c\
-    vala/gmpc-liststore-sort.vala\
-    Widgets/gmpc-menu-item-rating.vala\
-    browsers/gmpc-metadata-browser2.vala\
-    vala/gmpc-metadata-prefetcher.vala\
     vala/gmpc-mpddata-treeview-tooltip.vala\
-    browsers/gmpc-nowplaying2.vala\
     vala/gmpc-plugin.vala\
-    vala/gmpc-rating.vala\
-    vala/gmpc-song-links.vala\
     vala/gmpc-url-fetching-gui.vala\
-    vala/gmpc-database-update-tracker.vala\
     vala/gmpc-test-plugin.vala\
     vala/gmpc-paned-size-group.vala\
-    Providers/music-tree.vala\
-	main.c\
-	plugin.c\
-	mpdinteraction.c\
-	preferences.c\
-	tray-icon2.c\
-	misc.c\
-	playlist3.c\
-	playlist3-messages.c\
-	mm-keys.c\
-	config1.c\
-	MetaData/metadata.c\
-	MetaData/metadata-cache.c\
-	gmpc_easy_download.c\
-	setup-assistant.c\
-	url-fetcher.c\
-	advanced-search.c\
-	bug-information.c\
-    $(gmpc_bacon_FILES)\
-    $(gmpc_egg_FILES)\
-    $(gmpc_browser_FILES)
+    MetaData/metadata-cache-sqlite.c\
+    MetaData/metadata-cache.c\
+    MetaData/metadata.c\
+    preferences.c\
+    tray-icon2.c\
+    playlist3.c\
+    config1.c\
+    options.c\
+    plugin.c\
+    main.c
 
 nodist_gmpc_SOURCES=\
     $(gmpc_GOBCFILES)
@@ -99,8 +147,14 @@ INCLUDES=\
 	-I$(top_builddir)/src\
 	-I$(top_srcdir)/src/egg\
 	-I$(top_builddir)/src/egg\
+	-I$(top_srcdir)/src/Tools\
+	-I$(top_builddir)/src/Tools\
 	-I$(top_srcdir)/src/vala\
 	-I$(top_builddir)/src/vala\
+	-I$(top_srcdir)/src/Widgets\
+	-I$(top_builddir)/src/Widgets\
+	-I$(top_srcdir)/src/GUI\
+	-I$(top_builddir)/src/GUI\
 	-I$(top_srcdir)/src/MetaData/\
 	-I$(top_builddir)/src/MetaData/
 
@@ -112,23 +166,24 @@ LIBS= \
 	@gobject_LIBS@\
 	@gtk_LIBS@\
 	@gmodule_LIBS@\
-	@libglade_LIBS@\
 	@gthread_LIBS@\
 	@libsoup_LIBS@\
 	@libgio_LIBS@\
 	@SPIFF_LIBS@\
 	@libxspf_LIBS@\
-    @sqlite3_LIBS@
+	@libxml2_LIBS@\
+	@libx11_LIBS@\
+	@sqlite3_LIBS@\
+	-lz
 
-if USE_SYSTEM_LIBSEXY
-LIBS += @libsexy_LIBS@
+
+if HAVE_UNIQUE
+    LIBS += @unique_LIBS@
 endif
 
-if OSX
-LIBS+=@macint_LIBS@
+if HAVE_APP_INDICATOR
+    LIBS += @APP_INDICATOR_LIBS@
 endif
-
-
 
 AM_LDFLAGS = \
 	@EXTRA_LDFLAGS@\
@@ -143,26 +198,27 @@ AM_CFLAGS = @CFLAGS@\
 	@gtk_CFLAGS@\
 	@gmodule_CFLAGS@\
     @libxspf_CFLAGS@\
-	@libglade_CFLAGS@\
 	@gthread_CFLAGS@\
 	@libsoup_CFLAGS@\
 	@libgio_CFLAGS@\
     @sqlite3_CFLAGS@\
-	@EXTRA_CFLAGS@\
+    @libxml2_CFLAGS@\
+    @libx11_CFLAGS@\
+    @EXTRA_CFLAGS@\
 	-DPACKAGE_LIB_DIR=\""$(pkglibdir)"\"\
 	-DPACKAGE_DATA_DIR=\""$(datarootdir)"\"
 
-if USE_SYSTEM_LIBSEXY
-AM_CFLAGS += @libsexy_CFLAGS@
+
+if HAVE_UNIQUE
+    AM_CFLAGS += @unique_CFLAGS@ 
 endif
 
-if OSX
-AM_CFLAGS+=@macint_CFLAGS@
-INCLUDES+=-DOSX=1
+if HAVE_APP_INDICATOR
+    AM_CFLAGS += @APP_INDICATOR_CFLAGS@
 endif
 
 if MAINTAINER_MODE
-AM_CFLAGS+=-Wall -Wdeclaration-after-statement -Wshadow -fno-common -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wold-style-definition -Wmissing-declarations -Wredundant-decls -Wmissing-noreturn -Wpointer-arith -Wcast-align -Wwrite-strings -Winline -Wnested-externs -Wmissing-format-attribute -Waggregate-return -Wundef -Wmissing-include-dirs -Winit-self -Wswitch-default -Wswitch-enum
+AM_CFLAGS+=-Wall -Wdeclaration-after-statement -Wshadow -fno-common -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wold-style-definition -Wmissing-declarations -Wredundant-decls -Wmissing-noreturn -Wpointer-arith -Wcast-align -Wwrite-strings -Winline -Wnested-externs -Wmissing-format-attribute -Waggregate-return -Wundef -Wmissing-include-dirs -Winit-self -Wswitch-default -Wswitch-enum -g -O1
 endif
 
 
@@ -178,23 +234,22 @@ nodist_gmpcinclude_HEADERS=\
 gmpcinclude_HEADERS = \
 		plugin.h	\
 		config1.h	\
-		misc.h\
-		mpdinteraction.h\
         Widgets/mpd-async-request.h\
-		gmpc_easy_download.h\
+        Widgets/playlist3-messages.h\
+        Tools/gmpc_easy_download.h\
+        Tools/mpdinteraction.h\
+        Tools/misc.h\
         gmpc-extras.h\
-        playlist3-messages.h\
-		gmpc-version.h\
+        gmpc-version.h\
+        GUI/status_icon.h\
 		MetaData/metadata.h
 
 gmpcincludedir =$(includedir)/gmpc/
 
 EXTRA_DIST=\
 		playlist3.h\
-		playlist3-keybindings.h\
+        tray-icon2.h\
 		main.h\
-		mm-keys.h\
-		misc.h\
         Widgets/mpd-async-request.h\
 		config-defaults.h\
 		browsers/playlist3-tag2-browser.h\
@@ -204,18 +259,33 @@ EXTRA_DIST=\
 		browsers/playlist3-playlist-editor.h\
         gtktransition.h\
         plugin-internal.h\
-		setup-assistant.h\
+        Tools/mpd-easy-commands.h\
+        Tools/setup-assistant.h\
+		Tools/bug-information.h\
+        Tools/plugin-man.h\
+        Tools/log.h\
+		Tools/mm-keys.h\
+		Tools/misc.h\
 		MetaData/metadata.h\
 		MetaData/metadata-cache.h\
+		MetaData/metadata-cache-sqlite.h\
 		egg/eggcolumnchooserdialog.h\
 		egg/eggcolumnmodel.h\
+		Tools/advanced-search.h\
+		Tools/setup-assistant.h\
+		Tools/ipc.h\
 		revision.h\
-		bacon/bacon-message-connection.h\
-		advanced-search.h\
 		gmpc-version.h.in\
-		bug-information.h\
-        gmpc-win32.rc\
-        Widgets/pixbuf-cache.h\
+		Tools/bug-information.h\
+		options.h\
+		gmpc-win32.rc\
+        Tools/pixbuf-cache.h\
+        preferences.h\
+        internal-plugins.h\
+        GUI/control_window.h\
+        GUI/title_header.h\
+        GUI/cmd.h\
+        GUI/thv.h\
         $(VALA_VAPI_FILES)\
         $(gmpc_GOBFILES)
 
@@ -240,7 +310,6 @@ gmpc_GOBFILES = \
 		gmpc-mpddata-model-playlist.gob\
 		gmpc-mpddata-model-sort.gob\
 		gmpc-mpddata-treeview.gob\
-		gmpc-clicklabel.gob\
 		gmpc-stats-label.gob
 
 gmpc_GOBSTAMPFILES=\
@@ -258,38 +327,6 @@ gmpc_GOBHFILES=\
 	@GOB2@ --always-private-header $<
 	@touch $(top_builddir)/src/$@
 
-## 
-# Browsers
-##
-
-gmpc_browser_FILES=\
-	browsers/playlist3-tag2-browser.c\
-	browsers/playlist3-file-browser.c\
-	browsers/playlist3-current-playlist-browser.c\
-	browsers/playlist3-find2-browser.c\
-	browsers/server-information.c\
-	browsers/playlist3-playlist-editor.c
-
-##
-# Vala files
-##
-#gmpc_vala_FILES=\
-#	vala/gmpc-image.c\
-#	vala/gmpc-rating.c\
-#	vala/gmpc_menu_item_rating.c\
-#	vala/gmpc-easy-command.c\
-#	vala/gmpc-song-links.c\
-#	vala/gmpc-plugin.c\
-#	vala/gmpc-test-plugin.c\
-#    vala/gmpc-mpddata-treeview-tooltip.c\
-#	vala/gmpc-metadata-browser2.c\
-#    vala/gmpc-nowplaying2.c\
-#    vala/gmpc-favorites.c\
-#    vala/gmpc-liststore-sort.c\
-#    vala/gmpc-connection.c\
-#    vala/gmpc-url-fetching-gui.c\
-#    vala/gmpc-database-update-tracker.c\
-#    vala/gmpc-metadata-prefetcher.c
 
 ##
 # Embedded egg
@@ -297,13 +334,6 @@ gmpc_browser_FILES=\
 gmpc_egg_FILES=\
 	egg/eggcolumnchooserdialog.c\
 	egg/eggcolumnmodel.c
-
-##
-# Bacon
-##
-gmpc_bacon_FILES=\
-	bacon/bacon-message-connection.c
-
 
 ###
 # SM CLIENT STUFF
@@ -360,19 +390,6 @@ EXTRA_DIST+=\
 	smclient/eggsmclient.h                    \
 	smclient/eggsmclient-private.h            \
 	smclient/eggdesktopfile.h
-
-
-egg_session_end_LDADD =                  \
-	libeggsmclient.la
-
-egg_session_end_LDFLAGS =                \
-	$(platform_session_end_ldflags)
-
-egg_launch_SOURCES =                     \
-	smclient/egg-launch.c
-
-egg_launch_LDADD =                       \
-	libeggdesktopfile.la
 
 EXTRA_DIST +=                             \
 	smclient/eggsmclient-osx.c                \
