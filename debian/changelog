@@ -1,4 +1,4 @@
-gmpc (11.8.16-1) UNRELEASED; urgency=low
+gmpc (11.8.16-1) unstable; urgency=low
 
   * New upstream version (Closes: #640311)
     - new versioning scheme YY.MM.DD, compatible with the former
