@@ -1,3 +1,10 @@
+gmpc (11.8.16-2) UNRELEASED; urgency=low
+
+  * Patches :
+      - Change volume slider sensitivity (Closes: #646822)
+
+ -- Etienne Millon <etienne.millon@gmail.com>  Sat, 29 Oct 2011 21:20:27 +0200
+
 gmpc (11.8.16-1) unstable; urgency=low
 
   * New upstream version (Closes: #640311)
