@@ -2,8 +2,9 @@ gmpc (11.8.16-2) UNRELEASED; urgency=low
 
   * Patches :
       - Change volume slider sensitivity (Closes: #646822)
+      - Bring back images for transport buttons (Closes: #646822)
 
- -- Etienne Millon <etienne.millon@gmail.com>  Sat, 29 Oct 2011 21:20:27 +0200
+ -- Etienne Millon <etienne.millon@gmail.com>  Thu, 03 Nov 2011 19:31:11 +0100
 
 gmpc (11.8.16-1) unstable; urgency=low
 
