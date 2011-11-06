@@ -19,6 +19,7 @@ override_dh_install:
 
 override_dh_installdocs:
 	dh_installdocs
+	make -C doc/Mallard DESTDIR=debian/tmp/usr install
 	rm -rf debian/gmpc-dev/usr/share/doc/gmpc-dev
 	ln -sf gmpc debian/gmpc-dev/usr/share/doc/gmpc-dev
 	rm -rf debian/gmpc-dbg/usr/share/doc/gmpc-dbg
