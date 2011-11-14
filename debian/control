@@ -21,8 +21,8 @@ Build-Depends:
   valac (>= 0.7.10)
 Standards-Version: 3.9.2
 Homepage: http://gmpc.wikia.com/
-Vcs-Git: git://github.com/emillon/gmpc.git
-Vcs-Browser: https://github.com/emillon/gmpc
+Vcs-Git: git://anonscm.debian.org/pkg-mpd/gmpc.git
+Vcs-Browser: http://anonscm.debian.org/gitweb/?p=pkg-mpd/gmpc.git
 
 Package: gmpc
 Architecture: any
