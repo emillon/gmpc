@@ -4,8 +4,9 @@ gmpc (11.8.16-2) UNRELEASED; urgency=low
   * Patches :
       - Change volume slider sensitivity (Closes: #646822)
       - Bring back images for transport buttons (Closes: #646822)
+      - Fix build with valac 0.14 (Thanks to Michael Biebl, Closes: #650219)
 
- -- Etienne Millon <etienne.millon@gmail.com>  Sun, 06 Nov 2011 13:42:55 +0100
+ -- Etienne Millon <etienne.millon@gmail.com>  Mon, 28 Nov 2011 08:41:50 +0100
 
 gmpc (11.8.16-1) unstable; urgency=low
 
