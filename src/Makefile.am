@@ -8,7 +8,7 @@ CONF_VERSION=0
 
 bin_PROGRAMS=gmpc
 
-gmpc_VALAFLAGS=--pkg=gmodule-2.0 --pkg=config --pkg=gtk+-2.0 --pkg=gmpc --pkg=libmpd --pkg=libxml-2.0 --vapidir=$(top_srcdir)/src/vapi/ --basedir=$(top_builddir)/src/ -H gmpc-extras.h --library=gmpc-extras --use-header
+gmpc_VALAFLAGS=--pkg=gmodule-2.0 --pkg=config --pkg=gtk+-2.0 --pkg=gmpc --pkg=libmpd --pkg=libxml-2.0  --pkg=fix --vapidir=$(top_srcdir)/src/vapi/ --basedir=$(top_builddir)/src/ -H gmpc-extras.h --library=gmpc-extras --use-header
 
 VALA_VAPI_FILES=\
     vapi/gmpc.vapi\
@@ -17,14 +17,10 @@ VALA_VAPI_FILES=\
 
 
 PLUGIN_FILES=\
-    Providers/music-tree.vala\
-    Providers/HTBackdrops.vala\
-    Providers/RenderCover.vala\
-    Providers/LyrDB.vala\
-    Providers/ChartLyrics.vala\
-    Providers/DiscoGS.c\
-    Providers/LastFM.c\
-    Plugins/extraplaylist.c
+    Plugins/extraplaylist.c\
+    Plugins/AutoMPD.vala\
+    Plugins/sidebar-search.vala\
+    Plugins/sidebar-next-song.vala
 
 
 
@@ -44,11 +40,14 @@ gmpc_WIDGETS_FILES=\
     Widgets/gmpc-metadata-text-label.vala\
     Widgets/gmpc-metadata-similarsongs.vala\
     Widgets/gmpc-metadata-similarartists.vala\
+	Widgets/gmpc-sidebar-view.vala\
+	Widgets/gmpc-widgets-overlay.vala\
     GUI/control_window.c\
     GUI/title_header.c\
     GUI/status_icon.c\
-    GUI/cmd.c\
-    GUI/thv.c
+    GUI/cmd.c
+
+#    GUI/thv.c
 
 gmpc_TOOLS_FILES=\
     Tools/gmpc-database-update-tracker.vala\
@@ -96,8 +95,7 @@ gmpc_SOURCES=\
     vala/gmpc-url-fetching-gui.vala\
     vala/gmpc-test-plugin.vala\
     vala/gmpc-paned-size-group.vala\
-    MetaData/metadata-cache-sqlite.c\
-    MetaData/metadata-cache.c\
+    vala/gmpc-sidebar-plugins.vala\
     MetaData/metadata.c\
     preferences.c\
     tray-icon2.c\
@@ -106,6 +104,11 @@ gmpc_SOURCES=\
     options.c\
     plugin.c\
     main.c
+
+#    MetaData/metadata-cache-sqlite.c\
+#    MetaData/metadata-cache.c\
+#
+
 
 nodist_gmpc_SOURCES=\
     $(gmpc_GOBCFILES)
@@ -173,6 +176,7 @@ LIBS= \
 	@libxspf_LIBS@\
 	@libxml2_LIBS@\
 	@libx11_LIBS@\
+    @libglyr_LIBS@\
 	@sqlite3_LIBS@\
 	-lz
 
@@ -205,6 +209,7 @@ AM_CFLAGS = @CFLAGS@\
     @libxml2_CFLAGS@\
     @libx11_CFLAGS@\
     @EXTRA_CFLAGS@\
+    @libglyr_CFLAGS@\
 	-DPACKAGE_LIB_DIR=\""$(pkglibdir)"\"\
 	-DPACKAGE_DATA_DIR=\""$(datarootdir)"\"
 
@@ -267,8 +272,6 @@ EXTRA_DIST=\
 		Tools/mm-keys.h\
 		Tools/misc.h\
 		MetaData/metadata.h\
-		MetaData/metadata-cache.h\
-		MetaData/metadata-cache-sqlite.h\
 		egg/eggcolumnchooserdialog.h\
 		egg/eggcolumnmodel.h\
 		Tools/advanced-search.h\
@@ -285,9 +288,13 @@ EXTRA_DIST=\
         GUI/control_window.h\
         GUI/title_header.h\
         GUI/cmd.h\
-        GUI/thv.h\
         $(VALA_VAPI_FILES)\
         $(gmpc_GOBFILES)
+
+#        GUI/thv.h
+#		MetaData/metadata-cache.h\
+#		MetaData/metadata-cache-sqlite.h\
+#
 
 DISTCLEANFILES=\
 			   revision.h\

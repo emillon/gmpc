@@ -60,14 +60,18 @@ typedef enum
 	PL3_CAT_TITLE, /** title that is showed */
 	PL3_CAT_INT_ID, /* id */
 	PL3_CAT_ICON_ID, /* icon id */
-	PL3_CAT_PROC_DEPRECATED, /* for the lazy tree, if the dir is allready processed */
-	PL3_CAT_ICON_SIZE_DEPRECATED, /** icon size */
-	PL3_CAT_BROWSE_FORMAT_DEPRECATED, /** string, added for tag browser */
 	PL3_CAT_ORDER, /* int for sorting the list */
-    PL3_CAT_NUM_ITEMS,
+	PL3_CAT_BOLD,
 	PL3_CAT_NROWS
 } pl3_cat_store;
 
+typedef enum
+{
+PL3_CAT_BROWSER_TOP 			= 0,
+PL3_CAT_BROWSER_LIBRARY 		= 1000,
+PL3_CAT_BROWSER_ONLINE_MEDIA 	= 2000,
+PL3_CAT_BROWSER_MISC			= 3000
+} Pl3CatBrowserType;
 /* structures */
 /** gmpcPrefPlugin: need to be instant apply.
  * Plugin is expected to fill the container with it preferences widgets. (gtk_container_add)
@@ -259,6 +263,10 @@ extern GObject *paned_size_group;
 * show the main window 
 */
 void create_playlist3(void);
+/**
+ * Get the state of the sidebar 
+ */
+GmpcPluginSidebarState playlist3_get_sidebar_state(void);
 
 /**
 * hide the main window 

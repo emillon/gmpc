@@ -409,6 +409,11 @@ public class Gmpc.Easy.Command: Gmpc.Plugin.Base {
 	public static void 
 	help_window_destroy(Gtk.Dialog window,int response)
 	{
+		if(response == Gtk.ResponseType.HELP)
+		{
+			Gmpc.open_help("ghelp:gmpc?EasyCommand");
+			return;
+		}
 		window.destroy();
 	}
 	public static void
@@ -416,7 +421,10 @@ public class Gmpc.Easy.Command: Gmpc.Plugin.Base {
 	{
 		Gmpc.Easy.Command ec = (Gmpc.Easy.Command *)data;
 		/*  Create window */
-		var window = new Gtk.Dialog.with_buttons(_("Easy Command help"), null, 0, "gtk-close", Gtk.ResponseType.OK,null);
+		var window = new Gtk.Dialog.with_buttons(_("EasyCommand commands"), null, 0,
+				"gtk-close", Gtk.ResponseType.OK,
+				"gtk-help", Gtk.ResponseType.HELP,
+				null);
 
 		/* set window size */
 		window.set_default_size(600,400);
@@ -446,7 +454,7 @@ public class Gmpc.Easy.Command: Gmpc.Plugin.Base {
 		var prenderer = new Gtk.CellRendererPixbuf();
 		var column = new Gtk.TreeViewColumn ();
 		tree.append_column(column);
-		column.set_title(_(""));
+		column.set_title("");
 		column.pack_start(prenderer, false);
 		column.add_attribute(prenderer, "icon-name", 6);
 		column.add_attribute(prenderer, "stock-id", 7);

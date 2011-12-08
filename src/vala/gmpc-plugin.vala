@@ -103,7 +103,7 @@ namespace Gmpc {
         public delegate void MetaDataCallback(owned GLib.List<Gmpc.MetaData.Item>? list);
         /* untested */
         public interface MetaDataIface : Base {
-            public abstract void get_metadata (MPD.Song song, Gmpc.MetaData.Type type, MetaDataCallback callback);
+            public abstract void get_metadata (MPD.Song? song, Gmpc.MetaData.Type type, MetaDataCallback callback);
             /* Set get priority */
             public abstract int get_priority ();
             public abstract void set_priority (int priority);
@@ -126,6 +126,33 @@ namespace Gmpc {
                 return 0;
             }
 
+        }
+		public enum SidebarState {
+			FULL,
+			COLLAPSED
+		}
+        public interface SidebarIface : Base {
+            /* This works similar to the preferences pane. The vbox will contain the generated
+             * title as first element if title is not epmty, and you can pack your own widgets
+             * into it. */
+            public abstract void sidebar_pane_construct (Gtk.VBox parent);
+            public abstract void sidebar_pane_destroy (Gtk.VBox parent);
+
+			public virtual void sidebar_set_state(Gmpc.Plugin.SidebarState state)
+			{
+			}
+            
+            /* Override this if you want to give a custom title in the sidebar or
+             * an empty string to disable the automatic generated title */
+            public virtual string sidebar_get_title() {
+                return (string)null;
+            }
+            
+            /* set a default position in the sidebar. positive values add  in the scrolling pane
+             * below the browsers, negative values add sticking at the bottom  */
+            public virtual int sidebar_get_position() {
+                return 0;
+            }
         }
         public interface IntegrateSearchIface : Base {
             public virtual bool field_supported (MPD.Tag.Type tag)

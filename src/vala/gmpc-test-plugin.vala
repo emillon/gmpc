@@ -25,7 +25,7 @@ private const bool use_transition_tp = Gmpc.use_transition;
 
 public class Gmpc.MetaData.EditWindow : Gtk.Window {
     private const string some_unique_name = Config.VERSION;
-    private MPD.Song song = null;
+    private MPD.Song? song = null;
     private Gmpc.MetaData.Type query_type = Gmpc.MetaData.Type.ALBUM_ART;
 
     private GLib.List<unowned Gmpc.AsyncDownload.Handle> downloads = null;
@@ -276,7 +276,7 @@ public class Gmpc.MetaData.EditWindow : Gtk.Window {
                             }
                         }else{
                             MetaData.Item *item = MetaData.Item.copy(md);
-                            var h =  Gmpc.AsyncDownload.download_vala(uri,(void *)item,image_downloaded);                                 
+                            unowned Gmpc.AsyncDownload.Handle h =  Gmpc.AsyncDownload.download_vala(uri,(void *)item,image_downloaded);                                 
                             if(h!=null)
                             {
                                 h.set_user_data(md.plugin_name);
@@ -365,7 +365,9 @@ public class Gmpc.MetaData.EditWindow : Gtk.Window {
                 met.plugin_name = "User set";
                 met.content_type = MetaData.ContentType.URI;
                 met.set_uri(file);
-                Gmpc.MetaData.set_metadata(this.song, Gmpc.MetaData.Result.AVAILABLE, met); 
+				// @TODO fix this
+				GLib.error("needs implementing");
+                //Gmpc.MetaData.set_metadata(this.song, Gmpc.MetaData.Result.AVAILABLE, met); 
     
                 var met_false = new MetaData.Item();
                 met_false.type = this.query_type;
@@ -397,7 +399,9 @@ public class Gmpc.MetaData.EditWindow : Gtk.Window {
                     met.plugin_name = "User set";
                     met.content_type = MetaData.ContentType.URI;
                     met.set_uri(path);
-                    Gmpc.MetaData.set_metadata(this.song, Gmpc.MetaData.Result.AVAILABLE, met); 
+					// @TODO fix this
+					GLib.error("needs implementing");
+					//Gmpc.MetaData.set_metadata(this.song, Gmpc.MetaData.Result.AVAILABLE, met); 
 
                     var met_false = new MetaData.Item();
                     met_false.type = this.query_type;
@@ -406,7 +410,7 @@ public class Gmpc.MetaData.EditWindow : Gtk.Window {
                     metawatcher.data_changed(this.song, this.query_type, Gmpc.MetaData.Result.UNAVAILABLE, met_false);  
                     metawatcher.data_changed(this.song, this.query_type, Gmpc.MetaData.Result.AVAILABLE, met);  
                 }else{
-                    var h = Gmpc.AsyncDownload.download(path, store_image); 
+                    unowned Gmpc.AsyncDownload.Handle h = Gmpc.AsyncDownload.download(path, store_image); 
                     if(h!=null)
                         this.downloads.append(h);
                 }
@@ -423,7 +427,9 @@ public class Gmpc.MetaData.EditWindow : Gtk.Window {
                     met.plugin_name = "User set";
                     met.content_type = MetaData.ContentType.URI;
                     met.set_uri(filename);
-                    Gmpc.MetaData.set_metadata(this.song, Gmpc.MetaData.Result.AVAILABLE, met); 
+					// @TODO fix this
+					GLib.error("needs implementing");
+					//Gmpc.MetaData.set_metadata(this.song, Gmpc.MetaData.Result.AVAILABLE, met); 
 
                     var met_false = new MetaData.Item();
                     met_false.type = this.query_type;
@@ -448,7 +454,9 @@ public class Gmpc.MetaData.EditWindow : Gtk.Window {
                 met.plugin_name = "User set";
                 met.content_type = MetaData.ContentType.URI;
                 met.set_uri(file);
-                Gmpc.MetaData.set_metadata(this.song, Gmpc.MetaData.Result.AVAILABLE, met); 
+				// @TODO fix this
+				GLib.error("needs implementing");
+				//Gmpc.MetaData.set_metadata(this.song, Gmpc.MetaData.Result.AVAILABLE, met); 
 
                 var met_false = new MetaData.Item();
                 met_false.type = this.query_type;
@@ -481,7 +489,7 @@ public class Gmpc.MetaData.EditWindow : Gtk.Window {
     {
         clear_itemslist();
         GLib.log("MetadataSelector", GLib.LogLevelFlags.LEVEL_DEBUG, "Query metadata");
-        MPD.Song ss = this.song;
+        MPD.Song ss = this.song.copy();
         ss.artist = this.artist_entry.get_text();
         ss.album = this.album_entry.get_text();
         ss.title = this.title_entry.get_text();
@@ -570,7 +578,7 @@ public class Gmpc.MetaData.EditWindow : Gtk.Window {
     public
     EditWindow (MPD.Song song, Gmpc.MetaData.Type type) {
         var vbox = new Gtk.VBox(false, 6);
-        this.song = song;
+        this.song = song.copy();
         this.query_type = type;
         this.pbox = new Gtk.HBox(false, 6); 
         this.bar = new Gtk.ProgressBar();
@@ -721,7 +729,7 @@ public class Gmpc.MetaData.EditWindow : Gtk.Window {
         }
         this.downloads.first();
         while(this.downloads != null){
-            Gmpc.AsyncDownload.Handle handle = this.downloads.data;
+            unowned Gmpc.AsyncDownload.Handle handle = this.downloads.data;
             
             handle.cancel(); 
             this.downloads.first();
@@ -791,7 +799,7 @@ public class  Gmpc.TestPlugin : Gmpc.Plugin.Base,Gmpc.Plugin.ToolMenuIface, Gmpc
         {
             if(model.get_iter(out iter, path))
             {
-                unowned MPD.Song song = null;
+                unowned MPD.Song? song = null;
                 model.get(iter,0, out song);
                 if(song != null)
                 {

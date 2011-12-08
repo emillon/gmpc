@@ -151,7 +151,7 @@ static void tag2_browser_add_browser(GtkWidget * cat_tree, char *key)
 	GtkListStore *tree = (GtkListStore *) gtk_tree_view_get_model(GTK_TREE_VIEW(cat_tree));
 	gint pos = cfg_get_single_value_as_int_with_default(config, group, "position", 50 + g_list_length(tag2_ht));
 	g_free(group);
-	playlist3_insert_browser(&iter, pos);
+	playlist3_insert_browser(&iter, PL3_CAT_BROWSER_LIBRARY+pos%PL3_CAT_BROWSER_LIBRARY);
 	gtk_list_store_set(tree, &iter,
 					   PL3_CAT_TYPE, tag2_plug.id,
 					   PL3_CAT_TITLE, name, PL3_CAT_INT_ID, key, PL3_CAT_ICON_ID, "tag-browser", -1);
@@ -861,10 +861,6 @@ static void tag2_sentry_changed(GtkWidget * entry, tag_element * te)
 
 static void playtime_changed(GmpcMpdDataModel * model, gulong playtime)
 {
-	if (pl3_cat_get_selected_browser() == tag2_plug.id)
-	{
-		playlist3_show_playtime(playtime);
-	}
 }
 
 static void tag2_songlist_clear_selection(GtkWidget * button, tag_browser * browser)
@@ -1299,11 +1295,6 @@ static void tag2_browser_selected(GtkWidget * container)
 					gtk_container_add(GTK_CONTAINER(container), tb->tag2_vbox);
 					gtk_widget_show_all(container);
 					tag2_current = tb->tag2_vbox;
-
-					playlist3_show_playtime(gmpc_mpddata_model_get_playtime
-											(GMPC_MPDDATA_MODEL(gtk_tree_view_get_model(tb->tag_songlist))));
-				} else
-				{
 
 				}
 				g_free(key);

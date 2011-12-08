@@ -31,7 +31,7 @@ namespace Gmpc {
 
     }
 
-
+   [CCode (cheader_filename="metadata.h")]
    namespace MetaData {
 
         [CCode (cname="MetaDataContentType", cprefix = "META_DATA_CONTENT_", cheader_filename = "libmpd/libmpd.h,metadata.h")]
@@ -44,10 +44,13 @@ namespace Gmpc {
             STRV,
             TEXT_LIST
         }
-        [CCode (cname="MetaData", cheader_filename="metadata.h")]
+
         [Compact]
-        [Immutable]
-        [CCode (free_function="meta_data_free")]
+        [CCode (
+	cname="MetaData",
+	free_function="meta_data_free",
+	has_type_id = false
+	)]
         public class Item {
             [CCode (cname="meta_data_new")]
             public Item ();
@@ -114,6 +117,7 @@ namespace Gmpc {
             SONG_SIMILAR    = 64,
             GENRE_SIMILAR   = 128,
             SONG_GUITAR_TAB = 256,
+			BACKDROP_ART	= 512,
             QUERY_DATA_TYPES = 65535,
             QUERY_NO_CACHE   = 65536
         }
@@ -142,6 +146,7 @@ namespace Gmpc {
 
         [CCode ( cname="GmpcMetaImage", cheader_filename="gmpc-metaimage.h")]
         public class Image: Gtk.Widget {
+			public int size;
             [CCode (cname="gmpc_metaimage_new_size")]
             public Image(Type type, int size);
             [CCode (cname="gmpc_metaimage_update_cover_from_song")]
@@ -158,6 +163,8 @@ namespace Gmpc {
             [CCode (cname="gmpc_metaimage_set_loading_cover_icon")]
             public void set_loading_cover_icon(string name);
 
+            [CCode (cname="gmpc_metaimage_set_cover_na")]
+            public void set_cover_na();
             [CCode (cname="gmpc_metaimage_set_scale_up")]
             public void set_scale_up(bool scale);
 
@@ -199,6 +206,9 @@ namespace Gmpc {
 
     [CCode (cname = "playlist3_show_error_message", cheader_filename="playlist3-messages.h")]
     void show(string message, Gmpc.Messages.Level level);
+
+    [CCode (cname = "playlist3_error_add_widget", cheader_filename="playlist3-messages.h")]
+	void add_widget(Gtk.Widget widget);
    }
 
    namespace AsyncDownload {
@@ -257,21 +267,37 @@ namespace Gmpc {
     public string user_path(string file);
     [CCode (cname="open_uri", cheader_filename="misc.h")]
     public void open_uri(string uri);
+    [CCode (cname="open_help", cheader_filename="misc.h")]
+	public void open_help(string uri);
 
 
     namespace Playlist {
+
+		[CCode (cname="Pl3CatBrowserType", cprefix="PL3_CAT_BROWSER_", cheader_filename="plugin.h")]
+		public enum BrowserType{
+			TOP,
+			LIBRARY,
+			ONLINE_MEDIA,
+			MISC
+		}
         [CCode (cname="(GtkWindow *)playlist3_get_window", cheader_filename="plugin.h")]
         public unowned Gtk.Window get_window();
-[CCode (cname="playlist3_window_is_hidden", cheader_filename="plugin.h")]
+        [CCode (cname="playlist3_window_is_hidden", cheader_filename="plugin.h")]
         public bool is_hidden();
 
-[CCode (cname="pl3_hide", cheader_filename="plugin.h")]
+        [CCode (cname="pl3_hide", cheader_filename="plugin.h")]
         public void hide();
 
-[CCode (cname="create_playlist3", cheader_filename="plugin.h")]
+        [CCode (cname="create_playlist3", cheader_filename="plugin.h")]
         public void show();
         [CCode (cname="playlist3_get_accel_group", cheader_filename="playlist3.h")]
         public unowned Gtk.AccelGroup get_accel_group();
+        
+        [CCode (cname="playlist3_get_widget_by_id", cheader_filename="playlist3.h")]
+        public Gtk.Widget get_widget_by_id(string id);
+
+		[CCode (cname="playlist3_get_sidebar_state", cheader_filename="plugin.h")]
+		public Gmpc.Plugin.SidebarState get_sidebar_state();
     }
 
     namespace TrayIcon2 {
@@ -282,9 +308,9 @@ namespace Gmpc {
         public bool have_appindicator_support();
     }
 
-   [CCode (cname = "config", cheader_filename="plugin.h")]
-    static Settings config;
-    [CCode (cheader_filename="config1.h")]
+	[CCode (cname = "config", cheader_filename="plugin.h")]
+	static Settings config;
+    [CCode (cheader_filename="config1.h",cname="config_obj")]
         [Compact]
         [Immutable]
     public class Settings {
@@ -387,6 +413,9 @@ namespace Gmpc {
         public void play_path(string path);
         [CCode (cname="submenu_for_song")]
         public void submenu_for_song(Gtk.Widget menu, MPD.Song song);
+
+		[CCode (cname="connect_to_mpd")]
+		public void connect();
     }
 
         [CCode (cheader_filename="gmpc-profiles.h")]
@@ -401,6 +430,14 @@ namespace Gmpc {
             [CCode (cname="connection_get_hostname", cheader_filename="mpdinteraction.h")]
             public string? get_hostname();
 
+			public unowned string? get_id(string id);
+			public unowned string? create_new_item_with_name(string id, string name);
+			public void set_music_directory(string id, string value);
+			public void set_hostname(string id, string hostname);
+			[CCode (cname="gmpc_profiles_get_hostname", cheader_filename="mpdinteraction.h")]
+			public unowned string? get_profile_hostname(string id); 
+
+			public signal void set_current(string id);
     }
 
     namespace Fix{
@@ -440,15 +477,16 @@ namespace Gmpc {
 		public void set_enabled(int e);
 		public bool is_browser();
 	}
-	[CCode (cheader_filename="main.h", cname="plugins")]
+	[CCode (cheader_filename="main.h", array_length = false, cname="plugins")]
 	static weak parentPlugin[] plugins;
-	[CCode (cheader_filename="main.h", cname="num_plugins")]
+	[CCode (cname="num_plugins",cheader_filename="main.h")]
 	static int num_plugins;
 
 
     namespace Preferences {
         [CCode (cname="preferences_window_update", cheader_filename="preferences.h")]
         public void update();
-
+		[CCode (cname="preferences_show_pref_window", cheader_filename="preferences.h")]
+		public void show(int id);
     }
 }

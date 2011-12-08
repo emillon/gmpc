@@ -1,0 +1,495 @@
+GMPC Manual - The interface
+===========================
+:Author:  Qball
+:Email: Qball@gmpclient.org
+:Date: today
+:Revision: 0.01
+
+== Die Hauptansicht
+
+Das folgende Bild zeigt das Hauptfenster von GMPC:
+
+image:Images_DE/main-window_DE.png[]
+
+Wenn man das Hauptfenster verkleinert, können Teile davon vielleicht nicht angezeigt werden.
+Momentan gibts es zwei verkleinerte Ansichten.
+
+Verkleinerte Ansicht 1:
+
+image:Images_DE/main-window-collapsed1_DE.png[]
+
+Verkleinerte Ansicht 2:
+
+image:Images_DE/main-view-collapsed2_DE.png[]
+
+In dieser Anleitung werden wir jeden Teil der Anzeige erklären.
+
+=== Die Menüzeile
+
+image:Images_DE/menu-bar_DE.png[]
+
+Die Menüzeile ist der Zugang zu jedem Programmteil. Man kann das Playback steuern (Steuerung), GMPC konfigurieren, verschiedene Abspielgeräte ansteuern, andere Profile wählen, etc..
+
+Merke: Die Bestandteile der Menüs können unterschiedlich sein, je nach dem welche und wieviele Plugins installiert und aktiviert sind. 
+
+* Musik
+** 'Verbinden' - Verbindung mit MPD herstellen
+** 'Verbindung trennen' - Verbindung zu MPD trennen
+** 'Kennwort senden' - Ein neues Passwort zu MPD schicken, was die Erlaubnisstufe entweder erhöht oder verringert.
+** 'Profile' - Das Untermenü enthält eine Liste der vorhandenen Profile
+*** Liste der Profile
+** 'Preferences' - Öffnet das Einstellungen-Fenster xref:preferences[(Mehr)]
+** 'Quit' - Schließt GMPC komplett.
+* Server
+** 'Aktualisiere Datenbank' - Veranlasst MPD dazu, die komplette Datenbank zu aktualisieren (Achtung: kann bei mehreren zehntausend Dateien >5 Minuten dauern)
+** 'Information' - Öffnet ein Fenster mit Informationen über den Server xref:server-information[(Mehr)]
+** Liste der für MPD verfügbaren Abspielgeräte (Soundkarten), können hier (de-)aktiviert werden.
+* Steuerung
+** 'Wiedergabe/Pause'
+** 'Stop'
+** 'Nächster'
+** 'Vorheriger'
+** 'Stumm' - Schaltet den Stumm-Modus ein (verändert die Lautstärke auf 0 und stellt sie dann wieder her)
+** 'Endlosschleife' - (De-)Aktiviert die Endlosschleife
+** 'Zufall' - (De-)Aktiviert den Zufallsmodus
+** 'Einzelner Titel' - (De-)Aktiviert einzelne Titel, dann wird der nächste Titel nicht gestartet nachdem der Aktuelle fertig ist
+** 'Verbrauch' - (De-)Aktiviert den Verbrauchs-Modus, dann werden die gespielten Titel aus der Playliste genommen.
+* Ansicht
+** 'Oberfläche erweitern' - Mehr Elemente einblenden
+** 'Oberfläche beschränken' - Weniger Elemente einblenden
+** 'Vollbild' - Vollbild aktivieren
+** 'Zeige Künstlerbild' - (De-)Aktiviert die Anzeige des Künsterbildes in der Seitenleiste
+* Option
+** Hier stehen Optionen für die momentane Ansicht
+* Extras
+** 'URL hinzufügen' - Fügt eine URL zur Wiedergabe-Warteschlange hinzu xref:add-url[(Siehe hier)]
+** Liste von globalen Optionen, die durch Plugins hinzugefügt wurden
+* Gehe zu
+** Liste von aktivierten Ansichten, ermöglicht schnellen Wechsel zwischen den Ansichten
+* Hilfe
+** 'Statusnachrichten anzeigen' - Zeigt eine Liste der letzten Nachrichten, Warnungen und Informationen
+** 'Webseite' - Öffnet den Internetauftritt von GMPC
+** 'Hilfe' - Öffnet die Online-Hilfe im GMPC-Wiki
+** 'Bug-Informationen' - Öffnet ein Fenster mit Informationen über die verwendete GMPC-Version xref:bug-information[(Mehr)]
+** 'Easy-Command Hilfe' - Öffnet eine Liste mit Befehlen für das Easy-Command-Fenter. xref:easy-command[
+** 'About' - Öffnet das Über-Fenster
+
+=== Playback Steuerung
+image:Images_DE/playback-control_DE.png[]
+
+Die Steuerungselemente werden von links nach rechts erklärt.
+
+
+=== Album Cover
+image:Images_DE/pc-cover_DE.png[]
+
+Hier wird das Cover des aktuell gespielten Albums angezeigt. Wenn kein Cover vorhanden ist oder der Titel keine Informationen darüber hergibt, wird
+eine leere CD-Hülle angezeigt.
+
+[TIP]
+=================================
+* Das Cover wird vergrößert angezeigt, wenn man mit der Maus über das Cover fährt.
+* Klickt man mit der rechten Maustaste auf das Cover, kann man es bearbeiten.
+* Man kann die Coverdarstellung in den Einstellungen verändern (Mit oder ohne CD-Hülle).
+
+
+image:Images_DE/pc-cover_DE.png["With casing"]
+image:Images_DE/pc-cover-plain_DE.png["Withouth casing"]
+
+=================================
+
+
+==== Titelinformationen
+image:Images_DE/pc-song-info_DE.png[]
+
+Rechts neben dem Cover befinden sich Informationen zum abgespielten Titel (Titel, Artist, Albumname).
+
+TIP: Wenn man den Titel, den Artist oder den Albumnamen klickt, springt GMPC zum entsprechenden Eintrag im Metadaten-Browser.
+
+
+==== Favoriten
+image:Images_DE/pc-favorite-nhl_DE.png[]
+
+Ein Klick auf das Icon in Herzform erlaubt es, einen Titel als Favorit zu markieren oder die Markierung aufzuheben.
+
+Wenn der Titel als Favorit markiert ist, wird das Herz-Icon hervorgehoben. Wenn ein Titel kein Favorit ist, ist das Icon blass.
+
+* image:Images_DE/pc-favorite-hl_DE.png["Song is a favorite"]
+Als Favorit markiert:
+* image:Images_DE/pc-favorite-nhl_DE.png["Sog is not a favorite"]
+Nicht als Favorit markiert:
+
+Favorisierte Titel werden in einer extra Playlist gehalten, die "Favoriten" heißt.
+
+TIP: Mit einem Rechtsklick auf das Favoriten-Icon kann man den aktuellen Titel zu jeder existierenden Playlist hinzufügen.
+
+WARNING: Um Favoriten benutzen zu können, muss MPD Playlists speichern und laden (lesen) dürfen.
+
+
+==== Playback Steuerung
+image:Images_DE/pc-playback-control_DE.png[]
+
+Natürlich verfügt GMPC auch über Steuerungs-Buttons für das Abspielen: Play/Pause, Vorheriger, Nächster, Stop und einen Lautstärkeregler.
+
+
+[CAUTION]
+=====================================================================
+* Es werden genügende Zugriffsrechte benötigt, um das Playback zu steuern. Wenn diese Rechte fehlen, führen die Buttons nichts aus.
+* Wenn in MPD kein Ausgabegerät definiert ist oder verfügbar ist, funktioniert der Lautstärkeregler nicht.
+=====================================================================
+
+TIP: Wenn man mit der Maus über den Nächster-Button fährt, erscheint der nächste Titel in einem Tooltip.
+
+
+==== Statusleiste
+image:Images_DE/pc-seek-bar_DE.png[]
+
+Unter der Playback Steuerung befindet sich die Status-/Fortschrittsanzeige. Sie zeigt an, wieviel von dem aktuellen Titel schon gespielt wurde.
+Ein doppelter Linksklick oder ein einfacher Klick mit der mittleren Maustaste irgendwo auf diese Anzeige lässt GMPC direkt zu der gewählten Stelle springen.
+Den kleinen mitlaufenden Pfeil kann mit der linken Maustaste festgehalten und verschoben werden.
+
+Rechts neben der Statusleiste befindet sich die verstrichene Zeit (oder verbleibende, siehe Tip) und die Dauer des Titel (sofern vorhanden).
+
+
+[TIP]
+=======================
+* Ein Rechtsklick auf die Statusleiste ändert die Zeitanzeige von verstrichen zu verbleibend (und zurück).
+* Fährt man mit der Maus auf die Statusleiste, wird die Dauer des Titels und die Zeit an der Position des Mauszeiger angezeigt.
+=======================
+
+NOTE: Die Zeitsprünge geschehen nicht sofort, sie werden erst ausgeführt, wenn man den mitlaufenden Pfeil loslässt, andernfalls
+würde MPD mit Sprung-Anfragen zugemüllt.
+
+
+=== Nachrichtenleiste
+image:Images_DE/message-bar_DE.png[]
+
+Die Nachrichtenleiste wird nur angezeogt, wenn GMPC etwas mitzuteilen hat. Sie kann Informationen, Warnungen und Fehler anzeigen.
+
+Eine Liste der zuletzt angezeigten (oder versteckten) Meldungen kann über Hilfe -> Statusnachrichten anzeigen eingesehen werden.
+
+TIP: Man kann unter xref:preferences[preferences] Einstellen, welche Nachrichten in der Nachrichtenleiste angezeigt werden sollen.
+
+[[sidebar]]
+=== Seitenleiste
+image:Images_DE/sidebar_DE.png[]
+
+Über die Seitenleiste kann man zwischen den verschiedenen Fenstern wechseln.
+Per drag & drop kann die Anordnung der Elemente verändert werden.
+Welche Elemente vorhanden sind, hängt von den installierten/aktivierten Plugins und Einstellungen ab.
+
+Wenn man die Oberfläche beschränkt, wird die Seitenleiste zu einer horizontalen Dropdown-Auswahl:
+
+image:Images_DE/sidebar-hori1_DE.png[]
+
+Oder aber, wenn über xref:preferences[preferences] anders definiert, eine Liste von Buttons:
+
+image:Images_DE/sidebar-hori2_DE.png[]
+
+
+TIP: Die oberste Ansicht wird immer aktiviert, wenn man sich mit einem MPD Server verbindet.
+
+NOTE: Wird die Oberfläche beschränkt, wird die Seitenleiste horizontal angezeigt, oben drüber die Abspiel-Steuerung. Bei weiterer Beschränkung wird die Seitenleiste ausgeblendet.
+
+=== Hauptfenster
+
+Das Hauptfenster beherbergt die aktuelle ausgewählte Ansicht. Die Ansichten hab (normalerweise) den gleichen Aufbau.
+Entweder gibt es eine große Leiste (z.B. die Seitenleiste) oder zwei Leisten (z.B. Datenbank, Metadaten-Browser etc.), wobei die Größe/Breite zwischen den Ansichten ausgeglichen ist.
+
+Eine große Leiste:
+
+image:Images_DE/browser-pane-single_DE.png[]
+
+Zwei Leisten:
+
+image:Images_DE/browser-pane-single_DE.png[]
+
+NOTE: Wenn die Oberfläche komplett eingeklappt ist, wird das Hauptfenster nicht angezeigt.
+
+=== Statusleiste
+image:Images_DE/status-bar_DE.png[]
+
+Am unteren Rand des GMPC-Fensters befindet sich die Statusleiste. Die Statusleiste wird nicht angezeigt, wenn die Oberfläche komplett eingeklappt ist.
+
+Die Statusleiste besteht aus zwei Teilen:
+
+Links ist ein Anzeige-Block. Dieser zeigt Änderungen wie z.B. "Zufall: Ein/Aus", "10 Titel zur Warteschlange hinzugefügt" an.
+
+Rechts sind Status Symbole.
+
+==== Status Symbole
+image:Images_DE/status-icons_DE.png[]
+
+Status Symbole sind kleine Icons, die den Status einer Einstellung, eines Plugins oder eines Vorgangs anzeigen.
+
+Momentan zeigt GMPC immer die folgenden Symbole:
+
+* Wiederholung
+* Zufall
+* Einzelmodus
+* Verbrauchsmodus
+
+Einige Symbole werden nur angezeigt, wenn z.B. MPD die Datenbank aktualisiert.
+Alle Symbole besitzen einen Tooltip.
+
+NOTE: Ein Klick auf ein Status Symbol ändert dessen Status.
+
+NOTE: Einige Status Symbole (wie das des GMPC-Shout-Plugins) haben ein Kontextmenü.
+
+[[preferences]]
+== Einstellungen
+
+=== Verbindung
+image:Images_DE/preferences-connection_DE.png[]
+
+Unter "Verbindung" kann die Verbindung zum MPD eingestellt werden.
+Man kann mehrere Verbindungsprofile konfigurieren, zwischen welchen GMPC einen schnellen Wechsel erlaubt.
+
+* Das 'Name' Feld definiert den Namen, den GMPC für diese Verbindung anzeigt.
+* Das 'Host' Feld definiert den Hostnamen der MPD Maschine. Hier kann auch ein Pfad zu einem Socket angegeben werden.
+* Das 'Port' Feld definiert den Port, auf den MPD lauscht.
+* 'Authentifizierung verwenden' weist GMPC an, das 'Passwort' Feld bei der Verbindung an MPD zu übermitteln. Das Passwort wird gebraucht, wenn man sich am MPD Server explizit authentifizieren will (muss).
+* Das 'Musik-Ordner' Feld sagt GMPC, wo die Musik zu finden ist.
+
+=== Servereinstellungen
+image:Images_DE/preferences-server-settings_DE.png[]
+
+Wenn die Verbindung zu MPD steht, können verschiedene Parameter von MPD eingestellt werden:
+
+* 'Überblenden einschalten': Aktiviert das Aus- und Einklingen eines Songs (fading in/out), die Überblendzeit kann eingestellt werden. Überblenden wird von MPD erledigt, nicht von GMPC!
+* 'Wiedergabeverstärkung': Hier kann der Verstärkunsmodus ausgewählt werden.
+*' Ausgabegerät': De-/Aktivieren von Ausgabegeräten.
+
+
+=== Oberfläche
+image:Images_DE/preferences-interface_DE.png[]
+
+Hier wird die Oberfläche von GMPC konfiguriert.
+
+* 'Beim Schließen verstecken': Wenn GMPC über das "x" rechts oben geschlossen wird, bleibt GMPC im Tray offen. (Wenn kein Tray existiert, wird GMPC minimiert.)
+* 'Stilisiere Alben Cover': Die Cover sehen aus, als ob sie in einer CD-Hülle stecken.
+  image:Images_DE/pc-cover_DE.png["With casing"]
+  image:Images_DE/pc-cover-plain_DE.png["Withouth casing"]
+
+* 'Beende Wiedergabe beim Verlassen': Wenn GMPC geschlossen wird, wird auch das Abspielen gestoppt.
+* 'Zeige Tooltip in der Song-Liste': Aktiviert Tooltips in der Titelliste. Zeigt eine Infobox über den aktiven Titel unter dem Mauszeiger.
+* 'Enable search as you type' (bisher nicht übersetzt): Aktiviert, dass direkt beim Tippen gesucht wird (im Suchmodus, über STRG+F, kann langsam sein).
+* 'Schaltflächen statt Listenfeld in verkleinerter Ansicht': Ändert das Dropdown-Auswahlmenü zu einer Reihe aus Buttons.
+* 'Aktuell spielenden Titel zentrieren': Der aktuell gespielte Titel steht immer in der Mitte der Playlist.
+* 'Fensterposition und -größe zwischen Sitzungen sichern': Die Größe und Position vom GMPC-Fenster wird gespeichert und beim nächsten Programmstart wiederhergestellt.
+
+
+=== Tag-basierter Browser 
+image:Images_DE/preferences-tag-based-browser_DE.png[]
+
+=== Multimediatasten
+image:Images_DE/preferences-multimedia-keys_DE.png[]
+
+=== Benachrichtigung
+image:Images_DE/preferences-notification_DE.png[]
+
+=== Metadaten-Verwaltung
+image:Images_DE/preferences-metadata-handler_DE.png[]
+
+=== Proxy
+image:Images_DE/preferences-proxy_DE.png[]
+
+=== Metadaten-Browser
+image:Images_DE/preferences-metadata-browser_DE.png[]
+
+== Metadaten-Wähler
+
+Der Metadaten-Wähler kann per Rechtsklick auf einen Titel bzw. ein Metadaten-Item geöffnet werden.
+
+image:Images_DE/meta-data-selector-artist_DE.png[]
+image:Images_DE/meta-data-selector-lyrics_DE.png[]
+
+Wenn GMPC nicht die richtigen Metadaten findet, kann man sich alle Daten im Metadaten-Wähler anschauen. Der Wert des entsprechenden Feldes kann editiert werden, dann kann die Abfrage neu abgesetzt werden.
+Wie man in den Screenshots erkennt, sieht man die Ergebnisse und wo sie herkommen. Zusätzlich wird die Größe der Cover angezeigt (sofern vorhanden).
+
+Die folgenden Daten können ausgewählt werden:
+
+* Künstlerbilder
+* Album Cover
+* Liedtexte
+* Album Informationen
+* Künstler Biographie
+* Gitarren-Tabs
+
+== Ansichten
+
+=== Now Playing
+
+=== Datenbank
+
+=== Play Queue
+image:Images_DE/play-queue_DE.png[]
+
+Das ist im Prinzip die Haupt-Playlist. Jeder Titel der angehört werden soll erscheint hier. Hinzufügen per Rechtsklick und "Add" auf eine Datei in der Datenbank oder im Wiedergabelisten-Editor.
+Das funktioniert mit jeder Datei, Playlist oder jedem Ordner.
+
+Wenn man auf einen Eintrag in der Wiedergabe-Warteschlange rechts klickt, bekommt man dieses Popup:
+
+image:Images_DE/play-queue-rightclick_DE.png[]
+
+NOTE: Das Aussehen dieses Popups hängt von den installierten/aktivierten Plugins ab. Einige Plugins erzeugen hier Einträge, andere nicht.
+
+=== Tag Browser
+
+=== Suche
+
+=== Metadaten-Browser
+
+== Server Information
+image:Images_DE/server-information_DE.png[]
+
+[[query-syntax]]
+== Query Syntax
+Wörtlich übersetzt: Query = Abfrage
+
+Die Query Syntax wird im Suchfenster, in der Suchfunktion der Playlist und im EasyCommand verwendet.
+
+Sie besteht aus Folgendem:
+
+---------------
+<Feld>=<Wert>
+---------------
+
+Dieses Beispielt sucht nach "Wert" im Feld mit dem Namen "Feld".
+
+Diese Felder werden unterstützt:
+
+    artist
+    album
+    title
+    track
+    Name (trifft auf Streams zu)
+    Genre
+    Date
+    Composer
+    Performer
+    Comment
+    Disc
+    Filename
+    AlbumArtist
+    Any (durchsucht alle Felder) 
+
+Wenn MPD keins dieser Felder unterstützt, werden sie ignoriert und als Teil des Befehls angezeigt.
+
+Die Suche basiert auf Tokens (Stichworte) und unterscheidet Groß-/Kleinschreibung, zum Beispiel:
+
+-------------------
+artist=eric clapton
+-------------------
+
+Wird sowohl "eric clapton" als auch "Clapton, Eric" finden. Um die Suche per Stichworten zu umgehen, wird die Suche in () gestellt, z.B.:
+
+---------------------
+artist=(Eric Clapton)
+---------------------
+
+Wird nicht "Clapton, Eric" finden.
+
+Um die Suche zu verfeiner, können mehrere Werte angegeben werden, z.B.:
+
+----------------------------------
+artist=Eric Clapton album=Slowhand
+----------------------------------
+
+Mit dem || Operator kann man auch mehrere Abfragen auf einmal absetzen:
+
+-----------------------------------------
+artist=Eric Clapton || artist=Norah Jones
+-----------------------------------------
+
+Diese Abfrage wird alle Titel von Eric Clapton und Norah Jones finden.
+
+NOTE: Wenn <field= > abgesetzt wird, werden alle Felder durchsucht.
+
+
+== Easy Command
+image:Images_DE/Gmpc-easy-command_DE.png[]
+
+GMPC besitzt ein Funktion, die "Easy Command" heißt. Easy Command stellt eine kleine Befehls-Box bereit, die die schnelle Ausführung von Befehlen ermöglicht, ohne die Maus benutzen zu müssen.
+
+Beispiel: GMPC soll die Wiedergabe-Warteschlange nach dem Titel Holy Mother von Eric Clapton durchsuchen und diesen dann direkt abspielen.
+
+Zuerst wird Easy Command gestartet:
+
+----------
+ctrl-space
+----------
+
+Als nächstes wird der Befehl eingetippt:
+
+------------------------------------------
+play title=Holy mother artist=Eric Clapton
+------------------------------------------
+
+Befehle können auch verbunden werden:
+
+--------------------------------------------
+clear; add artist=Strehli; play title=SRV
+--------------------------------------------
+
+Ein globaler Befehl kann in den Einstellungen unter Multimediatasten definiert werden.
+
+Einige Befehle nutzen die xref:query-syntax[Query Syntax].
+
+
+=== Eingebaute Easy Commands
+
+Um die aktuellste Liste der verfügbaren Befehle zu kommen, siehe Hilfe -> Easy Command Hilfe.
+
+====  Wechseln
+
+*    Wechsle Wiedergabeliste: Wechsle zur Wiedergabeliste
+*    switch now playing: Zu Now Playing wechseln 
+*    Suche Wechseln: Zum Suchbrowser wechseln 
+
+==== Main
+
+*    Beenden: GMPC beenden
+*    Verstecken: GMPC verstecken
+*    Zeigen: GMPC zeigen
+*    Benachrichtigung anzeigen: Zeige Benachrichtigungen im Tray 
+
+==== Playback
+
+*    Wiedergabe: Wiedergabe starten
+*    Pause: Wiedergabe pausieren
+*    Weiter: Nächster Titel
+*    vorheriges: Vorheriger Titel
+*    Stop: Wiedergabe anhalten
+*    Zufall: Zufall (ein|aus)
+*    Wiederholen: Wiederholen (ein|aus)
+*    Laustärke: Laustärke (+-)<pegel>
+*    Stumm: Stumm
+*    Wiedergabe: Spiele <query> 
+
+*    seek hh:mm:ss: Seek to position (nicht in DE-Liste)
+*    seek +hh:mm:ss: Seek relative to current position (nicht in DE-Liste)
+*    seek -hh:mm:ss: Seek backwards relative to current position (nicht in DE-Liste)
+
+*    Wiederhole aktuelles Lied: Wieder das aktuelle Lied
+*    Stoppe nach dem aktuellen Lied: Stoppe Wiedergabe nach dem aktuellen Lied
+*    Verbrauch: Verbrauch (an|aus)
+*    Single: Single (an|aus) 
+
+==== Wiedergabe-Warteschlange Manipulation
+
+*    Hinzufügen: <query> hinuzfügen
+*    Ersetzen: Playlist mit <query> ersetzen
+*    Wiedergabeliste leeren: Wiedergabeliste leeren
+*    Aktuellen Titel abschneiden: Aktuelle Wiedergabeliste auf den aktuellen Titel zuschneiden 
+
+==== Suche
+
+*    Datenbank durchsuchen: Durchsuche Datenbank nach <query>
+*    Wiedergabeliste durchsuchen: Durchsuche Wiedergabeliste nach <query>
+
+==== Metadata Browser
+
+*    show current song: Show the page of the current playing song (nicht in DE-Liste)
+*    show current artist: Show the page of the current playing artist (nicht in DE-Liste)
+*    show current album: Show the page of the current playing album (nicht in DE-Liste)

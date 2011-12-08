@@ -1,10 +1,11 @@
 #Define the version
+# micro version (aka day) is 90+ means developers release
 m4_define([package_major_version], [11])
 m4_define([package_minor_version], [8])
-m4_define([package_micro_version], [16])
+m4_define([package_micro_version], [90])
 m4_define([package_version], [package_major_version.package_minor_version.package_micro_version])
 
-AC_INIT([gmpc], [11.8.16], [qball@sarine.nl])
+AC_INIT([gmpc],[11.8.90],[qball@gmpclient.org])
 
 #Define variable
 m4_define([package_tagline],       "All hail the Greg")
@@ -14,7 +15,7 @@ m4_define([package_bugtracker],    "http://gmpc.wikia.com/wiki/GMPC_HELP")
 
 
 
-AM_CONFIG_HEADER([config.h])
+AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE
 
@@ -37,18 +38,18 @@ AC_DEFINE(GMPC_WEBSITE,		package_website,	["Gmpc's website"])
 AC_DEFINE(GMPC_BUGTRACKER,      package_bugtracker,	["Gmpc's bugtracker"])
 AC_DEFINE(GMPC_COPYRIGHT,       package_copyright,	["Gmpc's Copyright"])
 
-
-AC_PREREQ(2.59)
+AC_PREREQ([2.67])
 
 # Remove the check for c++ and fortran compiler
-LT_INIT
+LT_INIT([win32-dll])
+LT_LANG([Windows Resource])
 m4_defun([_LT_AC_LANG_CXX_CONFIG], [:])
 m4_defun([_LT_AC_LANG_F77_CONFIG], [:])
 AC_REPLACE_FUNCS(strndup)
 
 
 #intltool, libtool. Check for CC compiler
-AC_PROG_INTLTOOL([0.21])
+IT_PROG_INTLTOOL([0.21])
 
 # Check for intltool version, needed for make dist.
 AM_CONDITIONAL([INTLTOOL_HIGHER_04000], [test ${INTLTOOL_APPLIED_VERSION_AS_INT} -ge 4000])
@@ -56,10 +57,8 @@ AM_CONDITIONAL([INTLTOOL_HIGHER_04000], [test ${INTLTOOL_APPLIED_VERSION_AS_INT}
 
 AC_PROG_CC
 AM_PROG_CC_C_O
-LT_AC_PROG_RC
-AC_LIBTOOL_WIN32_DLL
-AC_LIBTOOL_RC
-AC_PROG_LIBTOOL
+LT_PROG_RC
+
 # test for zlib
 zlib=0
 AC_CHECK_LIB(z, inflate,zlib=1,zlib=0)
@@ -72,6 +71,12 @@ fi
 
 
 PKG_PROG_PKG_CONFIG
+
+#glyr
+PKG_CHECK_MODULES([libglyr], libglyr)
+AC_SUBST(libglyr_LIBS)
+AC_SUBST(libglyr_CFLAGS)
+
 unique=0;
 AC_ARG_ENABLE([unique],
               [--enable-unique Use unique.],
@@ -152,6 +157,7 @@ AC_SUBST(GTK_REQUIRED)
 ##
 # User params
 ##
+
 
 # Maintainer mode
 AC_ARG_ENABLE([timing],
@@ -302,7 +308,7 @@ macosx=no
 case $host in
   *-*-mingw32* | *-*-windows)
     win32=yes
-    EXTRA_CFLAGS="$EXTRA_CFLAGS -mno-cygwin -mwindows -mms-bitfields"
+    EXTRA_CFLAGS="$EXTRA_CFLAGS -mwindows -mms-bitfields"
     EXTRA_LDFLAGS="-export-all-symbols -mwindows -mms-bitfields" ;;
   *-*-cygwin*)
     win32=yes
@@ -355,7 +361,7 @@ if test x${GOB2} = x""; then
 	exit 1;
 fi
 
-AM_PROG_VALAC([0.11.0])
+AM_PROG_VALAC([0.14.0])
 
 if test x${VALAC} = x""; then
     exit 1;
@@ -399,7 +405,7 @@ fi
 
 GNOME_DOC_INIT([0.18.0], [have_gdu=yes], [have_gdu=no])
 
-AC_OUTPUT([
+AC_CONFIG_FILES([
 shave
 shave-libtool
 Makefile
@@ -505,6 +511,7 @@ test/Misc/Makefile
 test/DiscoGS/Makefile
 test/LastFM/Makefile
 ])
+AC_OUTPUT
 echo ""
 echo ""
 echo "------------------ Status ------------------"

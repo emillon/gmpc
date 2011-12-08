@@ -30,11 +30,63 @@
 #include "revision.h"
 #include "gmpc-metaimage.h"
 #include "gmpc-extras.h"
-#include "GUI/thv.h"
 #include "GUI/cmd.h"
 #include "GUI/status_icon.h"
 #include "GUI/title_header.h"
 #include "GUI/control_window.h"
+
+// Collapsed mode.
+#define SIDEBAR_SMALL 32
+// Default size.
+#define SIDEBAR_LARGE -1 
+
+#ifndef GDK_KEY_0
+#define GDK_KEY_0 GDK_0
+#endif
+
+#ifndef GDK_KEY_1
+#define GDK_KEY_1 GDK_1
+#endif
+
+#ifndef GDK_KEY_2
+#define GDK_KEY_2 GDK_2
+#endif
+
+
+#ifndef GDK_KEY_3
+#define GDK_KEY_3 GDK_3
+#endif
+
+#ifndef GDK_KEY_4
+#define GDK_KEY_4 GDK_4
+#endif
+
+
+#ifndef GDK_KEY_5
+#define GDK_KEY_5 GDK_5
+#endif
+
+
+#ifndef GDK_KEY_6
+#define GDK_KEY_6 GDK_6
+#endif
+
+
+#ifndef GDK_KEY_7
+#define GDK_KEY_7 GDK_7
+#endif
+
+
+#ifndef GDK_KEY_8
+#define GDK_KEY_8 GDK_8
+#endif
+
+
+#ifndef GDK_KEY_9
+#define GDK_KEY_9 GDK_9
+#endif
+
+
 
 #define ALBUM_SIZE_SMALL 42
 #define ALBUM_SIZE_LARGE 42
@@ -55,6 +107,8 @@ static GtkTargetEntry target_table[] =
 GtkWidget *metaimage_album_art = NULL;
 GtkWidget *metaimage_artist_art = NULL;
 GmpcFavoritesButton *favorites_button = NULL;
+
+GtkCellRenderer *sidebar_text = NULL;
 /**
  * Widgets used in the header.
  * and the new progresbar
@@ -98,6 +152,7 @@ gboolean pl3_close(void);
 static void pl3_update_profiles_menu(GmpcProfiles * prof, const int changed, const int col, const gchar * id);
 gboolean playlist3_enter_notify_event(GtkWidget * wid, GdkEventCrossing * event, gpointer data);
 gboolean playlist3_leave_notify_event(GtkWidget * wid, GdkEventCrossing * event, gpointer data);
+gboolean pl3_window_focus_out_event(GtkWidget *window, GdkEventFocus *event, gpointer data);
 
 static void pl3_profiles_changed(GmpcProfiles * prof, const int changed, const int col, const gchar * id);
 static void playlist3_server_output_changed(GtkWidget * item, gpointer data);
@@ -105,6 +160,10 @@ static void playlist3_fill_server_menu(void);
 void playlist3_server_update_db(void);
 
 void easy_command_help_window(void);
+
+void pl3_style_set_event(GtkWidget *widget, GtkStyle *previous_style, gpointer user_data);
+
+void pl3_sidebar_plugins_init(void);
 
 /* Old category browser style */
 static int old_type = -1;
@@ -182,45 +241,6 @@ static void pl3_initialize_tree(void)
 }
 
 
-static void pl3_cat_combo_changed(GtkComboBox * box)
-{
-    GtkTreeIter iter;
-    GtkTreeSelection *selec = gtk_tree_view_get_selection((GtkTreeView *) gtk_builder_get_object(pl3_xml, "cat_tree"));
-    GtkTreeModel *model = gtk_tree_view_get_model((GtkTreeView *) gtk_builder_get_object(pl3_xml, "cat_tree"));
-    if (gtk_combo_box_get_active_iter(box, &iter))
-    {
-        GtkTreeIter cat_iter;
-        GtkTreePath *path = NULL;
-
-        path = gtk_tree_model_get_path(gtk_combo_box_get_model(box), &iter);
-        if (path && gtk_tree_model_get_iter(GTK_TREE_MODEL(pl3_tree), &cat_iter, path))
-        {
-            GtkTreeIter piter;
-            if (gtk_tree_selection_get_selected(selec, &model, &piter))
-            {
-                GtkTreePath *ppath = gtk_tree_model_get_path(model, &piter);
-                if (ppath && gtk_tree_path_is_descendant(ppath, path))
-                {
-                    gtk_tree_path_free(path);
-                    gtk_tree_path_free(ppath);
-                    return;
-                }
-                gtk_tree_path_free(ppath);
-            }
-            if (gtk_tree_path_get_depth(path) > 0)
-            {
-                if (!gtk_tree_selection_iter_is_selected(selec, &cat_iter))
-                {
-                    gtk_tree_selection_select_iter(selec, &cat_iter);
-                }
-            }
-        }
-        if (path)
-            gtk_tree_path_free(path);
-    }
-}
-
-
 /**
  * Function to handle a change in category.
  */
@@ -232,24 +252,12 @@ static void pl3_cat_sel_changed(GtkTreeSelection * selec, gpointer * userdata)
     GtkWidget *container = GTK_WIDGET(gtk_builder_get_object(pl3_xml, "browser_container"));
     if (!model)
         return;
-    thv_set_button_state(-1);
     if (gtk_tree_selection_get_selected(selec, &model, &iter))
     {
         gint type;
-        gint *ind;
-        GtkTreePath *path;
 
-        gtk_tree_model_get(model, &iter, 0, &type, -1);
+        gtk_tree_model_get(model, &iter, PL3_CAT_TYPE, &type, -1);
 
-        /**
-         * Reposition the breadcrumb
-         */
-        path = gtk_tree_model_get_path(model, &iter);
-        ind = gtk_tree_path_get_indices(path);
-        gtk_combo_box_set_active(GTK_COMBO_BOX(gtk_builder_get_object(pl3_xml, "cb_cat_selector")), ind[0]);
-
-        thv_set_button_state(ind[0]);
-        gtk_tree_path_free(path);
 
         /**
          * Start switching side view (if type changed )
@@ -259,12 +267,15 @@ static void pl3_cat_sel_changed(GtkTreeSelection * selec, gpointer * userdata)
             gmpc_plugin_browser_unselected(plugins[plugin_get_pos(old_type)], container);
         }
         old_type = -1;
-        pl3_push_rsb_message("");
-        /** if type changed give a selected signal */
-        if ((old_type != type))
-        {
-            gmpc_plugin_browser_selected(plugins[plugin_get_pos(type)], container);
-        }
+		if(type > -1)
+		{
+			/** if type changed give a selected signal */
+			if ((old_type != type))
+			{
+				gmpc_plugin_browser_selected(plugins[plugin_get_pos(type)], container);
+
+			}
+		}
         /**
          * update old value, so get_selected_category is correct before calling selection_changed
          */
@@ -300,6 +311,7 @@ int pl3_cat_tree_button_press_event(GtkTreeView * tree, GdkEventButton * event)
 
 void pl3_option_menu_activate(void)
 {
+
     GtkWidget *tree = GTK_WIDGET(gtk_builder_get_object(pl3_xml, "cat_tree"));
     int i;
     gint type = pl3_cat_get_selected_browser();
@@ -309,7 +321,7 @@ void pl3_option_menu_activate(void)
     GtkUIManager *ui = GTK_UI_MANAGER(gtk_builder_get_object(pl3_xml, "uimanager1"));
     GtkMenuItem *m_item = GTK_MENU_ITEM(gtk_ui_manager_get_widget(ui, "/menubartest/menu_option"));
 
-    gtk_menu_item_set_submenu(m_item, NULL);
+    //gtk_menu_item_set_submenu(m_item, NULL);
 
     if (!mpd_check_connected(connection) || type == -1)
         return;
@@ -344,6 +356,7 @@ int pl3_cat_tree_button_release_event(GtkTreeView * tree, GdkEventButton * event
     gint type = pl3_cat_get_selected_browser();
     int menu_items = 0;
     GtkWidget *menu = NULL;
+
     if (type == -1 || !mpd_check_connected(connection) || event->button != 3)
     {
         /* no selections, or no usefull one.. so propagate the signal */
@@ -373,6 +386,18 @@ int pl3_cat_tree_button_release_event(GtkTreeView * tree, GdkEventButton * event
     return TRUE;
 }
 
+void pl3_sidebar_plugins_init(void)
+{
+    int i;
+    for (i = 0; i < num_plugins; i++)
+    {
+		// This is implicitely done inside sidebar_init
+//        if (gmpc_plugin_is_sidebar(plugins[i]))
+        {
+			gmpc_plugin_sidebar_init(plugins[i]);
+        }
+    }
+}
 
 /**********************************************************
  * MISC
@@ -389,15 +414,12 @@ static gboolean pl3_win_state_event(GtkWidget * window, GdkEventWindowState * ev
 		if(control_window == NULL) {
 			control_window = create_control_window(window);
 			gtk_box_pack_start(GTK_BOX(vbox1), control_window, FALSE, FALSE, 0);
-//			gtk_box_reorder_child(GTK_BOX(vbox1), control_window, 0);
 		}
-		gtk_widget_hide(GTK_WIDGET(gtk_builder_get_object(pl3_xml, "bread_crumb")));
-        gtk_widget_hide(GTK_WIDGET(gtk_builder_get_object(pl3_xml, "box_tab_bar")));
-        gtk_widget_hide(GTK_WIDGET(gtk_builder_get_object(pl3_xml, "vbox5")));
+        gtk_widget_hide(GTK_WIDGET(gtk_builder_get_object(pl3_xml, "sidebar")));
         gtk_widget_hide(p);
         gtk_widget_hide(h);
         gtk_widget_hide(b);
-    } else
+    } else if ((event->changed_mask) & GDK_WINDOW_STATE_FULLSCREEN)
     {
 		control_window_destroy(control_window);
 		control_window = NULL;
@@ -407,6 +429,24 @@ static gboolean pl3_win_state_event(GtkWidget * window, GdkEventWindowState * ev
         gtk_widget_show(b);
     }
     return FALSE;
+}
+
+gboolean alt_button_pressed = FALSE;
+/**
+ * This avoids the 'keybinding help' to become sticky when moving the window, or chainging
+ * focus to other window.
+ */
+gboolean pl3_window_focus_out_event(GtkWidget *window, GdkEventFocus *event, gpointer data)
+{
+	if(alt_button_pressed)
+	{
+		GtkWidget *tree = GTK_WIDGET(gtk_builder_get_object(pl3_xml, "cat_tree"));
+		alt_button_pressed = FALSE;
+		gtk_widget_queue_draw(GTK_WIDGET(tree));
+	}
+	GmpcToolsBindingOverlayNotify *p = gtk_builder_get_object(pl3_xml, "binding_overlay_notify");
+	gmpc_tools_binding_overlay_notify_key_released(p,GDK_MOD1_MASK|GDK_CONTROL_MASK);
+	return FALSE;
 }
 
 
@@ -437,10 +477,37 @@ void pl3_window_fullscreen(void)
 }
 
 
+int pl3_window_key_release_event(GtkWidget * mw, GdkEventKey * event)
+{
+	if(event->keyval == GDK_KEY_Alt_L || event->keyval == GDK_KEY_Alt_R || event->keyval == GDK_KEY_Meta_L|| event->keyval == GDK_KEY_Meta_R) {
+		GtkWidget *tree = GTK_WIDGET(gtk_builder_get_object(pl3_xml, "cat_tree"));
+		alt_button_pressed = FALSE;
+		gtk_widget_queue_draw(GTK_WIDGET(tree));
+		GmpcToolsBindingOverlayNotify *p = gtk_builder_get_object(pl3_xml, "binding_overlay_notify");
+		gmpc_tools_binding_overlay_notify_key_released(p,GDK_MOD1_MASK);
+	}
+	if(event->keyval == GDK_KEY_Control_L || event->keyval == GDK_KEY_Control_R) {
+		GmpcToolsBindingOverlayNotify *p = gtk_builder_get_object(pl3_xml, "binding_overlay_notify");
+		gmpc_tools_binding_overlay_notify_key_released(p,GDK_CONTROL_MASK);
+	}
+	return FALSE;
+}
 int pl3_window_key_press_event(GtkWidget * mw, GdkEventKey * event)
 {
     int i = 0;
     gint type = pl3_cat_get_selected_browser();
+	if(event->keyval == GDK_KEY_Alt_L || event->keyval == GDK_KEY_Alt_R) {
+		GtkWidget *tree = GTK_WIDGET(gtk_builder_get_object(pl3_xml, "cat_tree"));
+		alt_button_pressed = TRUE;
+		gtk_widget_queue_draw(GTK_WIDGET(tree));
+		GmpcToolsBindingOverlayNotify *p = gtk_builder_get_object(pl3_xml, "binding_overlay_notify");
+		gmpc_tools_binding_overlay_notify_key_pressed(p,GDK_MOD1_MASK);
+	}
+	if(event->keyval == GDK_KEY_Control_L || event->keyval == GDK_KEY_Control_R) 
+	{
+		GmpcToolsBindingOverlayNotify *p = gtk_builder_get_object(pl3_xml, "binding_overlay_notify");
+		gmpc_tools_binding_overlay_notify_key_pressed(p,GDK_CONTROL_MASK);
+	}
     /**
      * Following key's are only valid when connected
      */
@@ -455,46 +522,42 @@ int pl3_window_key_press_event(GtkWidget * mw, GdkEventKey * event)
             gmpc_plugin_browser_key_press_event(plugins[i], mw, event, type);
         }
     }
+	if((event->state&GDK_MOD1_MASK) > 0)
+	{
+		guint kev = event->keyval;
+		if(kev >= GDK_KEY_0 && kev <= GDK_KEY_9)
+		{
+			int index = 0;
+			GtkTreeIter iter;
+			kev-=GDK_KEY_0;
+			if (gtk_tree_model_get_iter_first(pl3_tree, &iter))
+			{
+				if(kev == 0) kev+=10;
+				do{
+					gint type =0 ;
+					gtk_tree_model_get(pl3_tree, &iter, PL3_CAT_TYPE, &type, -1);
+					if(type >= 0) index++;
+					if(index == kev && type >= 0) 
+					{
+						GtkWidget *cat_tree = GTK_WIDGET(gtk_builder_get_object(pl3_xml, "cat_tree"));
+						GtkTreeSelection *select = gtk_tree_view_get_selection(GTK_TREE_VIEW(cat_tree));
+
+						// if this is allready selected, do +10. this allows us to go up to 20 browsers.
+						if(type == old_type  && gtk_tree_selection_iter_is_selected(select, &iter)) {
+							kev+=10;	
+						}else{
+							gtk_tree_selection_select_iter(select, &iter);
+							return;
+						}
+					}
+				}while(gtk_tree_model_iter_next(pl3_tree, &iter));
+			}
+		}
+	}
 
     /* don't propagate */
     return FALSE;
 }
-
-
-/**
- * Remove message from the status bar
- * Used internally by timeout
- */
-static int pl3_pop_statusbar_message(gpointer data)
-{
-    gint id = GPOINTER_TO_INT(data);
-    gtk_statusbar_pop(GTK_STATUSBAR(gtk_builder_get_object(pl3_xml, "statusbar1")), id);
-    return FALSE;
-}
-
-
-/**
- * Put message on status bar
- * This will be removed after 5 seconds
- */
-void pl3_push_statusbar_message(const char *mesg)
-{
-    gint id = gtk_statusbar_get_context_id(GTK_STATUSBAR(gtk_builder_get_object(pl3_xml, "statusbar1")), mesg);
-    /* message auto_remove after 5 sec */
-    g_timeout_add_seconds(5, (GSourceFunc) pl3_pop_statusbar_message, GINT_TO_POINTER(id));
-    gtk_statusbar_push(GTK_STATUSBAR(gtk_builder_get_object(pl3_xml, "statusbar1")), id, mesg);
-}
-
-
-/**
- * Push message to 2nd status bar
- * Message overwrites the previous message
- */
-void pl3_push_rsb_message(const char *string)
-{
-    gtk_statusbar_push(GTK_STATUSBAR(gtk_builder_get_object(pl3_xml, "statusbar1")), 0, string);
-}
-
 
 /**
  * Close the playlist and save position/size
@@ -525,11 +588,6 @@ gboolean pl3_close(void)
             cfg_set_single_value_as_int(config, "playlist", "width", pl3_wsize.width);
             cfg_set_single_value_as_int(config, "playlist", "height", pl3_wsize.height);
         }
-        if (pl3_zoom < PLAYLIST_SMALL)
-        {
-            cfg_set_single_value_as_int(config, "playlist", "pane-pos",
-                gtk_paned_get_position(GTK_PANED(gtk_builder_get_object(pl3_xml, "hpaned1"))));
-        }
     }
 
     if (cfg_get_single_value_as_int_with_default(config, "playlist", "hide-on-close", FALSE))
@@ -554,7 +612,7 @@ gboolean pl3_close(void)
 /**
  * Hide the playlist.
  * Before hiding save current size and position
- */
+*/
 int pl3_hide(void)
 {
     GtkWidget *pl3_win = playlist3_get_window();
@@ -586,9 +644,7 @@ int pl3_hide(void)
             g_log(LOG_DOMAIN, G_LOG_LEVEL_DEBUG, "pl3_hide: save size: %i %i\n", pl3_wsize.width, pl3_wsize.height);
             cfg_set_single_value_as_int(config, "playlist", "width", pl3_wsize.width);
             cfg_set_single_value_as_int(config, "playlist", "height", pl3_wsize.height);
-            cfg_set_single_value_as_int(config, "playlist", "pane-pos",
-                gtk_paned_get_position(GTK_PANED(gtk_builder_get_object(pl3_xml, "hpaned1"))));
-        }
+		}
         gtk_widget_hide(pl3_win);
         pl3_hidden = TRUE;
     }
@@ -717,30 +773,6 @@ void pl3_pb_seek_event(GtkWidget * pb, guint seek_time, gpointer user_data)
 }
 
 
-/**
- * When the position of the slider change, update the artist image
- */
-static void pl3_win_pane_changed(GtkWidget * panel, GParamSpec * arg1, gpointer data)
-{
-    gint position = 0;
-    gint max_size = cfg_get_single_value_as_int_with_default(config, "playlist",
-        "artist-size", 300);
-    gint size;
-    g_object_get(G_OBJECT(panel), "position", &position, NULL);
-    position -= 6;
-    /* force minimum size 16 */
-    if (position < 6)
-        position = 6;
-    size = ((position) > max_size) ? max_size : (position);
-
-    if (gmpc_metaimage_get_size(GMPC_METAIMAGE(metaimage_artist_art)) != size)
-    {
-        gmpc_metaimage_set_size(GMPC_METAIMAGE(metaimage_artist_art), size);
-        gmpc_metaimage_reload_image(GMPC_METAIMAGE(metaimage_artist_art));
-    }
-
-}
-
 
 static void about_dialog_activate(GtkWidget * dialog, const gchar * uri, gpointer data)
 {
@@ -760,7 +792,7 @@ static void playlist_connection_changed(MpdObj * mi, int connect, gpointer data)
         char **handlers;
 		gboolean found = FALSE;
         gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(pl3_xml, "vbox_playlist_player")), TRUE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(pl3_xml, "hpaned1")), TRUE);
+        gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(pl3_xml, "hpaned1-hbox")), TRUE);
 
         gtk_action_set_sensitive(GTK_ACTION(gtk_builder_get_object(pl3_xml, "MPDConnect")), FALSE);
         gtk_action_set_sensitive(GTK_ACTION(gtk_builder_get_object(pl3_xml, "MPDDisconnect")), TRUE);
@@ -782,11 +814,10 @@ static void playlist_connection_changed(MpdObj * mi, int connect, gpointer data)
 			g_strfreev(handlers);
 		}
         gtk_action_set_sensitive(GTK_ACTION(gtk_builder_get_object(pl3_xml, "open_local_file")), found);
-        pl3_push_rsb_message(_("Connected"));
     } else
     {
         gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(pl3_xml, "vbox_playlist_player")), FALSE);
-        gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(pl3_xml, "hpaned1")), FALSE);
+        gtk_widget_set_sensitive(GTK_WIDGET(gtk_builder_get_object(pl3_xml, "hpaned1-hbox")), FALSE);
 
         gtk_action_set_sensitive(GTK_ACTION(gtk_builder_get_object(pl3_xml, "MPDConnect")), TRUE);
         gtk_action_set_sensitive(GTK_ACTION(gtk_builder_get_object(pl3_xml, "MPDDisconnect")), FALSE);
@@ -794,7 +825,6 @@ static void playlist_connection_changed(MpdObj * mi, int connect, gpointer data)
         gtk_action_set_sensitive(GTK_ACTION(gtk_builder_get_object(pl3_xml, "menu_view")), FALSE);
         gtk_action_set_sensitive(GTK_ACTION(gtk_builder_get_object(pl3_xml, "menu_option")), FALSE);
         gtk_action_set_sensitive(GTK_ACTION(gtk_builder_get_object(pl3_xml, "open_local_file")), FALSE);
-        pl3_push_rsb_message(_("Not Connected"));
     }
     /** Set back to the current borwser, and update window title */
     if (connect)
@@ -869,16 +899,71 @@ static void playlist_connection_changed(MpdObj * mi, int connect, gpointer data)
 
 }
 
+void pl3_style_set_event( GtkWidget *widget,
+                          GtkStyle  *previous_style,
+                          gpointer   user_data)
+{
+    if (cfg_get_single_value_as_int_with_default(config, "Default", "use-dark-style-header", TRUE))
+    {
+        gtk_rc_parse_string("widget \"*header*\" style \"dark\"");
+    }
+}
+gboolean pl3_cat_select_function(GtkTreeSelection *select, GtkTreeModel *model, GtkTreePath *path, gboolean cur_select, gpointer data)
+{
+	GtkTreeIter iter;
+	if(gtk_tree_model_get_iter(model, &iter, path))
+	{
+        gint type =0 ;
+        gtk_tree_model_get(model, &iter, PL3_CAT_TYPE, &type, -1);
+		if(type >= 0) return TRUE;
+	}
+	return FALSE;
+}
+void pl3_sidebar_text_get_key_number( GtkTreeViewColumn *column, 
+		GtkCellRenderer *renderer,
+		GtkTreeModel *model,
+		GtkTreeIter *d_iter,
+		gpointer data)
+{
+	int number = 0;
+	GtkTreeIter iter;
+	GtkTreePath *pa1 = gtk_tree_model_get_path(model, d_iter);
+	if(!alt_button_pressed) {
+		g_object_set(G_OBJECT(renderer), "show-number", FALSE, NULL);
+		return;
+	}
+	if (gtk_tree_model_get_iter_first(pl3_tree, &iter))
+	{
+		do{
+			gint type =0 ;
+			gtk_tree_model_get(pl3_tree, &iter, PL3_CAT_TYPE, &type, -1);
+			if(type >= 0) number++;
+			if( type >= 0) 
+			{
+				GtkTreePath *pa2 = gtk_tree_model_get_path(model, &iter);
+				if(gtk_tree_path_compare(pa2, pa1) == 0){
+					g_object_set(G_OBJECT(renderer), "number", number%10, NULL);
+					g_object_set(G_OBJECT(renderer), "show-number", TRUE, NULL);
+					gtk_tree_path_free(pa2);
+					gtk_tree_path_free(pa1);
+					return;
+				}
+				gtk_tree_path_free(pa2);
+			}
+		}while(gtk_tree_model_iter_next(pl3_tree, &iter));
+	}
+	gtk_tree_path_free(pa1);
+	g_object_set(G_OBJECT(renderer), "number", number, NULL);
+	g_object_set(G_OBJECT(renderer), "show-number", FALSE, NULL);
+}
 
 void create_playlist3(void)
 {
     GtkWidget *pb,*ali;
-    GtkListStore *pl3_crumbs = NULL;
     GtkCellRenderer *renderer;
     GtkWidget *tree;
     GtkTreeSelection *sel;
     GtkTreeViewColumn *column = NULL;
-	GtkStatusbar *statusbar;
     gchar *path = NULL;
     GtkTreeIter iter;
     GError *error = NULL;
@@ -887,8 +972,8 @@ void create_playlist3(void)
     pl3_hidden = FALSE;
 
     /**
-     * If the playlist allready exists,
-     * It is probly coming from a hidden state,
+     * If the playlist already exists,
+     * It is probably coming from a hidden state,
      * so re-position the window
      */
     if (pl3_xml != NULL)
@@ -896,14 +981,38 @@ void create_playlist3(void)
         pl3_show_and_position_window();
         return;
     }
+
+    /** Ambiance / Radiance theme "dark" header */
+    if (cfg_get_single_value_as_int_with_default(config, "Default", "use-dark-style-header", TRUE))
+    {
+        gtk_rc_parse_string("widget \"*header*\" style \"dark\"");
+    }
+
+    /** use background color for the sidebar treeview cells */
+    gtk_rc_parse_string (
+        "style \"sidebar-treeview\"\n"
+        "{\n"
+        "   GtkTreeView::odd-row-color = @bg_color\n"
+        "   GtkTreeView::even-row-color = @bg_color\n"
+        "}\n"
+        "widget \"*.sidebar.*\" style \"sidebar-treeview\"");
+
+	/** menubar */
+	gtk_rc_parse_string (
+        "style \"menubar-style\"\n"
+        "{\n"
+        "   GtkMenuBar::shadow-type = none\n"
+        "}\n"
+        "widget \"*.menubar\" style \"menubar-style\"\n");
+
     /* initial, setting the url hook */
     gtk_about_dialog_set_url_hook((GtkAboutDialogActivateLinkFunc) about_dialog_activate, NULL, NULL);
-	TEC("Setup dialog url hook")
+    TEC("Setup dialog url hook")
     /* load gui desciption */
     path = gmpc_get_full_glade_path("playlist3.ui");
-	TEC("get path")
+    TEC("get path")
     pl3_xml = gtk_builder_new();
-	TEC("create builder")
+    TEC("create builder")
     if(gtk_builder_add_from_file(pl3_xml, path,&error) == 0)
     {
         /*
@@ -915,22 +1024,8 @@ void create_playlist3(void)
         abort();
     }
     g_free(path);
-	TEC("Load builder file")
+    TEC("Load builder file")
 
-    /** murrine hack */
-    if (cfg_get_single_value_as_int_with_default(config, "Default", "murrine-hack", FALSE))
-    {
-        GdkScreen *screen;
-        GdkColormap *colormap;
-        GtkWidget *win = playlist3_get_window();
-
-        screen = gtk_window_get_screen(GTK_WINDOW(win));
-        colormap = gdk_screen_get_rgba_colormap(screen);
-
-        if (colormap)
-            gtk_widget_set_default_colormap(colormap);
-		TEC("Murrine hack")
-	}
     /* create tree store for the "category" view */
     if (pl3_tree == NULL)
     {
@@ -940,75 +1035,72 @@ void create_playlist3(void)
             G_TYPE_STRING,       /* display name */
             G_TYPE_STRING,       /* full path and stuff for backend */
             G_TYPE_STRING,       /* icon id */
-            G_TYPE_BOOLEAN,      /* cat proc */
-            G_TYPE_UINT,         /* icon size */
-            G_TYPE_STRING,       /* browser markup */
             G_TYPE_INT,          /* ordering */
-            G_TYPE_STRING        /* Num items */
+			G_TYPE_INT
         };
         /* song id, song title */
         pl3_tree = (GtkTreeModel *) gmpc_tools_liststore_sort_new();
         gtk_list_store_set_column_types(GTK_LIST_STORE(pl3_tree), PL3_CAT_NROWS, types);
     }
 	TEC("Setup pl3_tree")
+	{
+		GtkTreeIter iter;
 
-	thv_init(pl3_tree);
-	TEC("thv_init")
+		playlist3_insert_browser(&iter, PL3_CAT_BROWSER_LIBRARY);
+		gtk_list_store_set(GTK_LIST_STORE(pl3_tree), &iter,
+				PL3_CAT_TYPE,-1, PL3_CAT_TITLE, _("Library"),PL3_CAT_BOLD, PANGO_WEIGHT_ULTRABOLD,-1);
+
+		playlist3_insert_browser(&iter, PL3_CAT_BROWSER_ONLINE_MEDIA);
+		gtk_list_store_set(GTK_LIST_STORE(pl3_tree), &iter,
+				PL3_CAT_TYPE,-1, PL3_CAT_TITLE, _("Online Media"),PL3_CAT_BOLD, PANGO_WEIGHT_ULTRABOLD,-1);
+
+		playlist3_insert_browser(&iter, PL3_CAT_BROWSER_MISC);
+		gtk_list_store_set(GTK_LIST_STORE(pl3_tree), &iter,
+				PL3_CAT_TYPE,-1, PL3_CAT_TITLE, _("Misc."),PL3_CAT_BOLD, PANGO_WEIGHT_ULTRABOLD,-1);
+	}
+
 
     tree = GTK_WIDGET(gtk_builder_get_object(pl3_xml, "cat_tree"));
+	gtk_tree_selection_set_select_function(gtk_tree_view_get_selection(GTK_TREE_VIEW(tree)),
+			pl3_cat_select_function, pl3_tree, NULL);
 
     gtk_tree_view_set_model(GTK_TREE_VIEW(tree), GTK_TREE_MODEL(pl3_tree));
     sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(tree));
     gtk_tree_selection_set_mode(GTK_TREE_SELECTION(sel), GTK_SELECTION_BROWSE);
     gtk_tree_view_set_reorderable(GTK_TREE_VIEW(tree), TRUE);
+	// Enable tooltip on the treeview.
+	gtk_tree_view_set_tooltip_column(GTK_TREE_VIEW(tree), PL3_CAT_TITLE);
 
-    renderer = gtk_cell_renderer_pixbuf_new();
+    sidebar_text = renderer = my_cell_renderer_new();//gtk_cell_renderer_pixbuf_new();
+    g_object_set(G_OBJECT(renderer), "xalign", 0.5,NULL);
     column = gtk_tree_view_column_new();
-    gtk_tree_view_column_pack_start(column, renderer, FALSE);
-    g_object_set(G_OBJECT(renderer), "stock-size", GTK_ICON_SIZE_DND, NULL);
+
+
+    gtk_tree_view_column_pack_start(column, renderer, TRUE);
+	gtk_tree_view_column_set_cell_data_func(column, sidebar_text, pl3_sidebar_text_get_key_number, NULL, NULL);
+    g_object_set(G_OBJECT(renderer), "stock-size", GTK_ICON_SIZE_MENU, NULL);
     {
         int w, h;
-        if (gtk_icon_size_lookup(GTK_ICON_SIZE_DND, &w, &h))
+        if (gtk_icon_size_lookup(GTK_ICON_SIZE_MENU, &w, &h))
         {
-            g_object_set(G_OBJECT(renderer), "height", h, NULL);
+            g_object_set(G_OBJECT(renderer), "height", h+10, NULL);
+            g_object_set(G_OBJECT(renderer), "image-width", w,NULL);
         }
     }
-    gtk_tree_view_column_set_attributes(column, renderer, "icon-name", PL3_CAT_ICON_ID, NULL);
+    gtk_tree_view_column_set_attributes(column, renderer,
+			"icon-name", PL3_CAT_ICON_ID,
+			"text", PL3_CAT_TITLE, 
+			"weight", PL3_CAT_BOLD, NULL);
+    g_object_set(renderer, "weight-set", TRUE, NULL);
 
-    renderer = gtk_cell_renderer_text_new();
-    /* insert the column in the tree */
-    gtk_tree_view_column_pack_start(column, renderer, TRUE);
-    gtk_tree_view_column_set_attributes(column, renderer, "text", PL3_CAT_TITLE, NULL);
-    g_object_set(renderer, "ellipsize", PANGO_ELLIPSIZE_END, NULL);
     gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
     gtk_tree_view_set_search_column(GTK_TREE_VIEW(tree), PL3_CAT_TITLE);
-
     g_signal_connect_after(G_OBJECT(sel), "changed", G_CALLBACK(pl3_cat_sel_changed), NULL);
 
-	TEC("setup cat_tree")
-    /**
-     * Bread Crumb system.
-     */
-    pl3_crumbs = (GtkListStore *) (pl3_tree);
-    gtk_combo_box_set_model(GTK_COMBO_BOX
-        (gtk_builder_get_object(pl3_xml, "cb_cat_selector")), GTK_TREE_MODEL(pl3_crumbs));
-    renderer = gtk_cell_renderer_pixbuf_new();
-    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(gtk_builder_get_object(pl3_xml, "cb_cat_selector")), renderer, FALSE);
-    gtk_cell_layout_add_attribute(GTK_CELL_LAYOUT
-        (gtk_builder_get_object
-        (pl3_xml, "cb_cat_selector")), renderer, "icon-name", PL3_CAT_ICON_ID);
+	TEC("setup cat_tree");
 
-    renderer = gtk_cell_renderer_text_new();
-    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(gtk_builder_get_object(pl3_xml, "cb_cat_selector")), renderer, TRUE);
-    gtk_cell_layout_add_attribute(GTK_CELL_LAYOUT
-        (gtk_builder_get_object(pl3_xml, "cb_cat_selector")), renderer, "text", PL3_CAT_TITLE);
-
-    g_signal_connect(gtk_builder_get_object(pl3_xml, "cb_cat_selector"),
-        "changed", G_CALLBACK(pl3_cat_combo_changed), NULL);
-
-	TEC("setup breadcrumb")
-    /* initialize the category view */
-    pl3_initialize_tree();
+	/* initialize the category view */
+	pl3_initialize_tree();
 
 	TEC("Init category tree")
     gtk_widget_show(GTK_WIDGET(gtk_builder_get_object(pl3_xml, "vbox_playlist_player")));
@@ -1027,6 +1119,8 @@ void create_playlist3(void)
 
     playlist3_new_header();
 
+    pl3_sidebar_plugins_init();
+
 	TEC("Init header")
     if (!cfg_get_single_value_as_int_with_default(config, "Interface", "hide-favorites-icon", FALSE))
     {
@@ -1034,8 +1128,6 @@ void create_playlist3(void)
         ali = gtk_alignment_new(0.0, 0.5, 0.0, 0.0);
         gtk_container_add(GTK_CONTAINER(ali), GTK_WIDGET(favorites_button));
         gtk_box_pack_start(GTK_BOX(gtk_builder_get_object(pl3_xml, "hbox10")), GTK_WIDGET(ali), FALSE, FALSE, 0);
-//		gtk_box_reorder_child(GTK_BOX(gtk_builder_get_object(pl3_xml,
-//						"hbox10")),ali,0);
 		gtk_widget_show_all(GTK_WIDGET(ali));
 		TEC("Init fav icon")
 	}
@@ -1090,7 +1182,7 @@ void create_playlist3(void)
     gmpc_metaimage_set_cover_na(GMPC_METAIMAGE(metaimage_album_art));
 
     metaimage_artist_art = gmpc_metaimage_new(META_ARTIST_ART);
-    gtk_box_pack_start(GTK_BOX(gtk_builder_get_object(pl3_xml, "vbox5")), metaimage_artist_art, FALSE, TRUE, 0);
+    gtk_container_add(GTK_CONTAINER(gtk_builder_get_object(pl3_xml, "sidebar_artist_image_alignment")), metaimage_artist_art);
 
     gmpc_metaimage_set_no_cover_icon(GMPC_METAIMAGE(metaimage_artist_art), (char *)"no-artist");
     gmpc_metaimage_set_loading_cover_icon(GMPC_METAIMAGE(metaimage_artist_art), (char *)"fetching-artist");
@@ -1100,7 +1192,7 @@ void create_playlist3(void)
         gmpc_metaimage_set_is_visible(GMPC_METAIMAGE(metaimage_artist_art), FALSE);
     }
     gmpc_metaimage_set_squared(GMPC_METAIMAGE(metaimage_artist_art), FALSE);
-    gmpc_metaimage_set_size(GMPC_METAIMAGE(metaimage_artist_art), 200);
+    gmpc_metaimage_set_size(GMPC_METAIMAGE(metaimage_artist_art), 145);
 
 	TEC("Setup metaimages")
     /* restore the window's position and size, if the user wants this. */
@@ -1128,12 +1220,8 @@ void create_playlist3(void)
         }
 		TEC("resize window settings")
         /* restore pane position */
-        if (cfg_get_single_value_as_int(config, "playlist", "pane-pos") != CFG_INT_NOT_DEFINED)
-        {
-            gtk_paned_set_position(GTK_PANED
-                (gtk_builder_get_object(pl3_xml, "hpaned1")),
-                cfg_get_single_value_as_int(config, "playlist", "pane-pos"));
-        }
+		gtk_widget_set_size_request(GTK_WIDGET(gtk_builder_get_object(pl3_xml,"sidebar")), 
+				SIDEBAR_LARGE,-1); 
 		TEC("set pane window settings")
         if (maximized)
             gtk_window_maximize(GTK_WINDOW(playlist3_get_window()));
@@ -1172,13 +1260,6 @@ void create_playlist3(void)
         "drag_data_received", GTK_SIGNAL_FUNC(playlist3_source_drag_data_recieved), NULL);
 
 	TEC("setup drag")
-    /* A signal that responses on change of pane position */
-    g_signal_connect(G_OBJECT(gtk_builder_get_object(pl3_xml, "hpaned1")),
-        "notify::position", G_CALLBACK(pl3_win_pane_changed), NULL);
-
-    /* update it */
-    pl3_win_pane_changed(GTK_WIDGET(gtk_builder_get_object(pl3_xml, "hpaned1")), NULL, NULL);
-	TEC("setup pos notify")
     /**
      *
      */
@@ -1188,9 +1269,7 @@ void create_playlist3(void)
 
 	TEC("signal connn changed")
 
-    /** Remove statusbar border */
-    statusbar = (GtkStatusbar *)gtk_builder_get_object(pl3_xml, "statusbar1");
-    gtk_frame_set_shadow_type (GTK_FRAME (statusbar->frame), GTK_SHADOW_NONE);
+    g_signal_connect(G_OBJECT(playlist3_get_window()), "style-set", G_CALLBACK(pl3_style_set_event), NULL);
 
     /**
      * Add status icons
@@ -1223,6 +1302,10 @@ GtkTreeView *playlist3_get_category_tree_view(void)
     return (GtkTreeView *) gtk_builder_get_object(pl3_xml, "cat_tree");
 }
 
+GtkWidget* playlist3_get_widget_by_id(const char *id) {
+    return (GtkWidget *) gtk_builder_get_object(pl3_xml, id);
+}
+
 
 /****************************************************************************************
  *  PREFERENCES										*
@@ -1230,7 +1313,6 @@ GtkTreeView *playlist3_get_category_tree_view(void)
 /* prototyping for glade */
 void ck_stop_on_exit_toggled_cb(GtkToggleButton * but, gpointer data);
 void ck_show_tooltip_enable_tb(GtkToggleButton * but);
-void ck_show_tabbed_heading_enable_cb(GtkToggleButton * but);
 
 G_MODULE_EXPORT void show_cover_case_tb(GtkToggleButton * but)
 {
@@ -1272,31 +1354,6 @@ G_MODULE_EXPORT void ck_show_tooltip_enable_tb(GtkToggleButton * but)
 {
     int bool1 = gtk_toggle_button_get_active(but);
     cfg_set_single_value_as_int(config, "GmpcTreeView", "show-tooltip", bool1);
-}
-
-
-G_MODULE_EXPORT void ck_show_tabbed_heading_enable_cb(GtkToggleButton * but)
-{
-    int bool1 = gtk_toggle_button_get_active(but);
-    int old = cfg_get_single_value_as_int_with_default(config, "playlist",
-        "button-heading", FALSE);
-    if (old == FALSE && bool1 == TRUE)
-    {
-        if (pl3_zoom == PLAYLIST_SMALL)
-        {
-            gtk_widget_hide(GTK_WIDGET(gtk_builder_get_object(pl3_xml, "bread_crumb")));
-            gtk_widget_show(GTK_WIDGET(gtk_builder_get_object(pl3_xml, "box_tab_bar")));
-        }
-    }
-    if (old == TRUE && bool1 == FALSE)
-    {
-        if (pl3_zoom == PLAYLIST_SMALL)
-        {
-            gtk_widget_show(GTK_WIDGET(gtk_builder_get_object(pl3_xml, "bread_crumb")));
-            gtk_widget_hide(GTK_WIDGET(gtk_builder_get_object(pl3_xml, "box_tab_bar")));
-        }
-    }
-    cfg_set_single_value_as_int(config, "playlist", "button-heading", bool1);
 }
 
 
@@ -1364,12 +1421,6 @@ void playlist_pref_construct(GtkWidget * container)
             (playlist_pref_xml, "ck_show_tooltip")),
             cfg_get_single_value_as_int_with_default
             (config, "GmpcTreeView", "show-tooltip", TRUE));
-        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON
-            (gtk_builder_get_object
-            (playlist_pref_xml,
-            "ck_show_tabbed_heading")),
-            cfg_get_single_value_as_int_with_default
-            (config, "playlist", "button-heading", FALSE));
 
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON
             (gtk_builder_get_object
@@ -1436,10 +1487,12 @@ void playlist_menu_artist_image_changed(GtkToggleAction *ta)
 {
     int active = gtk_toggle_action_get_active(ta);
     cfg_set_single_value_as_int(config, "playlist", "cover-image-enable", active);
-
-    gmpc_metaimage_set_is_visible(GMPC_METAIMAGE(metaimage_artist_art), active);
-    if (active)
-        gtk_widget_show(metaimage_artist_art);
+	if(pl3_zoom < PLAYLIST_SMALL)
+	{
+		gmpc_metaimage_set_is_visible(GMPC_METAIMAGE(metaimage_artist_art), active);
+		if (active)
+			gtk_widget_show(metaimage_artist_art);
+	}
 }
 
 
@@ -1478,6 +1531,7 @@ void playlist_zoom_in(void)
 static void playlist_zoom_level_changed(void)
 {
     GtkWidget *pl3_win = playlist3_get_window();
+	printf("playlist3 zoom level changed\n");
 
     if (pl3_old_zoom <= PLAYLIST_SMALL)
     {
@@ -1535,7 +1589,7 @@ static void playlist_zoom_level_changed(void)
     }
 
     /* Show full view */
-    gtk_widget_show(GTK_WIDGET(gtk_builder_get_object(pl3_xml, "hpaned1")));
+    gtk_widget_show(GTK_WIDGET(gtk_builder_get_object(pl3_xml, "hpaned1-hbox")));
     gtk_widget_show(GTK_WIDGET(gtk_builder_get_object(pl3_xml, "hbox1")));
     gtk_widget_show(GTK_WIDGET(gtk_builder_get_object(pl3_xml, "hbox10")));
     /** Menu Bar */
@@ -1548,11 +1602,26 @@ static void playlist_zoom_level_changed(void)
         g_log(LOG_DOMAIN, G_LOG_LEVEL_DEBUG, "restore size %i %i\n", pl3_wsize.width, pl3_wsize.height);
         gtk_window_resize(GTK_WINDOW(pl3_win), pl3_wsize.width, pl3_wsize.height);
     }
-    gtk_widget_show(GTK_WIDGET(gtk_builder_get_object(pl3_xml, "vbox5")));
-    gtk_widget_hide(GTK_WIDGET(gtk_builder_get_object(pl3_xml, "bread_crumb")));
-    gtk_widget_hide(GTK_WIDGET(gtk_builder_get_object(pl3_xml, "box_tab_bar")));
-    gtk_action_set_visible(GTK_ACTION(gtk_builder_get_object(pl3_xml, "menu_go")),TRUE);
+    gtk_widget_show(GTK_WIDGET(gtk_builder_get_object(pl3_xml, "sidebar")));
+
+    if (cfg_get_single_value_as_int_with_default(config, "playlist", "cover-image-enable", FALSE))
+    {
+        gmpc_metaimage_set_is_visible(GMPC_METAIMAGE(metaimage_artist_art), TRUE);
+		gtk_widget_show(metaimage_artist_art);
+	}
+	gtk_action_set_visible(GTK_ACTION(gtk_builder_get_object(pl3_xml, "menu_go")),TRUE);
     gtk_action_set_visible(GTK_ACTION(gtk_builder_get_object(pl3_xml, "menu_option")),TRUE);
+
+	gboolean st_shown;
+	g_object_get(G_OBJECT(sidebar_text), "show_text", &st_shown, NULL);
+	if(!st_shown)
+	{
+		/* restore pane position */
+		g_object_set(sidebar_text, "show_text", TRUE, NULL);
+		gtk_widget_set_size_request(GTK_WIDGET(gtk_builder_get_object(pl3_xml,"sidebar")), 
+				SIDEBAR_LARGE,-1); 
+		gmpc_sidebar_plugins_update_state(GMPC_PLUGIN_SIDEBAR_STATE_FULL);
+	}
 
     /* Now start hiding */
     switch (pl3_zoom)
@@ -1560,7 +1629,7 @@ static void playlist_zoom_level_changed(void)
         case PLAYLIST_NO_ZOOM:
             break;
         case PLAYLIST_MINI:
-            gtk_widget_hide(GTK_WIDGET(gtk_builder_get_object(pl3_xml, "hpaned1")));
+            gtk_widget_hide(GTK_WIDGET(gtk_builder_get_object(pl3_xml, "hpaned1-hbox")));
             gtk_action_set_visible(GTK_ACTION(gtk_builder_get_object(pl3_xml, "menu_option")),FALSE);
             gtk_action_set_visible(GTK_ACTION(gtk_builder_get_object(pl3_xml, "menu_go")),FALSE);
             if (pl3_win->window)
@@ -1577,16 +1646,19 @@ static void playlist_zoom_level_changed(void)
             }
             gtk_window_set_resizable(GTK_WINDOW(pl3_win), FALSE);
 
-            gtk_widget_hide(GTK_WIDGET(gtk_builder_get_object(pl3_xml, "vbox5")));
+            gtk_widget_hide(GTK_WIDGET(gtk_builder_get_object(pl3_xml, "sidebar")));
             break;
-        case PLAYLIST_SMALL:
-            gtk_widget_hide(GTK_WIDGET(gtk_builder_get_object(pl3_xml, "vbox5")));
-            if (!cfg_get_single_value_as_int_with_default(config, "playlist", "button-heading", FALSE))
-                gtk_widget_show(GTK_WIDGET(gtk_builder_get_object(pl3_xml, "bread_crumb")));
-            else
-                gtk_widget_show(GTK_WIDGET(gtk_builder_get_object(pl3_xml, "box_tab_bar")));
+		case PLAYLIST_SMALL:
+			gmpc_metaimage_set_is_visible(GMPC_METAIMAGE(metaimage_artist_art), FALSE);
+			if(st_shown) {
+				g_object_set(sidebar_text, "show_text", FALSE, NULL);
+				gtk_widget_set_size_request(GTK_WIDGET(gtk_builder_get_object(pl3_xml,"sidebar")),
+						SIDEBAR_SMALL,-1); 
 
-            gtk_widget_grab_focus(pl3_win);
+				gtk_widget_queue_draw(GTK_WIDGET(gtk_builder_get_object(pl3_xml,"sidebar")));
+				gmpc_sidebar_plugins_update_state(GMPC_PLUGIN_SIDEBAR_STATE_COLLAPSED);
+			}
+			gtk_widget_grab_focus(pl3_win);
         default:
             break;
     }
@@ -1632,7 +1704,8 @@ static void playlist_status_changed(MpdObj * mi, ChangedStatusType what, void *u
                 gtk_action_set_stock_id(GTK_ACTION(gtk_builder_get_object(pl3_xml, "MPDPlayPause")), "gtk-media-pause");
                 gtk_image_set_from_stock(GTK_IMAGE
                     (gtk_builder_get_object
-                    (pl3_xml, "play_button_image")), "gtk-media-pause", GTK_ICON_SIZE_BUTTON);
+                    (pl3_xml, "play_button_image")), "gtk-media-pause",
+					GTK_ICON_SIZE_MENU);
 
                 /**
                  * Update window title
@@ -1669,8 +1742,8 @@ static void playlist_status_changed(MpdObj * mi, ChangedStatusType what, void *u
                 gtk_action_set_stock_id(GTK_ACTION(gtk_builder_get_object(pl3_xml, "MPDPlayPause")), "gtk-media-play");
                 gtk_image_set_from_stock(GTK_IMAGE
                     (gtk_builder_get_object
-                    (pl3_xml, "play_button_image")), "gtk-media-play", GTK_ICON_SIZE_BUTTON);
-
+                    (pl3_xml, "play_button_image")), "gtk-media-play",
+					GTK_ICON_SIZE_MENU);
                 /**
                  * Set paused in Window string
                  */
@@ -1704,8 +1777,8 @@ static void playlist_status_changed(MpdObj * mi, ChangedStatusType what, void *u
 
                 gtk_image_set_from_stock(GTK_IMAGE
                     (gtk_builder_get_object
-                    (pl3_xml, "play_button_image")), "gtk-media-play", GTK_ICON_SIZE_BUTTON);
-
+                    (pl3_xml, "play_button_image")), "gtk-media-play",
+					GTK_ICON_SIZE_MENU);
                 if (gmpc_profiles_get_number_of_profiles(gmpc_profiles) > 1)
                 {
                     gchar *id = gmpc_profiles_get_current(gmpc_profiles);
@@ -1750,11 +1823,6 @@ static void playlist_status_changed(MpdObj * mi, ChangedStatusType what, void *u
     {
         if (mpd_check_connected(connection))
         {
-            char *string = g_strdup_printf(_("Repeat: %s"),
-                (mpd_player_get_repeat(connection)) ? _("On") : _("Off"));
-            pl3_push_statusbar_message(string);
-            g_free(string);
-
             gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(gtk_builder_get_object(pl3_xml, "MPDRepeat")),
                 mpd_player_get_repeat(connection));
         }
@@ -1764,11 +1832,6 @@ static void playlist_status_changed(MpdObj * mi, ChangedStatusType what, void *u
     {
         if (mpd_check_connected(connection))
         {
-            char *string = g_strdup_printf(_("Random: %s"),
-                (mpd_player_get_random(connection)) ? _("On") : _("Off"));
-            pl3_push_statusbar_message(string);
-            g_free(string);
-
             gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(gtk_builder_get_object(pl3_xml, "MPDRandom")),
                 mpd_player_get_random(connection));
         }
@@ -1781,11 +1844,6 @@ static void playlist_status_changed(MpdObj * mi, ChangedStatusType what, void *u
     {
         if (mpd_check_connected(connection))
         {
-            char *string = g_strdup_printf(_("Single mode: %s"),
-                (mpd_player_get_single(connection)) ? _("On") : _("Off"));
-            pl3_push_statusbar_message(string);
-            g_free(string);
-
             gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(gtk_builder_get_object(pl3_xml, "MPDSingleMode")),
                 mpd_player_get_single(connection));
         }
@@ -1795,11 +1853,6 @@ static void playlist_status_changed(MpdObj * mi, ChangedStatusType what, void *u
     {
         if (mpd_check_connected(connection))
         {
-            char *string = g_strdup_printf(_("Consume: %s"),
-                (mpd_player_get_consume(connection)) ? _("On") : _("Off"));
-            pl3_push_statusbar_message(string);
-            g_free(string);
-
             gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(gtk_builder_get_object(pl3_xml, "MPDConsumeMode")),
                 mpd_player_get_consume(connection));
         }
@@ -2052,22 +2105,6 @@ static void pl3_profile_selected(GtkRadioMenuItem * radio, gpointer data)
 
 static void pl3_profiles_changed(GmpcProfiles * prof, const int changed, const int col, const gchar * id)
 {
-    if (changed == PROFILE_ADDED)
-    {
-        gchar *message = g_strdup_printf("%s '%s' %s  ", _("Profile"),
-            gmpc_profiles_get_name(prof, id), _("added"));
-        pl3_push_statusbar_message(message);
-        g_free(message);
-    } else if (changed == PROFILE_COL_CHANGED && col == PROFILE_COL_HOSTNAME)
-    {
-        gchar *message = g_strdup_printf("%s '%s' %s %s",
-            _("Profile"),
-            gmpc_profiles_get_name(prof, id),
-            _("changed hostname to:"),
-            gmpc_profiles_get_hostname(prof, id));
-        pl3_push_statusbar_message(message);
-        g_free(message);
-    }
     if (!mpd_check_connected(connection))
     {
         playlist_connection_changed(connection, 0, NULL);
@@ -2272,7 +2309,7 @@ void playlist3_insert_browser(GtkTreeIter * iter, gint position)
         } while (sib == NULL && gtk_tree_model_iter_next(model, &it));
     }
     gtk_list_store_insert_before(GTK_LIST_STORE(pl3_tree), iter, sib);
-    gtk_list_store_set(GTK_LIST_STORE(pl3_tree), iter, PL3_CAT_ORDER, position, -1);
+    gtk_list_store_set(GTK_LIST_STORE(pl3_tree), iter, PL3_CAT_ORDER, position, PL3_CAT_BOLD, PANGO_WEIGHT_NORMAL, -1);
 }
 
 
@@ -2287,22 +2324,6 @@ void playlist3_destroy(void)
     gtk_widget_destroy(win);
     g_object_unref(pl3_xml);
 }
-
-
-gboolean playlist3_show_playtime(gulong playtime)
-{
-    if (playtime)
-    {
-        gchar *string = format_time(playtime);
-        pl3_push_rsb_message(string);
-        g_free(string);
-    } else
-    {
-        pl3_push_rsb_message("");
-    }
-    return FALSE;
-}
-
 
 GtkWidget *playlist3_get_window(void)
 {
@@ -2503,6 +2524,13 @@ void open_local_file(void)
 void show_user_manual(void);
 void show_user_manual(void)
 {
-	open_uri("ghelp:gmpc");
+	open_help("ghelp:gmpc");
+}
+
+GmpcPluginSidebarState playlist3_get_sidebar_state(void)
+{
+	gboolean st_shown;
+	g_object_get(G_OBJECT(sidebar_text), "show_text", &st_shown, NULL);
+	return  st_shown? GMPC_PLUGIN_SIDEBAR_STATE_FULL:GMPC_PLUGIN_SIDEBAR_STATE_COLLAPSED;
 }
 /* vim: set noexpandtab ts=4 sw=4 sts=4 tw=80: */

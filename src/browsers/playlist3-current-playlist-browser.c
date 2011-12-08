@@ -128,6 +128,10 @@ static void pl3_current_playlist_browser_clear_playlist(void);
 
 static void pl3_current_playlist_browser_init(PlayQueuePlugin * self);
 
+static void pl3_current_playlist_browser_clear_playlist_real(void)
+{
+	mpd_playlist_clear(connection);
+}
 static void pl3_cp_current_song_changed(GmpcMpdDataModelPlaylist * model2, GtkTreePath * path, GtkTreeIter * iter,
 										PlayQueuePlugin * self)
 {
@@ -141,49 +145,6 @@ static void pl3_cp_current_song_changed(GmpcMpdDataModelPlaylist * model2, GtkTr
 		{
 			gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(self->priv->pl3_cp_tree), path, NULL, TRUE, 0.5, 0);
 		}
-	}
-}
-
-static void __real_pl3_total_playtime_changed(GmpcMpdDataModelPlaylist * model, unsigned long loaded_songs,
-											  unsigned long total_playtime, gpointer user_data)
-{
-	if (mpd_playlist_get_playlist_length(connection) && loaded_songs > 0)
-
-	{
-		unsigned long total_songs = GMPC_MPDDATA_MODEL(model)->num_rows;
-		guint playtime = total_playtime * ((gdouble) (total_songs / (gdouble) loaded_songs));
-		gchar *string = format_time(playtime);
-		GString *tstring = g_string_new("");
-
-		g_string_append_printf(tstring, "%lu %s", total_songs, ngettext("item", "items", total_songs));
-		if (string)
-		{
-			g_string_append_printf(tstring, ", %s ", string);
-			if (loaded_songs != total_songs)
-			{
-				tstring = g_string_append(tstring, _("(Estimation)"));
-			}
-		}
-		pl3_push_rsb_message(tstring->str);
-
-		q_free(string);
-
-		g_string_free(tstring, TRUE);
-
-	} else
-	{
-
-		pl3_push_rsb_message("");
-
-	}
-}
-
-static void pl3_total_playtime_changed(GmpcMpdDataModelPlaylist * model, unsigned long loaded_songs,
-									   unsigned long total_playtime, PlayQueuePlugin * self)
-{
-	if (pl3_cat_get_selected_browser() == GMPC_PLUGIN_BASE(self)->id)
-	{
-		__real_pl3_total_playtime_changed(model, loaded_songs, total_playtime, self);
 	}
 }
 
@@ -216,16 +177,15 @@ static void pl3_cp_ec_playlist(PlayQueuePlugin * self, const gchar * param)
 static void pl3_cp_init(PlayQueuePlugin * self)
 {
 	g_signal_connect(G_OBJECT(playlist), "current_song_changed", G_CALLBACK(pl3_cp_current_song_changed), self);
-	g_signal_connect(G_OBJECT(playlist), "total_playtime_changed", G_CALLBACK(pl3_total_playtime_changed), self);
 
 	gmpc_easy_command_add_entry(gmpc_easy_command,
 								_("switch play queue"), "",
 								_("Switch to play queue"),
 								(GmpcEasyCommandCallback *) pl3_current_playlist_browser_activate, self);
 	gmpc_easy_command_add_entry(gmpc_easy_command,
-								_("Clear play queue"), "",
+								_("Clear"), "",
 								_("Clear play queue"),
-								(GmpcEasyCommandCallback *) pl3_current_playlist_browser_clear_playlist, self);
+								(GmpcEasyCommandCallback *) pl3_current_playlist_browser_clear_playlist_real, self);
 
 	gmpc_easy_command_add_entry(gmpc_easy_command,
 								_("Crop current song"), "",
@@ -484,7 +444,7 @@ static void pl3_current_playlist_browser_add(GmpcPluginBrowserIface * obj, GtkWi
 	GtkTreeIter iter;
 	GtkTreePath *path;
 	gint pos = cfg_get_single_value_as_int_with_default(config, "current-playlist", "position", 0);
-	playlist3_insert_browser(&iter, pos);
+	playlist3_insert_browser(&iter, PL3_CAT_BROWSER_TOP+1);
 	gtk_list_store_set(GTK_LIST_STORE(pl3_tree), &iter, PL3_CAT_TYPE, GMPC_PLUGIN_BASE(self)->id /*current_playlist_plug.id */ ,	/*PL3_CURRENT_PLAYLIST, */
 					   PL3_CAT_TITLE, _(gmpc_plugin_base_get_name(GMPC_PLUGIN_BASE(self))),
 					   PL3_CAT_ICON_ID, "playlist-browser", -1);
@@ -887,9 +847,6 @@ static void pl3_current_playlist_browser_selected(GmpcPluginBrowserIface * obj, 
 	gtk_container_add(GTK_CONTAINER(container), self->priv->pl3_cp_vbox);
 	gtk_widget_show(self->priv->pl3_cp_vbox);
 
-	gmpc_mpddata_model_playlist_get_total_playtime(GMPC_MPDDATA_MODEL_PLAYLIST(playlist), &a, &b);
-	__real_pl3_total_playtime_changed(GMPC_MPDDATA_MODEL_PLAYLIST(playlist), a, b, NULL);
-
 	gtk_widget_grab_focus(self->priv->pl3_cp_tree);
 
 	if (init && cfg_get_single_value_as_int_with_default(config, "playlist", "st_cur_song", 0))
@@ -1052,10 +1009,6 @@ static void pl3_current_playlist_save_playlist(void)
 	g_object_unref(xml);
 }
 
-static void pl3_current_playlist_browser_clear_playlist_real(void)
-{
-	mpd_playlist_clear(connection);
-}
 static void pl3_current_playlist_browser_clear_playlist(void)
 {
     GtkWidget *delete;

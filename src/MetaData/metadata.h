@@ -31,6 +31,7 @@ typedef enum {
 	META_SONG_SIMILAR       = 64,       /* Similar songs */
     META_GENRE_SIMILAR      = 128,
     META_SONG_GUITAR_TAB    = 256,
+	META_BACKDROP_ART		= 512,		/* Backdrop */
 	META_QUERY_DATA_TYPES  	= 65535,		/* Bitmask for getting the metadata types only */
 	META_QUERY_NO_CACHE 	= 65536 /* Do the query withouth checking the cache first */
 }MetaDataType;
@@ -163,4 +164,8 @@ gpointer metadata_get_list(mpd_Song  *song, MetaDataType type, void (*callback)(
 void metadata_get_list_cancel(gpointer data);
 mpd_Song *rewrite_mpd_song(mpd_Song *tsong, MetaDataType type);
 
+/**
+ * Clear an entry in the db.
+ */
+void meta_data_clear_entry(mpd_Song *song, MetaDataType type);
 #endif

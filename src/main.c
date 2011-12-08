@@ -39,7 +39,6 @@
 #include "setup-assistant.h"
 
 #include "gmpc-mpddata-model-playlist.h"
-#include "metadata-cache.h"
 #include "bug-information.h"
 
 #include "pixbuf-cache.h"
@@ -292,9 +291,9 @@ int main(int argc, char **argv)
     {
         /* start the metadata system */
         meta_data_init();
-        printf("Cleaning up cover file..\n");
+        //printf("Cleaning up cover file..\n");
         /* Call the cleanup */
-        metadata_cache_cleanup();
+        //metadata_cache_cleanup();
         printf("Done..\n");
         /* Destroy the meta data system and exit. */
         meta_data_destroy();
@@ -881,7 +880,7 @@ void send_password(void)
 
 static void playlist_support_help_button_clicked(GObject *a)
 {
-	open_uri("ghelp:gmpc#ProblemSolving");
+	open_help("ghelp:gmpc?ProblemSolving");
 
 }
 
@@ -1164,6 +1163,14 @@ static void  gmpc_mmkeys_connect_signals(GObject *keys)
 	g_signal_connect(keys,
 			"mm_playpause",
 			G_CALLBACK(play_song), NULL);
+
+	g_signal_connect(keys,
+			"mm_play",
+			G_CALLBACK(play_song), NULL);
+
+	g_signal_connect(keys,
+			"mm_pause",
+			G_CALLBACK(pause_song), NULL);
 
 	g_signal_connect(keys,
 			"mm_next",

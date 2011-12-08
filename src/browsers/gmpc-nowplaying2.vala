@@ -175,7 +175,7 @@ namespace Gmpc {
                 Gtk.ListStore store = (Gtk.ListStore)tree.get_model();
                 Gtk.TreeModel model = tree.get_model();
                 Gtk.TreeIter iter;
-                Gmpc.Browser.insert(out iter, config.get_int_with_default(this.get_name(), "position", 0));
+                Gmpc.Browser.insert(out iter, Gmpc.Playlist.BrowserType.TOP);
                 store.set(iter, 0, this.id, 1, this.get_name(), 3, "media-audiofile");
                 /* Create a row reference */
                 this.np_ref = new Gtk.TreeRowReference(model,  model.get_path(iter));
@@ -267,7 +267,7 @@ namespace Gmpc {
                     this.paned.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
                     this.paned.set_shadow_type(Gtk.ShadowType.NONE);
 					if(use_backdrop) {
-	                    this.container = new Gmpc.MetaData.Widgets.Backdrop(Gmpc.MetaData.Type.ARTIST_ART);
+	                    this.container = new Gmpc.MetaData.Widgets.Backdrop(Gmpc.MetaData.Type.BACKDROP_ART);
 					}else{
 						this.container = new Gtk.EventBox();
 					}
@@ -314,7 +314,7 @@ namespace Gmpc {
             private string song_checksum = null;
             private void update_playing()
             {
-                MPD.Song song = server.playlist_get_current_song();
+                unowned MPD.Song? song = server.playlist_get_current_song();
                 if(song == null) {
                     debug("GMPC Is playing, cannot get this");
        				if(use_backdrop)
@@ -932,7 +932,7 @@ namespace Gmpc {
                             var but_hbox = new Gtk.HBox(false, 6);
                             button.add(but_hbox);
                             var image = new Gmpc.MetaData.Image(Gmpc.MetaData.Type.ALBUM_ART, 48);
-                            var but_song = iter.song;
+                            unowned MPD.Song but_song = iter.song;
                             image.set_squared(true);
                             image.update_from_song_delayed(but_song);
 
