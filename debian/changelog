@@ -1,4 +1,4 @@
-gmpc (11.8.16-2) UNRELEASED; urgency=low
+gmpc (11.8.16-2) unstable; urgency=low
 
   * Install user manual (Closes: #647701)
   * New patches :
@@ -6,7 +6,7 @@ gmpc (11.8.16-2) UNRELEASED; urgency=low
       - Bring back images for transport buttons (Closes: #646822)
       - Fix build with valac 0.14 (Thanks to Michael Biebl, Closes: #650219)
 
- -- Etienne Millon <etienne.millon@gmail.com>  Sun, 18 Dec 2011 15:58:15 +0100
+ -- Etienne Millon <etienne.millon@gmail.com>  Sun, 18 Dec 2011 16:09:43 +0100
 
 gmpc (11.8.16-1) unstable; urgency=low
 
