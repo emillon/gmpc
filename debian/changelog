@@ -2,7 +2,7 @@ gmpc (11.8.16-2) unstable; urgency=low
 
   * Install user manual (Closes: #647701)
   * New patches :
-      - Change volume slider sensitivity (Closes: #646822)
+      - Change volume slider sensitivity (Closes: #646803)
       - Bring back images for transport buttons (Closes: #646822)
       - Fix build with valac 0.14 (Thanks to Michael Biebl, Closes: #650219)
 
