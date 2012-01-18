@@ -1,3 +1,11 @@
+gmpc (11.8.16-3) unstable; urgency=low
+
+  * New patches :
+      - Fix timeout when connecting to a slow mpd.
+        Thanks to olhotak. (Closes: #656290)
+
+ -- Etienne Millon <etienne.millon@gmail.com>  Wed, 18 Jan 2012 10:32:48 +0100
+
 gmpc (11.8.16-2) unstable; urgency=low
 
   * Install user manual (Closes: #647701)
