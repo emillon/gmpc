@@ -1,5 +1,5 @@
 /* Gnome Music Player Client (GMPC)
- * Copyright (C) 2004-2011 Qball Cow <qball@gmpclient.org>
+ * Copyright (C) 2004-2012 Qball Cow <qball@gmpclient.org>
  * Project homepage: http://gmpclient.org/
  
  * This program is free software; you can redistribute it and/or modify
@@ -224,7 +224,7 @@ public class Gmpc.MetaData.Widgets.SimilarArtists : Gtk.Table
             find.set_relief(Gtk.ReliefStyle.NONE);
             hbox.pack_start(find,false,false,0);
 
-            find.set_data_full("artist",(void *)"%s".printf(artist), (GLib.DestroyNotify) g_free);
+            find.set_data("artist",artist);
             find.clicked.connect(artist_button_clicked);
         }
 

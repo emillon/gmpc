@@ -1,5 +1,5 @@
 /* Gnome Music Player Client (GMPC)
- * Copyright (C) 2004-2011 Qball Cow <qball@gmpclient.org>
+ * Copyright (C) 2004-2012 Qball Cow <qball@gmpclient.org>
  * Project homepage: http://gmpclient.org/
  
  * This program is free software; you can redistribute it and/or modify
@@ -79,7 +79,7 @@ class Gmpc:MetaImage from Gtk:Event:Box{
 
 	/** Public */
 
-	public int size = {64};
+	public int size = {48};
 	public MetaDataType image_type = {META_ALBUM_ART};
 	public MpdObj *connection= {NULL};
 	public gboolean hide_on_na = {FALSE};
@@ -105,7 +105,7 @@ class Gmpc:MetaImage from Gtk:Event:Box{
 	property INT size
 		(nick = "Size",
 		blurb = "Size of the image",
-		default_value = 64,
+		default_value = 48,
 		export,
 		link);
 
@@ -191,15 +191,9 @@ class Gmpc:MetaImage from Gtk:Event:Box{
     {
         if(self->_priv->state == STATE_IMAGE)
         {
-            if(self->_priv->image_url)
-            {
-                if(GMPC_META_IMAGE_ASYNC(self->_priv->tooltip_image)->uri == NULL || 
-				strcmp(GMPC_META_IMAGE_ASYNC(self->_priv->tooltip_image)->uri, self->_priv->image_url) != 0)
-			gmpc_meta_image_async_set_from_file(GMPC_META_IMAGE_ASYNC(self->_priv->tooltip_image), self->_priv->image_url, 350, GMPC_MODIFICATION_TYPE_NONE); 
-                gtk_widget_show(self->_priv->tooltip_image);
-                return TRUE;
-            }
-        }
+			gtk_widget_show(self->_priv->tooltip_image);
+			return TRUE;
+		}
         return FALSE;
     }
 
@@ -256,26 +250,18 @@ class Gmpc:MetaImage from Gtk:Event:Box{
 
                         /* try to open it */
                         if(path && gdk_pixbuf_get_file_info(path, NULL,NULL))
-                        {
-                            mpd_Song *song = mpd_songDup(self->_priv->song);
-                            /* Create MetaData object */
-                            MetaData* met = meta_data_new();
-                            met->type = self->image_type;
-                            met->plugin_name = "User set";
-                            met->content_type = META_DATA_CONTENT_URI;
-                            met->content = path; path = NULL;
-                            met->size = -1;
-                            /* set cache */
-							/// TODO: fix this.
-							g_error("needs implementation");
-							//meta_data_set_cache(song, META_DATA_AVAILABLE, met); 
-							/* Signal */
-                            gmpc_meta_watcher_data_changed(gmw, song, self->image_type, META_DATA_AVAILABLE, met);
-                            /* free Metadata object */
-                            meta_data_free(met);
-                            found = TRUE;
-                            mpd_freeSong(song);
-                        }
+						{
+							/* Create MetaData object */
+							MetaData* met = meta_data_new();
+							met->type = self->image_type;
+							met->plugin_name = g_strdup("User set");
+							met->content_type = META_DATA_CONTENT_URI;
+							meta_data_set_uri(met, path);
+
+							meta_data_set_entry(self->_priv->song, met);
+							/* free Metadata object */
+							meta_data_free(met);
+						}
                         g_free(path);
                     }
                     g_strfreev(uri);
@@ -301,7 +287,7 @@ class Gmpc:MetaImage from Gtk:Event:Box{
         {
             Self *gmi =  GET_NEW;
             gmi->image_type = type;
-            gmi->size = size;
+            gmi->size = size;//pixbuf_cache_get_closest_size(size);
 
 
             gtk_event_box_set_visible_window(GTK_EVENT_BOX(gmi), FALSE);
@@ -427,11 +413,8 @@ class Gmpc:MetaImage from Gtk:Event:Box{
 			{
 				self_set_cover_fetching(self);
 			}else if (ret == META_DATA_AVAILABLE) {
-                    if(met->content_type == META_DATA_CONTENT_URI) {
-                        const gchar *path = meta_data_get_uri(met);
-                        self_set_cover_from_path(self,path); 
-					}else if (met->content_type == META_DATA_CONTENT_RAW) {
-						self_set_cover_raw(self, met->content, met->size);
+				if (met->content_type == META_DATA_CONTENT_RAW) {
+					self_set_cover_raw(self, met->content, met->size,met->md5sum);
                     }else{
                         self_set_cover_na(self);
                     }
@@ -453,11 +436,8 @@ class Gmpc:MetaImage from Gtk:Event:Box{
             {
                 self_set_cover_fetching(self);
             }else if (ret == META_DATA_AVAILABLE) {
-                if(met->content_type == META_DATA_CONTENT_URI) {
-                    const gchar *path = meta_data_get_uri(met);
-                    self_set_cover_from_path(self,path); 
-				}else if (met->content_type == META_DATA_CONTENT_RAW) {
-					self_set_cover_raw(self, met->content, met->size);
+				if (met->content_type == META_DATA_CONTENT_RAW) {
+					self_set_cover_raw(self, met->content, met->size,met->md5sum);
                 } else {
                     self_set_cover_na(self);
                 }
@@ -469,7 +449,6 @@ class Gmpc:MetaImage from Gtk:Event:Box{
             {
                 meta_data_free(met);
             }
-
             return FALSE;
         }
 	public 
@@ -499,10 +478,12 @@ class Gmpc:MetaImage from Gtk:Event:Box{
         if(self->image_type != type)
             return;
 
+		printf("aa: %i  %p - %p\n", self->image_type, self->_priv->song, song);
         if(!gmpc_meta_watcher_match_data(self->image_type, self->_priv->song, song))
         {
             return;
         }
+		printf("bb\n");
 
         /**
          * If mpd is stopped before the result is back, set the cover to na, and ignore the result
@@ -514,11 +495,8 @@ class Gmpc:MetaImage from Gtk:Event:Box{
         else
         {
             if(ret == META_DATA_AVAILABLE) {
-                if(met->content_type == META_DATA_CONTENT_URI) {
-                    const char *path = meta_data_get_uri(met);
-                    self_set_cover_from_path(self,path); 
-				}else if (met->content_type == META_DATA_CONTENT_RAW) {
-					self_set_cover_raw(self, met->content, met->size);
+				if (met->content_type == META_DATA_CONTENT_RAW) {
+					self_set_cover_raw(self, met->content, met->size,met->md5sum);
                 }else{
                     self_set_cover_na(self);
                     g_log(LOG_DOMAIN, G_LOG_LEVEL_WARNING, "Method not implemented: %i", met->content_type);
@@ -545,7 +523,7 @@ class Gmpc:MetaImage from Gtk:Event:Box{
                 return;
             }
             self->_priv->state = STATE_NA;
-	    gmpc_meta_image_async_clear_now(GMPC_META_IMAGE_ASYNC(self->_priv->tooltip_image));
+			gmpc_meta_image_async_clear_now(GMPC_META_IMAGE_ASYNC(self->_priv->tooltip_image));
 
             if(self->_priv->image_url)
             {
@@ -602,8 +580,8 @@ class Gmpc:MetaImage from Gtk:Event:Box{
                 return;
             }
             self->_priv->state = STATE_FETCHING;
-	    gmpc_meta_image_async_clear_now(GMPC_META_IMAGE_ASYNC(self->_priv->tooltip_image));
-            if(self->_priv->image_url)
+			gmpc_meta_image_async_clear_now(GMPC_META_IMAGE_ASYNC(self->_priv->tooltip_image));
+			if(self->_priv->image_url)
             {
                 q_free(self->_priv->image_url);
                 self->_priv->image_url = NULL;
@@ -637,7 +615,6 @@ class Gmpc:MetaImage from Gtk:Event:Box{
             if(self->squared) {
                 gtk_widget_set_size_request(GTK_WIDGET(self), self->size, self->size);
             } else {
-//                gtk_widget_set_size_request(GTK_WIDGET(self), gdk_pixbuf_get_width(pb2), gdk_pixbuf_get_height(pb2));
                 gmpc_meta_image_async_clear_now(GMPC_META_IMAGE_ASYNC(self->_priv->image));
             }
 
@@ -652,43 +629,26 @@ class Gmpc:MetaImage from Gtk:Event:Box{
 
     public	
         void
-        set_cover_raw(self, unsigned char *data, uint size) 
-        {
-            self->_priv->state = STATE_IMAGE;
-            gmpc_meta_image_async_set_from_raw(GMPC_META_IMAGE_ASYNC(self->_priv->image),data, size, self->size,
-                    ((cfg_get_single_value_as_int_with_default(config, "metaimage", "addcase",TRUE) && self->image_type == META_ALBUM_ART))?
-                    GMPC_MODIFICATION_TYPE_CASING:GMPC_MODIFICATION_TYPE_BORDER
-                    
-                    );
-            if(self->squared) {
-                gtk_widget_set_size_request(GTK_WIDGET(self), self->size, self->size);
-            }
-		}
-	public	
-        void
-        set_cover_from_path(self, const gchar *path)
-        {
-            self->_priv->state = STATE_IMAGE;
-            
-            if(self->_priv->image_url)
-            {
-                if(strcmp(path, self->_priv->image_url) == 0) {
-                    return;
-                }
-                q_free(self->_priv->image_url);
-                self->_priv->image_url = NULL;
-            }
-            self->_priv->image_url = g_strdup(path); 
-            gmpc_meta_image_async_set_from_file(GMPC_META_IMAGE_ASYNC(self->_priv->image), self->_priv->image_url, self->size,
-                    ((cfg_get_single_value_as_int_with_default(config, "metaimage", "addcase",TRUE) && self->image_type == META_ALBUM_ART))?
-                    GMPC_MODIFICATION_TYPE_CASING:GMPC_MODIFICATION_TYPE_BORDER
-                    
-                    );
-            if(self->squared) {
-                gtk_widget_set_size_request(GTK_WIDGET(self), self->size, self->size);
-            }
-           
-            return;
+        set_cover_raw(self, unsigned char *data, unsigned int size, unsigned char *md5sum) 
+		{
+			self->_priv->state = STATE_IMAGE;
+			gmpc_meta_image_async_set_from_raw(GMPC_META_IMAGE_ASYNC(self->_priv->image),data, size, self->size,
+					((cfg_get_single_value_as_int_with_default(config, "metaimage", "addcase",TRUE) && self->image_type == META_ALBUM_ART))?
+					GMPC_MODIFICATION_TYPE_CASING:GMPC_MODIFICATION_TYPE_BORDER,
+					md5sum
+					);
+			if(self->squared) {
+				gtk_widget_set_size_request(GTK_WIDGET(self), self->size, self->size);
+			}
+			// Update tooltip.
+			if(gtk_widget_get_has_tooltip(GTK_WIDGET(self)))
+			{
+				gmpc_meta_image_async_set_from_raw(GMPC_META_IMAGE_ASYNC(self->_priv->tooltip_image),
+					data, size, 350,
+					0,
+					md5sum	
+					);
+			}
 		}
 
 	public 
@@ -721,11 +681,8 @@ class Gmpc:MetaImage from Gtk:Event:Box{
 			{
 				self_set_cover_fetching(self);
 			}else if (ret == META_DATA_AVAILABLE) {
-				if(met->content_type == META_DATA_CONTENT_URI) {
-					const gchar *path = meta_data_get_uri(met);
-					self_set_cover_from_path(self,path); 
-				}else if (met->content_type == META_DATA_CONTENT_RAW) {
-					self_set_cover_raw(self, met->content, met->size);
+				if (met->content_type == META_DATA_CONTENT_RAW) {
+					self_set_cover_raw(self, met->content, met->size,met->md5sum);
 				}else{
 					g_log(LOG_DOMAIN, G_LOG_LEVEL_WARNING, "Not implemented");
 					self_set_cover_na(self);
@@ -830,18 +787,20 @@ class Gmpc:MetaImage from Gtk:Event:Box{
 			case GTK_RESPONSE_ACCEPT:
 				{	
 					gchar *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fcd));
-                    MetaData *met = meta_data_new();
-                    met->type = type;
-                    met->plugin_name = "User set";
-                    met->content_type = META_DATA_CONTENT_URI;
-                    met->content = filename;
-                    met->size = -1;
-					/// TODO: fix this.
-					g_error("needs implementation");
-					//meta_data_set_cache(song,META_DATA_AVAILABLE, met); 
-					gmpc_meta_watcher_data_changed(gmw, song, type, META_DATA_AVAILABLE, met);
-                    cfg_set_single_value_as_string(config, "MetaData", "image-file-chooser", filename); 
-                    meta_data_free(met);
+					{
+						/* Create MetaData object */
+						MetaData* met = meta_data_new();
+						met->type = self->image_type;
+						met->plugin_name = g_strdup("User set");
+						met->content_type = META_DATA_CONTENT_URI;
+						meta_data_set_uri(met, filename);
+
+						meta_data_set_entry(self->_priv->song, met);
+						/* free Metadata object */
+						meta_data_free(met);
+
+						cfg_set_single_value_as_string(config, "MetaData", "image-file-chooser", filename); 
+					}
 
 				}
 			default:
@@ -870,11 +829,14 @@ class Gmpc:MetaImage from Gtk:Event:Box{
 			case STATE_IMAGE:
                     if(self->_priv->image_url)
                     {
+						// How to fix this? for raw image.
+	/*
                         gchar *temp = self->_priv->image_url;
                         self->_priv->image_url = NULL;
 
                         self_set_cover_from_path(self, temp);
                         g_free(temp);
+*/
                     }
             /* fix bitching */
             case STATE_EMPTY:

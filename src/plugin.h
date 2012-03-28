@@ -1,5 +1,5 @@
 /* Gnome Music Player Client (GMPC)
- * Copyright (C) 2004-2011 Qball Cow <qball@gmpclient.org>
+ * Copyright (C) 2004-2012 Qball Cow <qball@gmpclient.org>
  * Project homepage: http://gmpclient.org/
  
  * This program is free software; you can redistribute it and/or modify
@@ -62,6 +62,7 @@ typedef enum
 	PL3_CAT_ICON_ID, /* icon id */
 	PL3_CAT_ORDER, /* int for sorting the list */
 	PL3_CAT_BOLD,
+	PL3_CAT_STOCK_ID,
 	PL3_CAT_NROWS
 } pl3_cat_store;
 

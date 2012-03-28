@@ -1,5 +1,5 @@
 /* Gnome Music Player Client (GMPC)
- * Copyright (C) 2004-2011 Qball Cow <qball@gmpclient.org>
+ * Copyright (C) 2004-2012 Qball Cow <qball@gmpclient.org>
  * Project homepage: http://gmpclient.org/
  
  * This program is free software; you can redistribute it and/or modify
@@ -30,7 +30,7 @@
 /* The hash table looking up the entries */
 static GHashTable *pb_cache = NULL;
 guint32 total_size = 0;
-#define MAX_SIZE 400
+#define MAX_SIZE 500
 
 /* The structure holding the cache entry */
 typedef struct
@@ -41,6 +41,28 @@ typedef struct
 	gboolean in_use;
 } DCE;
 static guint timeout = 0;
+
+
+const int sizes[] = {
+	32, // Small
+	48, // Default
+	80, // Large
+	250, // Browser
+	500 // Tooltip
+};
+
+int pixbuf_cache_get_closest_size(int size)
+{
+	int i = 0;
+	for(;i<NUM_COVER_SIZES;i++)
+	{
+		if(size <= sizes[i]) return sizes[i];
+	}
+	return sizes[NUM_COVER_SIZES-1];
+}
+
+
+
 /* Creates a new cache entry */
 static DCE *create_cache_entry(void)
 {
@@ -104,39 +126,6 @@ static void destroy_cache_entry(DCE * entry)
 	g_log(LOG_DOMAIN, G_LOG_LEVEL_DEBUG, "%i: Destroy cache entry: %p size: %u", g_hash_table_size(pb_cache) - 1, entry,total_size);
 }
 
-void pixbuf_cache_invalidate_pixbuf_entry(const gchar * url)
-{
-	GTimer *t = g_timer_new();
-	gchar *key;
-	DCE *e;
-	GList *liter, *list = NULL;
-	GHashTableIter iter;
-	g_hash_table_iter_init(&iter, pb_cache);
-	while (g_hash_table_iter_next(&iter, (gpointer) & key, (gpointer) & e))
-	{
-		int i;
-		int length = strlen(key);
-		for (i = 0; i < length && key[i] != ':'; i++) ;
-		if (key[i] == ':')
-		{
-			if (g_utf8_collate(&key[i + 1], url) == 0)
-			{
-				g_log(LOG_DOMAIN, G_LOG_LEVEL_DEBUG, "Invalidate :%s", e->key);
-				list = g_list_prepend(list, (gpointer) e->key);
-			}
-		}
-	}
-	for (liter = g_list_first(list); liter; liter = g_list_next(liter))
-	{
-		g_hash_table_remove(pb_cache, (gchar *) liter->data);
-	}
-	g_list_free(list);
-
-	g_timer_stop(t);
-	g_log(LOG_DOMAIN, G_LOG_LEVEL_DEBUG, "Invalidate took %.6f", g_timer_elapsed(t, NULL));
-	g_timer_destroy(t);
-}
-
 void pixbuf_cache_create(void)
 {
 	g_assert(pb_cache == NULL);
@@ -160,12 +149,17 @@ void pixbuf_cache_destroy(void)
 
 void pixbuf_cache_add_icon(int size, const gchar * url, GdkPixbuf * pb)
 {
-	GTimer *t = g_timer_new();
+	int *mdd= (int *)url;
 	gchar *key;
 	g_assert(pb_cache != NULL);
     if(size > MAX_SIZE) return;
 
-	key = g_strdup_printf("%i:%s", size, url);
+	key = g_strdup_printf("%i:%X%X%X%X", size, 
+			mdd[0],
+			mdd[1],
+			mdd[2],
+			mdd[3]
+			);
 
 	if (g_hash_table_lookup(pb_cache, key) == NULL)
 	{
@@ -175,34 +169,28 @@ void pixbuf_cache_add_icon(int size, const gchar * url, GdkPixbuf * pb)
 		e->in_use = TRUE;
 		g_object_add_toggle_ref(G_OBJECT(pb), (GToggleNotify) pixbuf_cache_entry_toggle_ref, (gpointer) key);
 		g_hash_table_insert(pb_cache, key, e);
-		g_log(LOG_DOMAIN, G_LOG_LEVEL_DEBUG, "%i Add entry: %s", g_hash_table_size(pb_cache), key);
 	}
     else g_free(key);
-	g_timer_stop(t);
-	g_log(LOG_DOMAIN, G_LOG_LEVEL_DEBUG, "Add icon took %.6f", g_timer_elapsed(t, NULL));
-	g_timer_destroy(t);
 }
 
 GdkPixbuf *pixbuf_cache_lookup_icon(int size, const gchar * url)
 {
-	GTimer *t = g_timer_new();
-	gchar *key = g_strdup_printf("%i:%s", size, url);
+	int *mdd= (int *)url;
+	gchar *key = g_strdup_printf("%i:%X%X%X%X", size, 
+			mdd[0],
+			mdd[1],
+			mdd[2],
+			mdd[3]	
+			);
 	DCE *retv = NULL;
 	retv = g_hash_table_lookup(pb_cache, key);
 	g_free(key);
 
-	g_log(LOG_DOMAIN, G_LOG_LEVEL_DEBUG, "Found entry: %p", key);
 	if (retv)
 	{
 		retv->in_use = TRUE;
 
-		g_timer_stop(t);
-		g_log(LOG_DOMAIN, G_LOG_LEVEL_DEBUG, "Lookup icon took %.6f", g_timer_elapsed(t, NULL));
-		g_timer_destroy(t);
 		return g_object_ref(retv->pb);
 	}
-	g_timer_stop(t);
-	g_log(LOG_DOMAIN, G_LOG_LEVEL_DEBUG, "Lookup icon took %.6f", g_timer_elapsed(t, NULL));
-	g_timer_destroy(t);
 	return NULL;
 }

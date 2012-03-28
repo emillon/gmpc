@@ -1,5 +1,5 @@
 /* Gnome Music Player Client (GMPC)
- * Copyright (C) 2004-2011 Qball Cow <qball@gmpclient.org>
+ * Copyright (C) 2004-2012 Qball Cow <qball@gmpclient.org>
  * Project homepage: http://gmpclient.org/
  
  * This program is free software; you can redistribute it and/or modify
@@ -341,18 +341,12 @@ end:
                     {
                         
                         GdkPixbuf *pb = NULL;
-                        if(met->content_type == META_DATA_CONTENT_URI)
-                        {
-                            const gchar *coverpath = meta_data_get_uri(met);
-                            MpdData_real *data = iter.user_data;	
-                            gmpc_pixbuf_loader_async_set_from_file(GMPC_PIXBUF_LOADER_ASYNC(self->_priv->images[n]),
-                                    coverpath, self->icon_size, self->icon_size,
-                                    ((data->type == MPD_DATA_TYPE_TAG && data->tag_type == MPD_TAG_ITEM_ALBUM) || (data->type == MPD_DATA_TYPE_SONG)?GMPC_MODIFICATION_TYPE_CASING: GMPC_MODIFICATION_TYPE_NONE));
-						} else if (met->content_type == META_DATA_CONTENT_RAW) {
+						if (met->content_type == META_DATA_CONTENT_RAW) {
                             MpdData_real *data = iter.user_data;	
                             gmpc_pixbuf_loader_async_set_from_raw(GMPC_PIXBUF_LOADER_ASYNC(self->_priv->images[n]),
                                     met->content, met->size, self->icon_size, self->icon_size,
-                                    ((data->type == MPD_DATA_TYPE_TAG && data->tag_type == MPD_TAG_ITEM_ALBUM) || (data->type == MPD_DATA_TYPE_SONG)?GMPC_MODIFICATION_TYPE_CASING: GMPC_MODIFICATION_TYPE_NONE));
+                                    ((data->type == MPD_DATA_TYPE_TAG && data->tag_type == MPD_TAG_ITEM_ALBUM) || (data->type == MPD_DATA_TYPE_SONG)?GMPC_MODIFICATION_TYPE_CASING: GMPC_MODIFICATION_TYPE_NONE),
+									met->md5sum);
 
                         }else{
                             pb = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(), "gmpc-no-cover", self->icon_size, 0,NULL);

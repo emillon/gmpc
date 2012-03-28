@@ -1,5 +1,5 @@
 /* Gnome Music Player Client (GMPC)
- * Copyright (C) 2004-2011 Qball Cow <qball@gmpclient.org>
+ * Copyright (C) 2004-2012 Qball Cow <qball@gmpclient.org>
  * Project homepage: http://gmpclient.org/
  
  * This program is free software; you can redistribute it and/or modify
@@ -20,6 +20,9 @@
 #ifndef __METADATA_H__
 #define __METADATA_H__
 #include <libmpd/libmpd.h>
+
+//#include <glyr/glyr.h>
+//#include <glyr/cache.h>
 
 typedef enum {
 	META_ALBUM_ART 			= 1,		/* Album Cover art 	*/
@@ -72,7 +75,7 @@ typedef struct {
     /* The name of the plugin that provided the data 
      * This can be NULL if unknown.
      **/
-    const gchar *plugin_name;
+    gchar *plugin_name;
     /* The data type */
     MetaDataContentType content_type;
     /* The contents */
@@ -81,6 +84,10 @@ typedef struct {
      * null terminated anyway.
      */
     gsize size;
+
+	/* md5sum */
+	unsigned char md5sum[16];
+
     /**
      * If type is an image (album art/artist art). 
      */
@@ -90,6 +97,7 @@ typedef struct {
 
 
 typedef void (*MetaDataCallback)(mpd_Song *song, MetaDataResult result, MetaData *met, gpointer data);
+typedef void (*MetaDataListCallback)(gpointer handle, const char *plugin_name, GList *results, gpointer data);
 /**
  * Create empty MetaData
  */
@@ -148,7 +156,6 @@ extern GmpcMetaWatcher *gmw;
 /*guint meta_data_get_path_callback(mpd_Song *song, MetaDataType type, MetaDataCallback callback, gpointer data);*/
 
 void meta_data_init(void);
-void meta_data_check_plugin_changed(void);
 void meta_data_handle_remove_request(guint id);
 void meta_data_destroy(void);
 
@@ -162,10 +169,19 @@ gchar * gmpc_get_metadata_filename(MetaDataType  type, mpd_Song *song, char *ext
 gpointer metadata_get_list(mpd_Song  *song, MetaDataType type, void (*callback)(gpointer handle, const gchar *plugin_name, GList *list, gpointer data), gpointer data);
 
 void metadata_get_list_cancel(gpointer data);
-mpd_Song *rewrite_mpd_song(mpd_Song *tsong, MetaDataType type);
+/**
+ * This function sanitizes and completes (if query_mpd enabled) a song's info
+ * to improve metadata results.
+ * returns a new mpd_Song.
+ */
+mpd_Song *rewrite_mpd_song(mpd_Song *tsong, MetaDataType type, gboolean query_mpd);
 
 /**
  * Clear an entry in the db.
  */
 void meta_data_clear_entry(mpd_Song *song, MetaDataType type);
+/**
+ * Set an entry in the db.
+ */
+void meta_data_set_entry ( mpd_Song *song, MetaData *met);
 #endif

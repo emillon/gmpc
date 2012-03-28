@@ -49,6 +49,7 @@ namespace Gmpc {
         [CCode (
 	cname="MetaData",
 	free_function="meta_data_free",
+	copy_function="meta_data_dup",
 	has_type_id = false
 	)]
         public class Item {
@@ -57,10 +58,16 @@ namespace Gmpc {
             public Gmpc.MetaData.Type type;
             [CCode (cname="meta_data_dup")]
             public static Item copy(Item item);
+			[CCode (cname="meta_data_dup")]
+			public Item dup();
+
+			
            public unowned string plugin_name;
            public int size;
            public void * content;
-           public Gmpc.MetaData.ContentType content_type;
+		   [CCode (array_length = false)]
+		   public uchar[] md5sum;
+		   public Gmpc.MetaData.ContentType content_type;
 
            [CCode (cname="meta_data_is_empty")]
            public bool is_empty();
@@ -130,6 +137,7 @@ namespace Gmpc {
         }
 
 
+
         public delegate void Callback (void *handle,string? plugin_name, GLib.List<MetaData.Item>? list);
         [CCode ( cname="metadata_get_list", cheader_filename="libmpd/libmpd.h,metadata.h" )]
         public void* get_list(MPD.Song song, Type type, Callback callback);
@@ -138,8 +146,8 @@ namespace Gmpc {
         public void* get_list_cancel(void *handle);
 
 
-        [CCode ( cname="meta_data_set_cache", cheader_filename="metadata-cache.h")]
-        public void set_metadata(MPD.Song song, Result result, Gmpc.MetaData.Item met);
+        [CCode ( cname="meta_data_set_entry", cheader_filename="metadata.h")]
+        public void set_metadata(MPD.Song song, Gmpc.MetaData.Item met);
 
         [CCode ( cname="gmpc_get_metadata_filename", cheader_filename="libmpd/libmpd.h,metadata.h")]
         public string get_metadata_filename(Type type, MPD.Song song, string? extension);
@@ -220,10 +228,9 @@ namespace Gmpc {
             CANCELLED
         }
 
-        [CCode (cname="GEADAsyncHandler", cheader_filename="gmpc_easy_download.h")]
+        [CCode (cname="GEADAsyncHandler", cheader_filename="gmpc_easy_download.h",ref_function="", unref_function ="")]
         [Compact]
         [Immutable]
-        [CCode (ref_function="", unref_function ="")]
         public class Handle {
             [CCode (cname="gmpc_easy_async_cancel", cheader_filename="gmpc_easy_download.h")]
             public void cancel ();
@@ -327,7 +334,7 @@ namespace Gmpc {
         public void colorshift_pixbuf(Gdk.Pixbuf dest, Gdk.Pixbuf src, int shift);
 
         [CCode (cname="darken_pixbuf",cheader_filename="misc.h")]
-        public void darken_pixbuf(Gdk.Pixbuf dest, uint factor = 1.0);
+        public void darken_pixbuf(Gdk.Pixbuf dest, uint factor = 1);
         [CCode (cname="decolor_pixbuf",cheader_filename="misc.h")]
         public void decolor_pixbuf(Gdk.Pixbuf dest, Gdk.Pixbuf src);
 		[CCode (cname="screenshot_add_border",cheader_filename="misc.h")]
@@ -453,9 +460,9 @@ namespace Gmpc {
     [CCode (cheader_filename="pixbuf-cache.h")]
     namespace PixbufCache {
         [CCode (cname="pixbuf_cache_lookup_icon")]
-            public Gdk.Pixbuf? lookup_icon(int size, string url);
+            public Gdk.Pixbuf? lookup_icon(int size,[CCode (array_length = false)] uchar[] url);
         [CCode (cname="pixbuf_cache_add_icon")]
-            public void add_icon(int size, string url, Gdk.Pixbuf pb);
+            public void add_icon(int size,[CCode (array_length = false)] uchar[] url, Gdk.Pixbuf pb);
 
     }
     [CCode (cheader_filename="advanced-search.h")]

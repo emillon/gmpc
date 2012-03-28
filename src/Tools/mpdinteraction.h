@@ -1,5 +1,5 @@
 /* Gnome Music Player Client (GMPC)
- * Copyright (C) 2004-2011 Qball Cow <qball@gmpclient.org>
+ * Copyright (C) 2004-2012 Qball Cow <qball@gmpclient.org>
  * Project homepage: http://gmpclient.org/
  
  * This program is free software; you can redistribute it and/or modify
@@ -21,6 +21,8 @@
 #define __MPDINTERACTION_H__
 int play_song(void);
 int pause_song(void);
+int real_play_song(void);
+int real_pause_song(void);
 int stop_song(void);
 int next_song(void);
 int prev_song(void);

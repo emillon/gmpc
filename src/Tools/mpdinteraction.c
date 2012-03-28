@@ -1,5 +1,5 @@
 /* Gnome Music Player Client (GMPC)
- * Copyright (C) 2004-2011 Qball Cow <qball@gmpclient.org>
+ * Copyright (C) 2004-2012 Qball Cow <qball@gmpclient.org>
  * Project homepage: http://gmpclient.org/
 
  * This program is free software; you can redistribute it and/or modify
@@ -147,7 +147,7 @@ static int connected_to_mpd(mpd_Connection * mpd_conn)
 
 static void connection_thread(void)
 {
-	mpd_Connection *conn = mpd_newConnection(connection_get_hostname(), connection_get_port(), DEFAULT_TIMEOUT);
+	mpd_Connection *conn = mpd_newConnection(connection_get_hostname(), connection_get_port(), cfg_get_single_value_as_float_with_default(config, "connection", "timeout", DEFAULT_TIMEOUT));
 	g_idle_add((GSourceFunc) connected_to_mpd, conn);
 	return;
 }
@@ -242,6 +242,23 @@ pause_song(void)
 	return FALSE;
 }
 
+int real_play_song(void)
+{
+	if (mpd_server_check_command_allowed(connection, "play") == MPD_SERVER_COMMAND_ALLOWED)
+		mpd_player_play(connection);
+	return FALSE;
+}
+
+int real_pause_song(void)
+{
+	int state = mpd_player_get_state(connection);
+	if (state == MPD_PLAYER_PLAY)
+	{
+		if (mpd_server_check_command_allowed(connection, "pause") == MPD_SERVER_COMMAND_ALLOWED)
+			mpd_player_pause(connection);
+	}
+	return FALSE;
+}
 int play_song(void)
 {
 	int state = mpd_player_get_state(connection);

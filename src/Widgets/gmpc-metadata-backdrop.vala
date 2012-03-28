@@ -1,5 +1,5 @@
 /* Gnome Music Player Client
- * Copyright (C) 2011 Qball Cow <qball@gmpclient.org>
+ * Copyright (C) 2011-2012 Qball Cow <qball@gmpclient.org>
  * Project homepage: http://gmpclient.org/
 
  * This program is free software; you can redistribute it and/or modify
@@ -45,28 +45,7 @@ namespace Gmpc
                    this.queue_draw();
                    return;
                 }
-                if(item.content_type == Gmpc.MetaData.ContentType.URI)
-                {
-                    string uri = item.get_uri();
-                    if(uri != null)
-                    {
-                        Gtk.Allocation req;
-                        int width;
-                        this.get_allocation(out req);
-                        width = int.max(req.width, 400);
-                        log(log_domain_mdbd, GLib.LogLevelFlags.LEVEL_DEBUG,
-                                "Getting image with size: %u", width);
-                        if(loader == null)
-                            loader = new PixbufLoaderAsync();
-                        loader.pixbuf_update.connect((source, pixbuf)=>{
-                            this.pb = pixbuf;
-                            log (log_domain_mdbd,GLib.LogLevelFlags.LEVEL_DEBUG,
-                            "Updating background");
-                            this.queue_draw();
-                            });
-                        loader.set_from_file(uri, width, -1,mod_type);
-                    }
-                }else if (item.content_type == Gmpc.MetaData.ContentType.RAW)
+                if (item.content_type == Gmpc.MetaData.ContentType.RAW)
 				{
 					Gtk.Allocation req;
 					int width;
@@ -83,7 +62,7 @@ namespace Gmpc
 							this.queue_draw();
 							});
 					unowned uchar[] data = item.get_raw();
-					loader.set_from_raw(data, width,-1, mod_type);
+					loader.set_from_raw(data, width,-1, mod_type, item.md5sum);
 				}
             }
             /**

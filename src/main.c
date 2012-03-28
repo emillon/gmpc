@@ -1,5 +1,5 @@
 /* Gnome Music Player Client (GMPC)
- * Copyright (C) 2004-2011 Qball Cow <qball@gmpclient.org>
+ * Copyright (C) 2004-2012 Qball Cow <qball@gmpclient.org>
  * Project homepage: http://gmpclient.org/
 
  * This program is free software; you can redistribute it and/or modify
@@ -184,8 +184,6 @@ int main(int argc, char **argv)
 
 	log_init();
 
-    egg_sm_client_set_mode(EGG_SM_CLIENT_MODE_NO_RESTART);
-
     /**
      * Setup NLS
      */
@@ -269,11 +267,6 @@ int main(int argc, char **argv)
 		gtk_settings_set_string_property(gtk_settings_get_default(),
 				"gtk-icon-theme-name" , settings.icon_theme,NULL);
 	}
-    /* connect signal to Session manager to quit */
-    g_signal_connect(
-		egg_sm_client_get(), "quit",
-		G_CALLBACK(main_quit), NULL);
-    TEC("EggSmClient");
 
     /**
      * Call create_gmpc_paths();
@@ -484,13 +477,6 @@ int main(int argc, char **argv)
     }
     /* time todo some initialisation of plugins */
 	plugin_manager_initialize_plugins();
-
-    /**
-     * Ask user about added/removed provider plugins
-     */
-    if (!settings.disable_plugins)
-        meta_data_check_plugin_changed();
-    TEC("Metadata plugin changed check");
 
     /**
      * Create the main window
@@ -1166,11 +1152,11 @@ static void  gmpc_mmkeys_connect_signals(GObject *keys)
 
 	g_signal_connect(keys,
 			"mm_play",
-			G_CALLBACK(play_song), NULL);
+			G_CALLBACK(real_play_song), NULL);
 
 	g_signal_connect(keys,
 			"mm_pause",
-			G_CALLBACK(pause_song), NULL);
+			G_CALLBACK(real_pause_song), NULL);
 
 	g_signal_connect(keys,
 			"mm_next",

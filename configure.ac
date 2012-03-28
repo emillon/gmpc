@@ -10,7 +10,7 @@ AC_INIT([gmpc],[11.8.90],[qball@gmpclient.org])
 #Define variable
 m4_define([package_tagline],       "All hail the Greg")
 m4_define([package_website],       "http://gmpclient.org")
-m4_define([package_copyright],     "Copyright 2003-2011 Qball Cow")
+m4_define([package_copyright],     "Copyright 2003-2012 Qball Cow")
 m4_define([package_bugtracker],    "http://gmpc.wikia.com/wiki/GMPC_HELP")
 
 
@@ -30,9 +30,11 @@ AM_MAINTAINER_MODE
 [GMPC_MAJOR_VERSION]=package_major_version
 [GMPC_MINOR_VERSION]=package_minor_version
 [GMPC_MICRO_VERSION]=package_micro_version
+[GMPC_COPYRIGHT]=package_copyright
 AC_SUBST([GMPC_MAJOR_VERSION])
 AC_SUBST([GMPC_MINOR_VERSION])
 AC_SUBST([GMPC_MICRO_VERSION])
+AC_SUBST([GMPC_COPYRIGHT])
 AC_DEFINE(GMPC_TAGLINE,         package_tagline,	["Gmpc's tagline"])
 AC_DEFINE(GMPC_WEBSITE,		package_website,	["Gmpc's website"])
 AC_DEFINE(GMPC_BUGTRACKER,      package_bugtracker,	["Gmpc's bugtracker"])
@@ -58,6 +60,9 @@ AM_CONDITIONAL([INTLTOOL_HIGHER_04000], [test ${INTLTOOL_APPLIED_VERSION_AS_INT}
 AC_PROG_CC
 AM_PROG_CC_C_O
 LT_PROG_RC
+
+dnl Checks for libm 
+AC_CHECK_LIB([m],[floor])
 
 # test for zlib
 zlib=0
@@ -411,6 +416,7 @@ shave-libtool
 Makefile
 src/Makefile
 src/gmpc-version.h
+src/gmpc-win32.rc
 glade/Makefile
 data/Makefile
 po/Makefile.in

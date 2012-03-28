@@ -1,5 +1,5 @@
 /* Gnome Music Player Client (GMPC)
- * Copyright (C) 2004-2011 Qball Cow <qball@gmpclient.org>
+ * Copyright (C) 2004-2012 Qball Cow <qball@gmpclient.org>
  * Project homepage: http://gmpclient.org/
  
  * This program is free software; you can redistribute it and/or modify
@@ -44,7 +44,6 @@
  * Some gobjects
  */
 #include "gmpc-profiles.h"
-#include "smclient/eggsmclient.h"
 
 extern int 				gmpc_connected;
 extern GtkTreeModel 	*playlist;
@@ -67,11 +66,6 @@ int plugin_get_pos(int id);
 void show_error_message(const gchar *string);
 
 
-/**
- * Metadata 
- */
-
-void meta_data_add_plugin(gmpcPluginParent *plug);
 /**
  * TODO move this 
  */

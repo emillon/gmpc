@@ -1,5 +1,5 @@
 /* Gnome Music Player Client (GMPC)
- * Copyright (C) 2004-2011 Qball Cow <qball@gmpclient.org>
+ * Copyright (C) 2004-2012 Qball Cow <qball@gmpclient.org>
  * Project homepage: http://gmpclient.org/
 
  * This program is free software; you can redistribute it and/or modify
@@ -125,6 +125,18 @@ public class Gmpc.Plugins.AutoMPD:
 	}
 
 
+	public bool mpd_conf_generate_autostart_file {
+		get{
+			return config.get_int_with_default(this.get_name(),
+					"Generate autostart file", 0) == 1;  
+		}
+		set{
+			config.set_int(this.get_name(),
+					"Generate autostart file", (value)?1:0);  
+			set_auto_start();	
+		}
+	}
+
 	/**
 	 * Gmpc.Plugin.Base
 	 */
@@ -220,6 +232,8 @@ public class Gmpc.Plugins.AutoMPD:
 		GLib.log(log_domain_autompd, GLib.LogLevelFlags.LEVEL_DEBUG,
 				"Starting MPD");
 		create_config_file();
+		// Create autostart file (if requested)
+		set_auto_start();
 
 		var c_dir = GLib.Environment.get_user_cache_dir();
 		var full_path = GLib.Path.build_filename(c_dir,"gmpc", auto_mpd_id, "mpd.conf");
@@ -588,6 +602,60 @@ public class Gmpc.Plugins.AutoMPD:
 			}
 		}
 	}
+
+	/***
+	 * Auto start on logon
+	 */
+	private void set_auto_start()
+	{
+		if(mpd_conf_generate_autostart_file)
+		{
+			var config_dir = GLib.Environment.get_user_config_dir(); 
+			string autostart_path = GLib.Path.build_filename(
+					config_dir,
+					"autostart",
+					"%s.desktop".printf(auto_mpd_id));
+			if(!GLib.FileUtils.test(autostart_path, GLib.FileTest.EXISTS|GLib.FileTest.IS_REGULAR))
+			{
+				// Write out the file:
+				FileStream? autostartfp = FileStream.open(autostart_path, "w");
+				if(autostartfp != null)
+				{
+					var c_dir = GLib.Environment.get_user_cache_dir();
+					var full_path = GLib.Path.build_filename(c_dir,"gmpc", auto_mpd_id, "mpd.conf");
+
+					autostartfp.puts("[Desktop Entry]\n");
+					autostartfp.puts("Name=MPD\n");
+					autostartfp.puts("GenericName=Music Player Daemon (GMPC session)\n");
+					autostartfp.puts("Comment=The best way to playback music\n");
+					autostartfp.puts("Exec=mpd \"%s\"\n".printf(full_path));
+					autostartfp.puts("Terminal=false\n");
+					autostartfp.puts("Type=Application\n");
+					autostartfp.puts("Categories=Autio;Network\n");
+					autostartfp.puts("StartupNotify=false");
+				}else{
+					Gmpc.Messages.show(_("Auto MPD failed to create autostart file."),
+							Gmpc.Messages.Level.WARNING); 
+				}
+			}
+		}
+		else
+		{
+			var config_dir = GLib.Environment.get_user_config_dir(); 
+			string autostart_path = GLib.Path.build_filename(
+					config_dir,
+					"autostart",
+					"%s.desktop".printf(auto_mpd_id));
+
+			if(GLib.FileUtils.test(autostart_path, GLib.FileTest.EXISTS|GLib.FileTest.IS_REGULAR))
+			{
+				// Remove the desktop file.	
+				GLib.FileUtils.unlink(autostart_path);
+			}
+		}
+	}
+
+
 	/***
 	 * Destructor
 	 */
@@ -658,6 +726,13 @@ public class Gmpc.Plugins.AutoMPD:
 		auhl.active = mpd_conf_generate_httpd_lame;
 		auhl.toggled.connect((source)=>{
 				mpd_conf_generate_httpd_lame = source.active;
+		});
+
+		// Auto start
+		var cafcb = pref_builder.get_object("cb_create_autostart_file") as Gtk.CheckButton;
+		cafcb.active = mpd_conf_generate_autostart_file;
+		cafcb.toggled.connect((source)=>{
+				mpd_conf_generate_autostart_file= source.active;
 		});
 
 		// Restart button
