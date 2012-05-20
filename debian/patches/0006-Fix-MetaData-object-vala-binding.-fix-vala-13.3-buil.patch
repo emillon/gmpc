@@ -16,7 +16,7 @@ index bad3ddc..d685b88 100644
                          }else{
                              MetaData.Item *item = MetaData.Item.copy(md);
 -                            var h =  Gmpc.AsyncDownload.download_vala(uri,(void *)item,image_downloaded);                                 
-+                            unowned Gmpc.AsyncDownload.Handle h =  Gmpc.AsyncDownload.download_vala(uri,(void *)item,image_downloaded);                                 
++                            unowned Gmpc.AsyncDownload.Handle h =  Gmpc.AsyncDownload.download_vala(uri,(void *)item,image_downloaded);
                              if(h!=null)
                              {
                                  h.set_user_data(md.plugin_name);
@@ -25,7 +25,7 @@ index bad3ddc..d685b88 100644
                      metawatcher.data_changed(this.song, this.query_type, Gmpc.MetaData.Result.AVAILABLE, met);  
                  }else{
 -                    var h = Gmpc.AsyncDownload.download(path, store_image); 
-+                    unowned Gmpc.AsyncDownload.Handle h = Gmpc.AsyncDownload.download(path, store_image); 
++                    unowned Gmpc.AsyncDownload.Handle h = Gmpc.AsyncDownload.download(path, store_image);
                      if(h!=null)
                          this.downloads.append(h);
                  }
