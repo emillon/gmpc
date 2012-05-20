@@ -5,3 +5,4 @@
 0005-Correct-vapi-binding-for-MPD.Song.patch
 0006-Fix-MetaData-object-vala-binding.-fix-vala-13.3-buil.patch
 0007-Fix-timeout-when-connecting-to-a-slow-mpd.patch
+0008-Fix-build-with-valac-0.16.patch
