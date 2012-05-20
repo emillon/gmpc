@@ -4,7 +4,7 @@ Subject: Small fixes to glyros and vapi
 
 ---
  src/vapi/gmpc.vapi |    6 +++---
- 1 files changed, 3 insertions(+), 3 deletions(-)
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/src/vapi/gmpc.vapi b/src/vapi/gmpc.vapi
 index 39de1d0..4a38e60 100644
@@ -23,4 +23,3 @@ index 39de1d0..4a38e60 100644
          [Compact]
          [Immutable]
      public class Settings {
--- 

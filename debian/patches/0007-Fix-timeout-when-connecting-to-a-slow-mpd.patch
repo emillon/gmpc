@@ -7,7 +7,7 @@ Bug: http://musicpd.org/mantis/print_bug_page.php?bug_id=3403
 Bug-Debian: http://bugs.debian.org/656290
 ---
  src/Tools/mpdinteraction.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/src/Tools/mpdinteraction.c b/src/Tools/mpdinteraction.c
 index 31aa63c..bd3aecd 100644
@@ -22,4 +22,3 @@ index 31aa63c..bd3aecd 100644
  	g_idle_add((GSourceFunc) connected_to_mpd, conn);
  	return;
  }
--- 

@@ -129,4 +129,3 @@ index 72b4ef7..3dac409 100644
                  if (gmpc_profiles_get_number_of_profiles(gmpc_profiles) > 1)
                  {
                      gchar *id = gmpc_profiles_get_current(gmpc_profiles);
--- 

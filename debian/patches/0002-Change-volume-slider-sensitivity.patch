@@ -9,7 +9,7 @@ This patch reverts to the previous behaviour.
 Relevant Debian bug : #646822.
 ---
  src/Widgets/gmpc-progress.vala |    4 ++--
- 1 files changed, 2 insertions(+), 2 deletions(-)
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/src/Widgets/gmpc-progress.vala b/src/Widgets/gmpc-progress.vala
 index 3742374..f1082af 100644
@@ -29,4 +29,3 @@ index 3742374..f1082af 100644
          }
          return false;
      }
--- 

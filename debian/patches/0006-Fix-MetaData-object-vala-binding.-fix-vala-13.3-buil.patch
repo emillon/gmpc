@@ -68,4 +68,3 @@ index 0b41fcc..46ab281 100644
          public class Item {
              [CCode (cname="meta_data_new")]
              public Item ();
--- 

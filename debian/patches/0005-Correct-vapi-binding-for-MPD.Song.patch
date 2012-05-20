@@ -3,9 +3,9 @@ Date: Wed, 14 Sep 2011 13:06:39 +0200
 Subject: Correct vapi binding for MPD.Song
 
 ---
- src/Providers/ChartLyrics.vala                |    4 +-
+ src/Providers/ChartLyrics.vala                |    4 +--
  src/Providers/HTBackdrops.vala                |    2 +-
- src/Providers/LyrDB.vala                      |    4 +-
+ src/Providers/LyrDB.vala                      |    4 +--
  src/Providers/RenderCover.vala                |    2 +-
  src/Providers/music-tree.vala                 |   21 +++++++------
  src/Tools/gmpc-metadata-prefetcher.vala       |    2 +-
@@ -13,15 +13,15 @@ Subject: Correct vapi binding for MPD.Song
  src/Widgets/gmpc-metadata-similarartists.vala |    6 ++--
  src/Widgets/gmpc-metadata-similarsongs.vala   |   12 ++++----
  src/Widgets/gmpc-metadata-text-label.vala     |    6 ++--
- src/Widgets/gmpc-song-links.vala              |    4 +-
+ src/Widgets/gmpc-song-links.vala              |    4 +--
  src/Widgets/gmpc-song-list.vala               |    6 ++--
  src/browsers/gmpc-metadata-browser2.vala      |   39 +++++++++++++------------
- src/browsers/gmpc-nowplaying2.vala            |    4 +-
+ src/browsers/gmpc-nowplaying2.vala            |    4 +--
  src/vala/gmpc-favorites.vala                  |    2 +-
  src/vala/gmpc-plugin.vala                     |    2 +-
- src/vala/gmpc-test-plugin.vala                |    8 ++--
- src/vapi/gmpc.vapi                            |    4 +-
- src/vapi/libmpd.vapi                          |   34 +++++++++++-----------
+ src/vala/gmpc-test-plugin.vala                |    8 ++---
+ src/vapi/gmpc.vapi                            |    4 +--
+ src/vapi/libmpd.vapi                          |   34 ++++++++++-----------
  19 files changed, 84 insertions(+), 80 deletions(-)
 
 diff --git a/src/Providers/ChartLyrics.vala b/src/Providers/ChartLyrics.vala
@@ -688,4 +688,3 @@ index 36b2569..2ecf6b4 100644
                  public string tag;
                  public Playlist playlist;
                
--- 
