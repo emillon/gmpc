@@ -1,4 +1,4 @@
-gmpc (11.8.16-3) UNRELEASED; urgency=low
+gmpc (11.8.16-3) unstable; urgency=low
 
   * New patches :
       - Fix timeout when connecting to a slow mpd.
@@ -6,7 +6,7 @@ gmpc (11.8.16-3) UNRELEASED; urgency=low
       - Fix FTBFS with valac 0.16 (Closes: #673592)
   * Bump Standards-Version to 3.9.3 (no changes).
 
- -- Etienne Millon <etienne.millon@gmail.com>  Wed, 18 Jan 2012 10:32:48 +0100
+ -- Etienne Millon <etienne.millon@gmail.com>  Thu, 24 May 2012 16:29:47 +0200
 
 gmpc (11.8.16-2) unstable; urgency=low
 
