@@ -4,6 +4,7 @@ gmpc (11.8.16-3) UNRELEASED; urgency=low
       - Fix timeout when connecting to a slow mpd.
         Thanks to olhotak. (Closes: #656290)
       - Fix FTBFS with valac 0.16 (Closes: #673592)
+  * Bump Standards-Version to 3.9.3 (no changes).
 
  -- Etienne Millon <etienne.millon@gmail.com>  Wed, 18 Jan 2012 10:32:48 +0100
 
