@@ -1,8 +1,8 @@
-gmpc (11.8.16-4) UNRELEASED; urgency=low
+gmpc (11.8.16-4) unstable; urgency=low
 
   * Disable LyrDB.com lyrics provider, which segfaults. (Closes: #650359)
 
- -- Etienne Millon <etienne.millon@gmail.com>  Mon, 13 Aug 2012 19:54:41 +0200
+ -- Etienne Millon <etienne.millon@gmail.com>  Mon, 13 Aug 2012 20:09:54 +0200
 
 gmpc (11.8.16-3) unstable; urgency=low
 
