@@ -6,3 +6,4 @@
 0006-Fix-MetaData-object-vala-binding.-fix-vala-13.3-buil.patch
 0007-Fix-timeout-when-connecting-to-a-slow-mpd.patch
 0008-Fix-build-with-valac-0.16.patch
+0009-Disable-LyrDB-lyrics-provider.patch
