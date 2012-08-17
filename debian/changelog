@@ -1,8 +1,11 @@
 gmpc (11.8.16-4) unstable; urgency=low
 
   * Disable LyrDB.com lyrics provider, which segfaults. (Closes: #650359)
+  * debian/copyright:
+    - Convert to DEP-5.
+    - Update copyright information.
 
- -- Etienne Millon <etienne.millon@gmail.com>  Mon, 13 Aug 2012 20:09:54 +0200
+ -- Etienne Millon <etienne.millon@gmail.com>  Fri, 17 Aug 2012 22:59:10 +0200
 
 gmpc (11.8.16-3) unstable; urgency=low
 
