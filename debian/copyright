@@ -41,11 +41,11 @@ License:
  be used in projects which are not available under a GNU Public License,
  but which still want to provide support for the GNU gettext functionality.
 
-Files: ./src/gtktransition.h
+Files: src/gtktransition.h
 Copyright: 2011, Mark Lee <marklee@src.gnome.org>
 License: LGPL-2+
 
-Files: ./src/smclient/*
+Files: src/smclient/*
 Copyright: 1998, The Open Group
   1999-2000, Red Hat Inc
   2001, George Lebl
@@ -53,11 +53,11 @@ Copyright: 1998, The Open Group
   2008, Red Hat, Inc
 License: LGPL-2+
 
-Files: ./src/egg/*
+Files: src/egg/*
 Copyright: 2001, Anders Carlsson, Jonathan Blanford
 License: LGPL-2+
 
-Files: ./ltmain.sh
+Files: ltmain.sh
 Copyright: 1996-2001, 2003-2007, 2008 Free Software Foundation, Inc
 License: GPL-2+
 
