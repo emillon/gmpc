@@ -29,6 +29,18 @@ Files: gnome-doc-utils.make
 Copyright: 2004-2005 Shaun McCance <shaunm@gnome.org>
 License: GPL-2+
 
+Files: po/*
+Copyright: 2011 Rosetta Contributors and Canonical Ltd
+License: GPL-2+
+
+Files: po/Makefile.in.in
+Copyright: 2004-2008 Rodney Dawes <dobey.pwns@gmail.com>
+ 1995, 1996, 1997 Ulrich Drepper <drepper@gnu.ai.mit.edu>
+License:
+ This file may be copied and used freely without restrictions.  It may
+ be used in projects which are not available under a GNU Public License,
+ but which still want to provide support for the GNU gettext functionality.
+
 Files: ./src/gtktransition.h
 Copyright: 2011, Mark Lee <marklee@src.gnome.org>
 License: LGPL-2+
