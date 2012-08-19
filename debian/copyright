@@ -3,6 +3,13 @@ Upstream-Name: gmpc
 Upstream-Contact: Qball Cow <qball@gmpclient.org>
 Source: http://gmpclient.org/ or git snapshots on git://repo.or.cz/gmpc.git
 
+Comment: The original authors are :
+ Qball <Qball@Sarine.nl>
+ LibertyZero <mail@libertyzero.com>
+ .
+ Artwork:
+ Jakub Szypulka
+
 Files: *
 Copyright: 2004-2011, Qball Cow <qball@gmpclient.org>
 License: GPL-2+
