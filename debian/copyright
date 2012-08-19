@@ -25,6 +25,10 @@ Files: doc/Mallard/*
 Copyright: 2011, Qball Cow <qball@gmpclient.org>
 License: CC-BY-SA-3-exc
 
+Files: gnome-doc-utils.make
+Copyright: 2004-2005 Shaun McCance <shaunm@gnome.org>
+License: GPL-2+
+
 Files: ./src/gtktransition.h
 Copyright: 2011, Mark Lee <marklee@src.gnome.org>
 License: LGPL-2+
