@@ -6,10 +6,12 @@ Sources:
 
   - [fr] https://translations.launchpad.net/gmpc/l10n/+lang/fr
   - [oc] https://translations.launchpad.net/gmpc/l10n/+lang/oc
+  - [ru] http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=687999
 ---
  po/fr.po |  241 +++++++++++++++++++++++++++++++++++---------------------------
  po/oc.po |   18 ++---
- 2 files changed, 147 insertions(+), 112 deletions(-)
+ po/ru.po |    2 +-
+ 3 files changed, 148 insertions(+), 113 deletions(-)
 
 diff --git a/po/fr.po b/po/fr.po
 index 977d910..648f76b 100644
@@ -794,3 +796,16 @@ index 3bf707d..8497f7e 100644
  
  #. * MM_VOLUME_UP
  #: ../src/Tools/mm-keys.c:85
+diff --git a/po/ru.po b/po/ru.po
+index 4b61f2b..9fdae66 100644
+--- a/po/ru.po
++++ b/po/ru.po
+@@ -2273,7 +2273,7 @@ msgstr ""
+ 
+ #: ../src/Widgets/GmpcVolume.c:294 ../src/Widgets/GmpcVolume.c:304
+ msgid "Volume"
+-msgstr "Том"
++msgstr "громкость"
+ 
+ #: ../src/Widgets/GmpcVolume.c:305
+ msgid "Muted"
