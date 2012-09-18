@@ -1,3 +1,10 @@
+gmpc (11.8.16-5) UNRELEASED; urgency=low
+
+  * Update translations :
+    - [fr] import from Launchpad
+
+ -- Etienne Millon <etienne.millon@gmail.com>  Tue, 18 Sep 2012 08:35:54 +0200
+
 gmpc (11.8.16-4) unstable; urgency=low
 
   * Disable LyrDB.com lyrics provider, which segfaults. (Closes: #650359)
