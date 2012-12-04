@@ -10,11 +10,11 @@ Sources:
   - [ru] http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=687999
 ---
  configure.ac |    2 +-
- po/ca.po     | 2480 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ po/ca.po     | 2478 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  po/fr.po     |  241 +++---
  po/oc.po     |   18 +-
  po/ru.po     |    2 +-
- 5 files changed, 2629 insertions(+), 114 deletions(-)
+ 5 files changed, 2627 insertions(+), 114 deletions(-)
  create mode 100644 po/ca.po
 
 diff --git a/configure.ac b/configure.ac
@@ -32,10 +32,10 @@ index c2721c4..96ad6a2 100644
  AM_GLIB_GNU_GETTEXT
 diff --git a/po/ca.po b/po/ca.po
 new file mode 100644
-index 0000000..03d41eb
+index 0000000..b99e42d
 --- /dev/null
 +++ b/po/ca.po
-@@ -0,0 +1,2480 @@
+@@ -0,0 +1,2478 @@
 +# Catalan translation for gmpc
 +# Copyright (c) 2012 Rosetta Contributors and Canonical Ltd 2012
 +# This file is distributed under the same license as the gmpc package.
@@ -65,9 +65,7 @@ index 0000000..03d41eb
 +#: ../src/browsers/gmpc-nowplaying2.c:2641
 +#: ../src/browsers/gmpc-nowplaying2.c:2645
 +msgid "Gnome Music Player Client"
-+msgstr ""
-+"Client de reproducció\n"
-+"de música del GNOME"
++msgstr "Client de reproducció de música del GNOME"
 +
 +#: ../src/main.c:333
 +msgid "Failed to load the configuration system."
