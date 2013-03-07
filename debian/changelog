@@ -1,8 +1,8 @@
-gmpc (11.8.16-6) UNRELEASED; urgency=low
+gmpc (11.8.16-6) unstable; urgency=low
 
   * Fix catalan menu entry (Closes: #694547)
 
- -- Etienne Millon <etienne.millon@gmail.com>  Tue, 04 Dec 2012 14:42:00 +0100
+ -- Etienne Millon <etienne.millon@gmail.com>  Thu, 07 Mar 2013 18:36:17 +0100
 
 gmpc (11.8.16-5) unstable; urgency=low
 
