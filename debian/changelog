@@ -1,3 +1,9 @@
+gmpc (11.8.16-7) UNRELEASED; urgency=low
+
+  * Bump Standards-Version to 3.9.4 (no changes).
+
+ -- Etienne Millon <etienne.millon@gmail.com>  Mon, 27 May 2013 10:51:35 +0200
+
 gmpc (11.8.16-6) unstable; urgency=low
 
   * Fix catalan menu entry (Closes: #694547)
