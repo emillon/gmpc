@@ -3,6 +3,7 @@ gmpc (11.8.16-7) UNRELEASED; urgency=low
   * Bump Standards-Version to 3.9.4 (no changes).
   * Force vala version to 0.16 to fix FTBFS.
   * Disable discogs lyrics provider (Closes: #705164)
+  * Disable htbackdrops plugin (Closes: #720918)
 
  -- Etienne Millon <etienne.millon@gmail.com>  Mon, 27 May 2013 10:51:35 +0200
 
