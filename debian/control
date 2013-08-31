@@ -1,7 +1,7 @@
 Source: gmpc
 Section: sound
 Priority: optional
-Maintainer: Etienne Millon <etienne.millon@gmail.com>
+Maintainer: Etienne Millon <me@emillon.org>
 Build-Depends: debhelper (>= 9),
                dh-autoreconf,
                gnome-doc-utils,
