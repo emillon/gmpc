@@ -1,8 +1,8 @@
 gmpc (11.8.16-7) UNRELEASED; urgency=low
 
+  * Force vala version to 0.16 to fix FTBFS. (Closes: #710623)
   * Bump Standards-Version to 3.9.4 (no changes).
   * Set dh compatibility to 9 to enable hardening & multiarch dirs.
-  * Force vala version to 0.16 to fix FTBFS.
   * Disable discogs lyrics provider (Closes: #705164)
   * Disable htbackdrops plugin (Closes: #720918)
   * Update my email address.
