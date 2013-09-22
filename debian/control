@@ -11,7 +11,7 @@ Build-Depends: debhelper (>= 9),
                libglade2-dev,
                libglib2.0-dev,
                libgtk2.0-dev,
-               libmpd-dev (>= 0.19.2),
+               libmpd-dev,
                libsexy-dev,
                libsoup2.4-dev,
                libsqlite3-dev,
@@ -64,7 +64,7 @@ Description: Gnome Music Player Client - debugging symbols
 Package: gmpc-dev
 Architecture: any
 Depends: gmpc (= ${binary:Version}),
-         libmpd-dev (>= 0.18.96),
+         libmpd-dev,
          pkg-config,
          ${misc:Depends}
 Description: Gnome Music Player Client (plugin development files)
