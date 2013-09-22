@@ -1,6 +1,8 @@
 gmpc (11.8.16-7) unstable; urgency=low
 
-  * Force vala version to 0.16 to fix FTBFS. (Closes: #710623)
+  * Fix FTBFS. (Closes: #710623)
+    - Force vala version to 0.16.
+    - Pass -lm to linker.
   * Bump Standards-Version to 3.9.4 (no changes).
   * Set dh compatibility to 9 to enable hardening & multiarch dirs.
   * Disable discogs lyrics provider (Closes: #705164)

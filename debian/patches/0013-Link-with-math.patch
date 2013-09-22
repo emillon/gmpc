@@ -1,0 +1,17 @@
+Subject: Link with math library
+From: Etienne Millon <me@emillon.org>
+
+As gmpc uses floor(), it should link with -lm.
+
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -174,7 +174,8 @@
+ 	@libxml2_LIBS@\
+ 	@libx11_LIBS@\
+ 	@sqlite3_LIBS@\
+-	-lz
++	-lz \
++	-lm
+ 
+ 
+ if HAVE_UNIQUE
