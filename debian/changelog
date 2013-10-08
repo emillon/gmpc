@@ -1,3 +1,10 @@
+gmpc (11.8.16-8) UNRELEASED; urgency=low
+
+  * Add a Breaks clause to force gmpc-plugins to be multiarch-aware.
+    (Closes: #725127)
+
+ -- Etienne Millon <me@emillon.org>  Tue, 08 Oct 2013 13:30:14 +0200
+
 gmpc (11.8.16-7) unstable; urgency=low
 
   * Fix FTBFS. (Closes: #710623)

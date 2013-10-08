@@ -27,7 +27,7 @@ Package: gmpc
 Architecture: any
 Depends: gmpc-data (= ${source:Version}), ${misc:Depends}, ${shlibs:Depends}
 Suggests: gmpc-plugins, mpd
-Breaks: gmpc-plugins(<< 11.8.16)
+Breaks: gmpc-plugins (<< 11.8.16-2~)
 Enhances: mpd
 Provides: mpd-client
 Description: Gnome Music Player Client (graphical interface to MPD)
