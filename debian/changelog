@@ -1,10 +1,10 @@
-gmpc (11.8.16-8) UNRELEASED; urgency=low
+gmpc (11.8.16-8) unstable; urgency=low
 
   * Add a Breaks clause to force gmpc-plugins to be multiarch-aware.
     (Closes: #725127)
   * Remove outdated README.source.
 
- -- Etienne Millon <me@emillon.org>  Tue, 08 Oct 2013 13:30:14 +0200
+ -- Etienne Millon <me@emillon.org>  Thu, 10 Oct 2013 11:34:58 +0200
 
 gmpc (11.8.16-7) unstable; urgency=low
 
