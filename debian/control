@@ -30,7 +30,7 @@ Suggests: gmpc-plugins, mpd
 Breaks: gmpc-plugins (<< 11.8.16-2~)
 Enhances: mpd
 Provides: mpd-client
-Description: Gnome Music Player Client (graphical interface to MPD)
+Description: GNOME Music Player Client (graphical interface to MPD)
  A GNOME/GTK2.2 client for Music Player Daemon, it began life as traymp,
  a simple tray notification client and has grown into much more.
  Current features include:
@@ -47,7 +47,7 @@ Priority: extra
 Section: debug
 Architecture: any
 Depends: gmpc (= ${binary:Version}), ${misc:Depends}
-Description: Gnome Music Player Client - debugging symbols
+Description: GNOME Music Player Client - debugging symbols
  A GNOME/GTK2.2 client for Music Player Daemon, it began life as traymp,
  a simple tray notification client and has grown into much more.
  Current features include:
@@ -67,7 +67,7 @@ Depends: gmpc (= ${binary:Version}),
          libmpd-dev,
          pkg-config,
          ${misc:Depends}
-Description: Gnome Music Player Client (plugin development files)
+Description: GNOME Music Player Client (plugin development files)
  A GNOME/GTK2.2 client for Music Player Daemon, it began life as traymp,
  a simple tray notification client and has grown into much more.
  Current features include:
@@ -88,7 +88,7 @@ Depends: ${misc:Depends}
 Recommends: gmpc
 Replaces: gmpc (<< 0.20.0-2)
 Breaks: gmpc (<< 0.20.0-2)
-Description: Gnome Music Player Client - data files
+Description: GNOME Music Player Client - data files
  A GNOME/GTK2.2 client for Music Player Daemon, it began life as traymp,
  a simple tray notification client and has grown into much more.
  Current features include:

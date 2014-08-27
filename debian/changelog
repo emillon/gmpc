@@ -1,6 +1,7 @@
 gmpc (11.8.16-9) UNRELEASED; urgency=medium
 
   * Fix building with a recent vala (Closes: #739030)
+  * Fix capitalization of GNOME in package descriptions.
 
  -- Etienne Millon <me@emillon.org>  Wed, 27 Aug 2014 09:23:00 +0200
 
