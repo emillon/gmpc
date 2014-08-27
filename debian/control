@@ -16,7 +16,7 @@ Build-Depends: debhelper (>= 9),
                libsoup2.4-dev,
                libsqlite3-dev,
                libunique-dev,
-               valac-0.16,
+               valac,
                zlib1g-dev
 Standards-Version: 3.9.4
 Homepage: http://gmpc.wikia.com/
