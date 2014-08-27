@@ -1,0 +1,36 @@
+From d997de89d44564ea3f3147dca00efe113de02146 Mon Sep 17 00:00:00 2001
+From: Qbal Cow <qball@gmpclient.org>
+Date: Sun, 23 Dec 2012 20:10:30 +0100
+Subject: [PATCH] Updates for vala 0.18.
+
+---
+ src/vala/gmpc-mpddata-treeview-tooltip.vala | 5 ++++-
+ src/vapi/gmpc.vapi                          | 3 ++-
+ 2 files changed, 6 insertions(+), 2 deletions(-)
+
+--- a/src/vala/gmpc-mpddata-treeview-tooltip.vala
++++ b/src/vala/gmpc-mpddata-treeview-tooltip.vala
+@@ -43,7 +43,11 @@
+             return false;
+         }
+ 
++#if VALA_0_18
++        if(!this.par_widget.get_tooltip_context(ref x, ref y,keyboard_tip, out model, out path, out iter)){
++#else
+         if(!this.par_widget.get_tooltip_context(out x, out y,keyboard_tip, out model, out path, out iter)){
++#endif
+             this.checksum = null;
+             return false;
+         }
+--- a/src/vapi/gmpc.vapi
++++ b/src/vapi/gmpc.vapi
+@@ -349,7 +349,8 @@
+ 
+     /* objects */
+     namespace MpdData {
+-        [CCode (cheader_filename="gmpc-mpddata-treeview.h",cname="GmpcMpdDataTreeview",type_check_function="GMPC_IS_MPDDATA_TREEVIEW")]
++        [CCode (cheader_filename="gmpc-mpddata-treeview.h",cname="GmpcMpdDataTreeview",type_check_function="GMPC_IS_MPDDATA_TREEVIEW",
++                type_id="GMPC_TYPE_MPDDATA_TREEVIEW")]
+         public class TreeView : Gtk.TreeView {
+             [CCode (cname="gmpc_mpddata_treeview_new")]
+             public TreeView(string name, bool sort, Gtk.TreeModel model);
