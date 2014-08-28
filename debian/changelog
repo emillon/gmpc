@@ -6,6 +6,7 @@ gmpc (11.8.16-9) UNRELEASED; urgency=medium
     - fix capitalization of GNOME
   * Bump Standards-Version to 3.9.5 (no changes).
   * Add libappindicator support (Closes: #736261)
+  * Update Vcs-Browser URL.
 
  -- Etienne Millon <me@emillon.org>  Wed, 27 Aug 2014 09:23:00 +0200
 
